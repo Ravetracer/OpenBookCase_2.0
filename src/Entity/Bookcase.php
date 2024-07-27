@@ -14,80 +14,105 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation as Serializer;
+
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Component\Uid\Ulid;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookcaseRepository::class)]
+#[ORM\Index(columns: ['position_latitude'], name: 'latitude')]
+#[ORM\Index(columns: ['position_longitude'], name: 'longitude')]
+#[ORM\Index(columns: ['legacy_id'], name: 'legacyId')]
 class Bookcase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\Column(type: 'ulid', unique: true)]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
+    #[Serializer\Groups(['bookcase'])]
     private ?Ulid $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\NotNull]
+    #[Serializer\Groups(['bookcase'])]
     private ?string $title = null;
 
     #[ORM\Embedded(class: Position::class)]
     #[Assert\Valid]
+    #[Serializer\Groups(['bookcase'])]
     private ?Position $position = null;
 
     #[ORM\Column(length: 1024, nullable: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?string $webpage = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?string $mobility = null;
 
     #[ORM\Embedded(class: Accessibility::class)]
     #[Assert\Valid]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?Accessibility $accessibility = null;
 
     #[ORM\Column(nullable: false, enumType: EntryType::class)]
+    #[Serializer\Exclude]
     private EntryType $entryType = EntryType::Bookcase;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?string $installationType = null;
 
     #[ORM\Column(nullable: false, enumType: MapSymbol::class)]
+    #[Serializer\Exclude]
     private MapSymbol $mapSymbol = MapSymbol::Standard;
 
     #[ORM\Embedded(class: Active::class)]
+    #[Serializer\Groups(['bookcase'])]
     private ?Active $active = null;
 
     #[ORM\Column]
+    #[Serializer\Groups(['bookcase_detail'])]
     private bool $digitalMediaAllowed = false;
 
     #[ORM\Column(length: 128, nullable: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?string $shareLink = null;
 
     #[ORM\ManyToMany(targetEntity: Caretaker::class, inversedBy: 'bookcases')]
+    #[Serializer\Groups(['bookcase_detail'])]
     private Collection $caretakers;
 
     #[ORM\Embedded(class: Address::class)]
     #[Assert\Valid]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?Address $address = null;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: OpeningTime::class)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private Collection $openingTimes;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: WishlistItem::class, orphanRemoval: true)]
+    #[Serializer\Groups(['wishlist'])]
     private Collection $wishlistItems;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: Image::class, orphanRemoval: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private Collection $images;
 
     #[ORM\Column(type: 'integer', nullable: true)]
+    #[Serializer\Exclude]
     private ?int $legacyId = null;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: Rating::class, orphanRemoval: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private Collection $ratings;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Serializer\Groups(['bookcase_detail'])]
     private ?string $comment = null;
 
     public function __construct()
@@ -184,6 +209,14 @@ class Bookcase
         return $this->entryType;
     }
 
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('entryType')]
+    #[Serializer\Groups(['bookcase_detail'])]
+    public function getEntryTypeValue(): ?string
+    {
+        return $this->entryType->value;
+    }
+
     public function setEntryType(EntryType $entryType): self
     {
         $this->entryType = $entryType;
@@ -206,6 +239,14 @@ class Bookcase
     public function getMapSymbol(): MapSymbol
     {
         return $this->mapSymbol;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('mapSymbol')]
+    #[Serializer\Groups(['bookcase'])]
+    public function getMapSymbolValue(): ?string
+    {
+        return $this->mapSymbol->value;
     }
 
     public function setMapSymbol(MapSymbol $mapSymbol): self

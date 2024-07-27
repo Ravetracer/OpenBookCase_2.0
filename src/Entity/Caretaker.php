@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation\Groups;
+
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Component\Uid\Ulid;
 
@@ -19,21 +21,27 @@ class Caretaker
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
+    #[Groups(['caretaker'])]
     private ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['caretaker'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 512, nullable: true)]
+    #[Groups(['caretaker'])]
     private ?string $contact = null;
 
     #[ORM\Embedded(class: Address::class)]
+    #[Groups(['caretaker'])]
     private ?Address $address = null;
 
     #[ORM\ManyToMany(targetEntity: Bookcase::class, mappedBy: 'caretakers')]
+    #[Groups(['caretaker'])]
     private Collection $bookcases;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['caretaker'])]
     private ?string $legacyContactData = null;
 
     public function __construct()

@@ -6,6 +6,7 @@ use App\Repository\ImageRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Uid\Ulid;
@@ -21,35 +22,45 @@ class Image
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
+    #[Groups(['images'])]
     private ?Ulid $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['images'])]
     private ?string $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['images'])]
     private ?Bookcase $bookcase = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['images'])]
     private ?User $uploadedBy = null;
 
     #[UploadableField(mapping: 'images', fileNameProperty: 'filename', size: 'imageSize')]
+    #[Groups(['images'])]
     private ?File $imageFile = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['images'])]
     private ?string $filename = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['images'])]
     private ?string $filenameThumbnail = null;
 
     #[ORM\Column]
+    #[Groups(['images'])]
     private ?int $imageSize = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['images'])]
     private ?int $rotation = null;
 
     #[ORM\Column(type: 'datetime')]
+    #[Groups(['images'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     public function getId(): ?Ulid

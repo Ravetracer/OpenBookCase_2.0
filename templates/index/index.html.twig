@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}OpenBookCase 2.0{% endblock %}
+
+{% block body %}
+  <div id="mapParent">
+    <div id="map" {{ stimulus_controller('map', {'detailstrans': 'Details'|trans }) }}></div>
+  </div>
+
+  <div class="spinner-border hidden" role="status" id="loaderSpinner">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="bookcaseDetails" aria-labelledby="bookcaseDetailsLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="bookcaseDetailsLabel">--- title ---</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-labelledby="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="row">
+        <div class="col-lg-6">
+          <div id="imageControls" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner" id="bookcase_images_items"></div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#imageControls" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#imageControls" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {{ include('index/snippets/infoRow.html.twig', {label: 'bctype', fieldId: 'view_bc_type', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'installationType', fieldId: 'view_bc_instType', margin: true}) }}
+      {{ include('index/snippets/subheadline.twig', {label: 'position'}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'latitude', fieldId: 'view_bc_lat', extraClasses: 'ps-4'}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'longitude', fieldId: 'view_bc_lon', extraClasses: 'ps-4', margin: true }) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'address', fieldId: 'view_bc_address', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'openingTimes', fieldId: 'view_bc_openingTimes', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'caretaker', fieldId: 'view_bc_caretaker', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'webpage', fieldId: 'view_bc_webpage', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'accessibility', fieldId: 'view_bc_accessibility', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'status', fieldId: 'view_bc_status', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'shareLink', fieldId: 'view_bc_shareLink', margin: true}) }}
+      {{ include('index/snippets/infoRow.html.twig', {label: 'rating', fieldId: 'view_bc_rating', margin: true}) }}
+    </div>
+  </div>
+{% endblock %}

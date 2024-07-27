@@ -22,7 +22,25 @@ Encore
      */
     .addEntry('app', './assets/app.js')
 
-    .enableVueLoader(() => {}, { runtimeCompilerBuild: false })
+    .copyFiles({
+        from: './assets/js',
+        to: 'assets/js/[path][name].[ext]'
+    })
+
+    .copyFiles({
+        from: './assets/images',
+        to: 'images/[path][name].[ext]',
+    })
+
+    .copyFiles({
+        from: './assets/fonts',
+        to: 'assets/fonts/[path][name].[ext]'
+    })
+
+    .copyFiles({
+        from: './assets/webfonts',
+        to: 'assets/webfonts/[path][name].[ext]'
+    })
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')
@@ -62,7 +80,7 @@ Encore
     .enableSassLoader()
 
     // uncomment if you use TypeScript
-    //.enableTypeScriptLoader()
+    // .enableTypeScriptLoader()
 
     // uncomment if you use React
     //.enableReactPreset()

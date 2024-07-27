@@ -1,0 +1,20 @@
+bctype: Type
+position: Position
+latitude: Latitude
+longitude: Longitude
+accessibility: Accessiblity
+installationType: Kind of installation
+activeState: Active state
+state: State
+description: Description
+digitalMediaAllowed: Is digital media allowed
+shareLink: Share link
+caretakers: Caretakers
+name: Name
+address: Address
+openingTimes: Opening times
+openTime: Open time
+twentyForSeven: 24/7
+author: Author
+ratings: Ratings
+comment: Comment

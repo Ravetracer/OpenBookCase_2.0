@@ -1,19 +1,82 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
-        {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+        <!-- Meta -->
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="OpenBookCase - Where's the nearest public book case">
+        <meta name="author" content="Christian Nielebock">
+        <!-- Favicon -->
+        <link rel="icon" href="assets/images/favicon.png">
+
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
+    </head>
+    <body>
+        <div id="preloader">
+            <div class="preloader">
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div class="container-fluid">
+                {% include('navigation.html.twig') %}
+                {% block body %}{% endblock %}
+            </div><!-- / container -->
+        </div><!-- / main-container -->
+
+        <!-- core JavaScript -->
+        <script src="build/assets/js/jquery.min.js"></script>
+        <script src="build/assets/js/popper.min.js"></script>
+        <script src="build/assets/js/bootstrap.min.js"></script>
+        <!-- / core JavaScript -->
+
+        <!-- preloader -->
+        <script src="build/assets/js/preloader.js"></script>
+        <!-- / preloader -->
+
+        <!-- smooth scroll -->
+        <script src="build/assets/js/jquery.easing.min.js"></script>
+        <script src="build/assets/js/smooth-scroll.js"></script>
+        <!-- / smooth scroll -->
+
+        <!-- hide nav -->
+        <script src="build/assets/js/hide-nav.js"></script>
+        <!-- / hide nav -->
+
+        <!-- ripple-effect -->
+        <script src="build/assets/js/jquery-pseudo-ripple.js"></script>
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
+
+        <script>
+            $('.btn').ripple({
+                duration: 1000,
+            });
+
+            $('.menu-custom .nav-link').ripple({
+                duration: 1000,
+            });
+
+            $('.menu-pills .nav-link').ripple({
+                duration: 1000,
+            });
+
+            $('.nav-tabs .nav-link').ripple({
+                duration: 1000,
+            });
+
+            $('.page-item.active .page-link').ripple({
+                duration: 1000,
+            });
+        </script>
+        <!-- / ripple-effect -->
     </body>
 </html>

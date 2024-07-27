@@ -4,14 +4,14 @@
         "@babel/preset-env": "^7.16.0",
         "@hotwired/stimulus": "^3.0.0",
         "@symfony/stimulus-bridge": "^3.2.0",
-        "@symfony/webpack-encore": "^4.0.0",
+        "@symfony/webpack-encore": "^4.2.0",
         "core-js": "^3.23.0",
+        "file-loader": "^6.2.0",
         "regenerator-runtime": "^0.13.9",
-        "sass": "^1.56.1",
-        "sass-loader": "^13.0.0",
-        "vue": "^2.5",
-        "vue-loader": "^15.9.5",
-        "vue-template-compiler": "^2.7.14",
+        "sass": "^1.57.1",
+        "sass-loader": "^13.2.0",
+        "ts-loader": "^9.4.4",
+        "typescript": "^5.1.6",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
         "webpack-notifier": "^1.15.0"
@@ -25,6 +25,9 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "vuetify": "^2.6.12"
+        "axios": "^1.2.2",
+        "leaflet": "^1.9.3",
+        "lit": "^2.8.0",
+        "webpack-dev-server": "^4.11.1"
     }
 }

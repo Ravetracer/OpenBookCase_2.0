@@ -1,3 +1,35 @@
-body {
-    background-color: lightgray;
+html, body {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+#mapParent {
+    height: 100vh;
+    width: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 0;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+}
+
+#obc_logo {
+    width: 15em;
+}
+
+#loaderSpinner {
+    position: absolute;
+    top: 8em;
+    right: 2em;
+}
+
+.offcanvas {
+    --bs-offcanvas-width: 600px;
 }

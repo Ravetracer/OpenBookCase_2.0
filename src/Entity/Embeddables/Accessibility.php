@@ -8,14 +8,17 @@ namespace App\Entity\Embeddables;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Embeddable]
 class Accessibility
 {
     #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    #[Groups(['bookcase'])]
     private ?int $level = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['bookcase'])]
     private ?string $description = null;
 
     public function getLevel(): ?int

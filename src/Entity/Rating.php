@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\RatingRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Component\Uid\Ulid;
 
@@ -25,6 +26,7 @@ class Rating
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['ratings'])]
     private ?Bookcase $bookcase = null;
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]

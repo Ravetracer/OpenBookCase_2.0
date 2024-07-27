@@ -7,14 +7,17 @@
 namespace App\Entity\Embeddables;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Embeddable]
 class Position
 {
     #[ORM\Column]
+    #[Groups(['bookcase'])]
     private ?float $latitude = null;
 
     #[ORM\Column]
+    #[Groups(['bookcase'])]
     private ?float $longitude = null;
 
     public function getLatitude(): ?float

@@ -1,0 +1,10 @@
+<div class="mb-3 row">
+  {{ form_label(bcFormField, labelText | trans, {'label_attr': {'class': 'col-sm-4 col-form-label text-info'}}) }}
+  <div class="col-sm-8">
+    {% if not editMode %}
+      {{ form_widget(bcFormField, {'attr': {'class': 'form-control-plaintext', 'readonly': 'readonly', 'disabled': 'disabled'}}) }}
+    {% else %}
+      {{ form_widget(bcFormField, {'attr': {'class': 'form-control'}}) }}
+    {% endif %}
+  </div>
+</div>

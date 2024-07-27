@@ -11,18 +11,30 @@ use App\Enums\ActiveStatus;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation as Serializer;
+
 #[ORM\Embeddable]
 class Active
 {
     #[ORM\Column(nullable: false, enumType: ActiveStatus::class)]
+    #[Serializer\Exclude]
     private ActiveStatus $status = ActiveStatus::Active;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Serializer\Groups(['bookcase'])]
     private ?string $statusDescription = null;
 
     public function getStatus(): ActiveStatus
     {
         return $this->status;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('status')]
+    #[Serializer\Groups(['bookcase'])]
+    public function getStatusValue(): ?string
+    {
+        return $this->status->value;
     }
 
     public function setStatus(ActiveStatus $status): self

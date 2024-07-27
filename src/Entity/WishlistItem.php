@@ -8,6 +8,7 @@ use App\Repository\WishlistItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Component\Uid\Ulid;
 
@@ -18,29 +19,37 @@ class WishlistItem
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
+    #[Groups(['wishlist'])]
     private ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['wishlist'])]
     private ?string $title = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['wishlist'])]
     private ?string $isbn = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['wishlist'])]
     private ?string $author = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['wishlist'])]
     private ?string $misc = null;
 
     #[ORM\ManyToOne(inversedBy: 'wishlistItems')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['wishlist'])]
     private ?Bookcase $bookcase = null;
 
     #[ORM\ManyToOne(inversedBy: 'wishlistItems')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['wishlist'])]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, enumType: WishlistItemStatus::class)]
+    #[Groups(['wishlist'])]
     private WishlistItemStatus $status = WishlistItemStatus::Open;
 
     public function getId(): ?Ulid
