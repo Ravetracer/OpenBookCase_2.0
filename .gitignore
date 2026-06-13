@@ -29,4 +29,7 @@ yarn-error.log
 /.idea/
 /public/images/
 *.js.map
+# Legacy data importers — kept local, never published
+/src/Command/ImportPhpMyAdminJsonCommand.php
+/src/Command/ImportLesestundenCommand.php
 ###< project local/dev artifacts ###
