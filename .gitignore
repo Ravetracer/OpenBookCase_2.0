@@ -24,3 +24,9 @@
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+###> project local/dev artifacts ###
+/.idea/
+/public/images/
+*.js.map
+###< project local/dev artifacts ###
