@@ -1,0 +1,17 @@
+{# Renders the "Official Bookcrossing Zone" toggle with an info-icon link to
+   bookcrossing.com. Shared by the quick-add and full edit forms. Expects the
+   form field as `field`; marks it rendered so form_rest won't duplicate it. #}
+{% import 'components/icon.html.twig' as ui %}
+<div class="mb-4">
+  <label class="label cursor-pointer justify-start gap-3">
+    {{ form_widget(field) }}
+    <span class="label-text">
+      {{ 'form.is_bookcrossing_zone'|trans }}
+      <a href="https://bookcrossing.com" target="_blank" rel="noopener noreferrer"
+         class="ml-1 inline-flex align-text-bottom text-info opacity-70 hover:opacity-100"
+         aria-label="{{ 'form.bookcrossing_info'|trans }}"
+         title="{{ 'form.bookcrossing_info'|trans }}">{{ ui.icon('info', 'size-4') }}</a>
+    </span>
+  </label>
+</div>
+{% do field.setRendered %}

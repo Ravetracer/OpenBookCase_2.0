@@ -768,6 +768,7 @@ export default class extends Controller {
             mobility: checked('f-mobility'),
             minRating: ratingEl ? parseInt(ratingEl.value, 10) || 0 : 0,
             wishlist: !!panel.querySelector('input[name="f-wishlist"]:checked'),
+            bookcrossing: !!panel.querySelector('input[name="f-bookcrossing"]:checked'),
             watching: !!panel.querySelector('input[name="f-watching"]:checked'),
             totals: {
                 accessibility: total('f-accessibility'),
@@ -791,6 +792,7 @@ export default class extends Controller {
 
         if (f.minRating > 0 && !(item.ratingAverage != null && item.ratingAverage >= f.minRating)) return false;
         if (f.wishlist && !(item.openWishlistCount > 0)) return false;
+        if (f.bookcrossing && !item.isBookcrossingZone) return false;
         if (f.watching && !this.watchedIds.has(item.id)) return false;
 
         return true;
@@ -822,9 +824,9 @@ export default class extends Controller {
         if (!panel) return;
 
         panel.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
-            // Category checkboxes default to checked; the wishlist/watching
-            // toggles default to off.
-            cb.checked = cb.name !== 'f-wishlist' && cb.name !== 'f-watching';
+            // Category checkboxes default to checked; the wishlist/bookcrossing/
+            // watching toggles default to off.
+            cb.checked = !['f-wishlist', 'f-bookcrossing', 'f-watching'].includes(cb.name);
         });
         const ratingEl = panel.querySelector('select[name="f-rating"]');
         if (ratingEl) ratingEl.value = '0';
@@ -844,6 +846,7 @@ export default class extends Controller {
             if (f.mobility.length !== f.totals.mobility) n += 1;
             if (f.minRating > 0) n += 1;
             if (f.wishlist) n += 1;
+            if (f.bookcrossing) n += 1;
             if (f.watching) n += 1;
         }
 

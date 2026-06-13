@@ -78,7 +78,7 @@
                       data-map-target="filterBadge"></span>
             </button>
 
-            <div class="absolute right-0 mt-2 hidden max-h-[75vh] w-72 overflow-y-auto rounded-box bg-base-100 p-4 shadow-xl"
+            <div class="absolute right-0 mt-2 hidden max-h-[75vh] w-80 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-box bg-base-100 p-4 shadow-xl"
                  data-map-target="filterPanel"
                  data-action="change->map#applyFilters">
                 <div class="mb-3 flex items-center justify-between">
@@ -160,16 +160,28 @@
                 </label>
 
                 {# Open wishlist items #}
-                <label class="label cursor-pointer justify-between py-1">
-                    <span class="label-text">{{ 'filter.wishlist'|trans }}</span>
-                    <input type="checkbox" class="toggle toggle-sm toggle-primary" name="f-wishlist">
+                <label class="label cursor-pointer justify-between gap-3 py-1">
+                    <span class="label-text flex-1">{{ 'filter.wishlist'|trans }}</span>
+                    <input type="checkbox" class="toggle toggle-sm toggle-primary shrink-0" name="f-wishlist">
+                </label>
+
+                {# Official BookCrossing zones #}
+                <label class="label cursor-pointer justify-between gap-3 py-1">
+                    <span class="label-text flex flex-1 items-center gap-1">
+                        {{ 'filter.bookcrossing'|trans }}
+                        <a href="https://bookcrossing.com" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex shrink-0 text-info opacity-70 hover:opacity-100"
+                           aria-label="{{ 'form.bookcrossing_info'|trans }}"
+                           title="{{ 'form.bookcrossing_info'|trans }}">{{ ui.icon('info', 'size-4') }}</a>
+                    </span>
+                    <input type="checkbox" class="toggle toggle-sm toggle-primary shrink-0" name="f-bookcrossing">
                 </label>
 
                 {% if app.user %}
                     {# Entries the user is watching #}
-                    <label class="label cursor-pointer justify-between py-1">
-                        <span class="label-text">{{ 'filter.watching'|trans }}</span>
-                        <input type="checkbox" class="toggle toggle-sm toggle-primary" name="f-watching">
+                    <label class="label cursor-pointer justify-between gap-3 py-1">
+                        <span class="label-text flex-1">{{ 'filter.watching'|trans }}</span>
+                        <input type="checkbox" class="toggle toggle-sm toggle-primary shrink-0" name="f-watching">
                     </label>
                 {% endif %}
             </div>

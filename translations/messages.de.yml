@@ -293,6 +293,8 @@ form:
   webpage: Webseite
   is_mobile: 'Mobiler Bücherschrank'
   digital_media_allowed: Digitale Medien erlaubt
+  is_bookcrossing_zone: Offizielle BookCrossing-Zone
+  bookcrossing_info: Mehr über BookCrossing
   comment: Kommentar
   latitude: Breitengrad
   longitude: Längengrad
@@ -457,4 +459,8 @@ filter:
   rating: Mindestbewertung
   rating_any: Beliebig
   wishlist: Offene Wünsche vorhanden
+  bookcrossing: Offizielle BookCrossing-Zone
   watching: Nur beobachtete
+
+'yes': 'Ja'
+'no': 'Nein'

@@ -72,6 +72,7 @@ class BookcaseRepository extends ServiceEntityRepository
                 'bc.active.statusDescription AS statusDescription',
                 'bc.accessibility.level AS accessibilityLevel',
                 'bc.isMobile AS isMobile',
+                'bc.isBookcrossingZone AS isBookcrossingZone',
                 // COUNT/AVG are DISTINCT/id-safe: two one-to-many joins (wishes +
                 // ratings) cross-multiply rows, so plain COUNT(wi.id) would inflate.
                 // AVG is unaffected by the uniform row duplication.
@@ -95,6 +96,7 @@ class BookcaseRepository extends ServiceEntityRepository
             ->addGroupBy('bc.active.statusDescription')
             ->addGroupBy('bc.accessibility.level')
             ->addGroupBy('bc.isMobile')
+            ->addGroupBy('bc.isBookcrossingZone')
             ->setParameter('open', WishlistItemStatus::Open->value)
             ->setParameter('latMin', $latMin)
             ->setParameter('latMax', $latMax)

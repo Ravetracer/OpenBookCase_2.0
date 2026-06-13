@@ -27,6 +27,7 @@ class BookcaseType extends AbstractType
             ->add('position', PositionType::class)
             ->add('webpage', null, ['label' => 'form.webpage'])
             ->add('isMobile', CheckboxType::class, ['required' => false, 'label' => 'form.is_mobile', 'attr' => ['class' => 'toggle']])
+            ->add('isBookcrossingZone', CheckboxType::class, ['required' => false, 'label' => 'form.is_bookcrossing_zone', 'attr' => ['class' => 'toggle']])
             ->add('accessibility', AccessibilityType::class)
             ->add('entryType', EnumType::class, [
                 'class' => EntryType::class,

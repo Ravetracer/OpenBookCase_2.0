@@ -293,6 +293,8 @@ form:
   webpage: Website
   is_mobile: 'Mobile installation'
   digital_media_allowed: Digital media allowed
+  is_bookcrossing_zone: Official Bookcrossing Zone
+  bookcrossing_info: More about BookCrossing
   comment: Comment
   latitude: Latitude
   longitude: Longitude
@@ -457,4 +459,8 @@ filter:
   rating: Minimum rating
   rating_any: Any
   wishlist: Has open wishes
+  bookcrossing: Official Bookcrossing Zone
   watching: Only watched
+
+'yes': 'Yes'
+'no': 'No'

@@ -33,6 +33,16 @@
   {{ include('index/snippets/infoRow.html.twig', { label: 'bctype', fieldValue: bookcase.entryTypeValue, margin: true, translateFieldValue: true }) }}
   {{ include('index/snippets/infoRow.html.twig', { label: 'installationType', fieldValue: bookcase.installationType, margin: true }) }}
   {{ include('index/snippets/infoRow.html.twig', { label: 'form.is_mobile', fieldValue: bookcase.isMobile ? 'mobile'|trans : 'fixed'|trans, margin: true }) }}
+  <div class="grid grid-cols-1 gap-0.5 border-b border-base-200 py-2 sm:grid-cols-3 sm:gap-2">
+    <dt class="font-semibold text-base-content/70">
+      {{ 'form.is_bookcrossing_zone'|trans }}
+      <a href="https://bookcrossing.com" target="_blank" rel="noopener noreferrer"
+         class="ml-1 inline-flex align-text-bottom text-info opacity-70 hover:opacity-100"
+         aria-label="{{ 'form.bookcrossing_info'|trans }}"
+         title="{{ 'form.bookcrossing_info'|trans }}">{{ ui.icon('info', 'size-4') }}</a>
+    </dt>
+    <dd class="sm:col-span-2">{{ bookcase.isBookcrossingZone ? 'yes'|trans : 'no'|trans }}</dd>
+  </div>
   {{ include('index/snippets/infoRow.html.twig', { label: 'position', fieldValue: bookcase.position.latitude ~ ', ' ~ bookcase.position.longitude, margin: true }) }}
   {# Structured address if present, else the imported free-text field (same fallback as the list). #}
   {% set a = bookcase.address %}

@@ -7,6 +7,7 @@ use App\Enums\EntryType;
 use App\Form\subForms\PositionType;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -33,6 +34,7 @@ class BookcaseCreateType extends AbstractType
                 'choice_translation_domain' => 'bookcasetypes',
             ])
             ->add('installationType', null, ['label' => 'form.installation_type'])
+            ->add('isBookcrossingZone', CheckboxType::class, ['required' => false, 'label' => 'form.is_bookcrossing_zone', 'attr' => ['class' => 'toggle']])
             ->add('position', PositionType::class)
         ;
     }

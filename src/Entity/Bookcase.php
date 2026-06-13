@@ -61,6 +61,12 @@ class Bookcase
     #[Serializer\Groups(['bookcase_detail'])]
     public bool $isMobile = false;
 
+    // Whether this entry is an official BookCrossing release point/zone
+    // (https://bookcrossing.com). Carried over from the legacy "bookcrosserzone" flag.
+    #[ORM\Column(options: ['default' => false])]
+    #[Serializer\Groups(['bookcase_detail'])]
+    public bool $isBookcrossingZone = false;
+
     #[ORM\Embedded(class: Accessibility::class)]
     #[Assert\Valid]
     #[Serializer\Groups(['bookcase_detail'])]

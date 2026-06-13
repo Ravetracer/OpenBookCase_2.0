@@ -293,6 +293,8 @@ form:
   webpage: Website
   is_mobile: 'Mobiele opstelling'
   digital_media_allowed: Digitale media toegestaan
+  is_bookcrossing_zone: Officiële BookCrossing-zone
+  bookcrossing_info: Meer over BookCrossing
   comment: Opmerking
   latitude: Breedtegraad
   longitude: Lengtegraad
@@ -457,4 +459,8 @@ filter:
   rating: Minimale beoordeling
   rating_any: Alle
   wishlist: Heeft open wensen
+  bookcrossing: Officiële BookCrossing-zone
   watching: Alleen gevolgd
+
+'yes': 'Ja'
+'no': 'Nee'

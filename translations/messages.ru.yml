@@ -293,6 +293,8 @@ form:
   webpage: Веб-сайт
   is_mobile: 'Мобильная установка'
   digital_media_allowed: Цифровые носители разрешены
+  is_bookcrossing_zone: Официальная зона BookCrossing
+  bookcrossing_info: Подробнее о BookCrossing
   comment: Комментарий
   latitude: Широта
   longitude: Долгота
@@ -457,4 +459,8 @@ filter:
   rating: Минимальная оценка
   rating_any: Любая
   wishlist: Есть открытые пожелания
+  bookcrossing: Официальная зона BookCrossing
   watching: Только отслеживаемые
+
+'yes': 'Да'
+'no': 'Нет'
