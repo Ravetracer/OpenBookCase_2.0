@@ -437,3 +437,24 @@ reset:
   password_too_short: "Das Passwort muss mindestens 6 Zeichen lang sein."
   password_mismatch: "Die Passwörter stimmen nicht überein."
   success: "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden."
+
+# ── Kartenmarker-Filter ──
+filter:
+  title: Filter
+  reset: Zurücksetzen
+  accessibility: Barrierefreiheit
+  acc_full: Voll zugänglich
+  acc_partial: Teilweise zugänglich
+  acc_none: Nicht zugänglich
+  acc_unknown: Keine Angabe
+  status: Status
+  type: Typ
+  type_bookcase: Bücherschrank
+  type_givebox: Givebox
+  mobility: Aufstellung
+  fixed: Fest
+  mobile: Mobil
+  rating: Mindestbewertung
+  rating_any: Beliebig
+  wishlist: Offene Wünsche vorhanden
+  watching: Nur beobachtete

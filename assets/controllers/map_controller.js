@@ -100,10 +100,15 @@ export default class extends Controller {
     connect() {
         this.map.on('moveend', this.loadEntries.bind(this));
 
-        // Close the suggestion list when clicking anywhere outside the search box.
+        // Close the suggestion list when clicking anywhere outside the search box,
+        // and the filter panel when clicking outside the filter control.
         this.outsideClick = (e) => {
             if (!this.element.contains(e.target)) {
                 this.hideResults();
+            }
+            if (this.hasFilterContainerTarget && this.hasFilterPanelTarget
+                && !this.filterContainerTarget.contains(e.target)) {
+                this.filterPanelTarget.classList.add('hidden');
             }
         };
         document.addEventListener('click', this.outsideClick);
@@ -165,6 +170,7 @@ export default class extends Controller {
         document.removeEventListener('click', this.outsideClick);
         document.removeEventListener('bc:created', this.onCreated);
         document.removeEventListener('wishlist:changed', this.onWishlistChanged);
+        document.removeEventListener('watchlist:changed', this.onWatchlistChanged);
         document.removeEventListener('bc:rating', this.onRatingChanged);
         document.removeEventListener('bc:updated', this.onUpdated);
         document.removeEventListener('home:changed', this.onHomeChanged);
@@ -735,6 +741,116 @@ export default class extends Controller {
         }
     }
 
+    // ── Marker filters ───────────────────────────────────────────────────────
+
+    // Show/hide the filter panel (and keep aria state in sync).
+    toggleFilterPanel() {
+        if (!this.hasFilterPanelTarget) return;
+        this.filterPanelTarget.classList.toggle('hidden');
+    }
+
+    // Read the panel's current state into a plain object. Queried by attribute
+    // (not a Stimulus target) so it also works during initialize(), before the
+    // first marker load. Returns null when the panel isn't present (no filtering).
+    readFilters() {
+        const panel = this.element.querySelector('[data-map-target="filterPanel"]');
+        if (!panel) return null;
+
+        const checked = (name) =>
+            Array.from(panel.querySelectorAll(`input[name="${name}"]:checked`)).map((i) => i.value);
+        const total = (name) => panel.querySelectorAll(`input[name="${name}"]`).length;
+        const ratingEl = panel.querySelector('select[name="f-rating"]');
+
+        return {
+            accessibility: checked('f-accessibility'),
+            status: checked('f-status'),
+            type: checked('f-type'),
+            mobility: checked('f-mobility'),
+            minRating: ratingEl ? parseInt(ratingEl.value, 10) || 0 : 0,
+            wishlist: !!panel.querySelector('input[name="f-wishlist"]:checked'),
+            watching: !!panel.querySelector('input[name="f-watching"]:checked'),
+            totals: {
+                accessibility: total('f-accessibility'),
+                status: total('f-status'),
+                type: total('f-type'),
+                mobility: total('f-mobility'),
+            },
+        };
+    }
+
+    // Does a marker's data satisfy the given filter state?
+    passesFilters(item, f) {
+        if (!f) return true;
+
+        // null accessibility (no level set) is its own bucket: 'unset'.
+        const accToken = item.accessibility || 'unset';
+        if (!f.accessibility.includes(accToken)) return false;
+        if (!f.status.includes(item.status)) return false;
+        if (!f.type.includes(item.entryType)) return false;
+        if (!f.mobility.includes(item.isMobile ? 'mobile' : 'fixed')) return false;
+
+        if (f.minRating > 0 && !(item.ratingAverage != null && item.ratingAverage >= f.minRating)) return false;
+        if (f.wishlist && !(item.openWishlistCount > 0)) return false;
+        if (f.watching && !this.watchedIds.has(item.id)) return false;
+
+        return true;
+    }
+
+    // Re-evaluate every loaded marker against the (possibly changed) filters and
+    // add/remove it from the cluster in a single batch.
+    applyFilters() {
+        this.currentFilters = this.readFilters();
+
+        const toAdd = [];
+        const toRemove = [];
+        Object.values(this.markersById).forEach(({ marker, item }) => {
+            const pass = this.passesFilters(item, this.currentFilters);
+            const onMap = this.markerCluster.hasLayer(marker);
+            if (pass && !onMap) toAdd.push(marker);
+            else if (!pass && onMap) toRemove.push(marker);
+        });
+
+        if (toRemove.length) this.markerCluster.removeLayers(toRemove);
+        if (toAdd.length) this.markerCluster.addLayers(toAdd);
+
+        this.updateFilterBadge(this.currentFilters);
+    }
+
+    // Reset every control to its default (everything visible) and re-apply.
+    resetFilters() {
+        const panel = this.element.querySelector('[data-map-target="filterPanel"]');
+        if (!panel) return;
+
+        panel.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+            // Category checkboxes default to checked; the wishlist/watching
+            // toggles default to off.
+            cb.checked = cb.name !== 'f-wishlist' && cb.name !== 'f-watching';
+        });
+        const ratingEl = panel.querySelector('select[name="f-rating"]');
+        if (ratingEl) ratingEl.value = '0';
+
+        this.applyFilters();
+    }
+
+    // Badge = number of filter dimensions that deviate from "show everything".
+    updateFilterBadge(f) {
+        if (!this.hasFilterBadgeTarget) return;
+
+        let n = 0;
+        if (f) {
+            if (f.accessibility.length !== f.totals.accessibility) n += 1;
+            if (f.status.length !== f.totals.status) n += 1;
+            if (f.type.length !== f.totals.type) n += 1;
+            if (f.mobility.length !== f.totals.mobility) n += 1;
+            if (f.minRating > 0) n += 1;
+            if (f.wishlist) n += 1;
+            if (f.watching) n += 1;
+        }
+
+        this.filterBadgeTarget.textContent = String(n);
+        this.filterBadgeTarget.classList.toggle('hidden', n === 0);
+    }
+
     // Merge new data into a marker and refresh its icon + open popup in place.
     // Called from dialog-driven events (wishlist, rating, edit save).
     updateMarker(id, patch = {}) {
@@ -751,7 +867,18 @@ export default class extends Controller {
 
         entry.marker.setIcon(this.markerIcon(entry.item));
         if (entry.marker.isPopupOpen()) entry.marker.getPopup().update();
-        this.markerCluster.refreshClusters(entry.marker);
+
+        // The change (rating, wishlist count, mobility, …) may flip whether the
+        // entry still matches the active filters — reconcile its membership.
+        const pass = this.passesFilters(entry.item, this.currentFilters);
+        const onMap = this.markerCluster.hasLayer(entry.marker);
+        if (pass && !onMap) {
+            this.markerCluster.addLayer(entry.marker);
+        } else if (!pass && onMap) {
+            this.markerCluster.removeLayer(entry.marker);
+        } else if (onMap) {
+            this.markerCluster.refreshClusters(entry.marker);
+        }
     }
 
     // After a drag: confirm the move was intentional, then persist it. On

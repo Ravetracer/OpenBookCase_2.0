@@ -437,3 +437,24 @@ reset:
   password_too_short: "La contraseña debe tener al menos 6 caracteres."
   password_mismatch: "Las contraseñas no coinciden."
   success: "Tu contraseña se ha cambiado. Ya puedes iniciar sesión."
+
+# ── Filtros de marcadores del mapa ──
+filter:
+  title: Filtros
+  reset: Restablecer
+  accessibility: Accesibilidad
+  acc_full: Totalmente accesible
+  acc_partial: Parcialmente accesible
+  acc_none: No accesible
+  acc_unknown: Sin información
+  status: Estado
+  type: Tipo
+  type_bookcase: Casita de libros
+  type_givebox: Caja de intercambio
+  mobility: Instalación
+  fixed: Fija
+  mobile: Móvil
+  rating: Valoración mínima
+  rating_any: Cualquiera
+  wishlist: Con deseos abiertos
+  watching: Solo seguidos

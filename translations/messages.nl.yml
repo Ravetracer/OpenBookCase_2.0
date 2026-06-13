@@ -437,3 +437,24 @@ reset:
   password_too_short: "Het wachtwoord moet minstens 6 tekens bevatten."
   password_mismatch: "De wachtwoorden komen niet overeen."
   success: "Je wachtwoord is gewijzigd. Je kunt nu inloggen."
+
+# ── Kaartmarker-filters ──
+filter:
+  title: Filters
+  reset: Herstellen
+  accessibility: Toegankelijkheid
+  acc_full: Volledig toegankelijk
+  acc_partial: Gedeeltelijk toegankelijk
+  acc_none: Niet toegankelijk
+  acc_unknown: Geen informatie
+  status: Status
+  type: Type
+  type_bookcase: Boekenkast
+  type_givebox: Give-box
+  mobility: Opstelling
+  fixed: Vast
+  mobile: Mobiel
+  rating: Minimale beoordeling
+  rating_any: Alle
+  wishlist: Heeft open wensen
+  watching: Alleen gevolgd

@@ -437,3 +437,24 @@ reset:
   password_too_short: "The password must be at least 6 characters."
   password_mismatch: "The passwords don't match."
   success: "Your password has been changed. You can now sign in."
+
+# ── Map marker filters ──
+filter:
+  title: Filters
+  reset: Reset
+  accessibility: Accessibility
+  acc_full: Fully accessible
+  acc_partial: Partially accessible
+  acc_none: Not accessible
+  acc_unknown: No information
+  status: Status
+  type: Type
+  type_bookcase: Bookcase
+  type_givebox: Give-box
+  mobility: Installation
+  fixed: Fixed
+  mobile: Mobile
+  rating: Minimum rating
+  rating_any: Any
+  wishlist: Has open wishes
+  watching: Only watched

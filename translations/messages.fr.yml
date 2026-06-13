@@ -437,3 +437,24 @@ reset:
   password_too_short: "Le mot de passe doit comporter au moins 6 caractères."
   password_mismatch: "Les mots de passe ne correspondent pas."
   success: "Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter."
+
+# ── Filtres des marqueurs de la carte ──
+filter:
+  title: Filtres
+  reset: Réinitialiser
+  accessibility: Accessibilité
+  acc_full: Entièrement accessible
+  acc_partial: Partiellement accessible
+  acc_none: Non accessible
+  acc_unknown: Sans information
+  status: Statut
+  type: Type
+  type_bookcase: Boîte à livres
+  type_givebox: Give-box
+  mobility: Installation
+  fixed: Fixe
+  mobile: Mobile
+  rating: Note minimale
+  rating_any: Toutes
+  wishlist: Souhaits ouverts
+  watching: Suivis uniquement
