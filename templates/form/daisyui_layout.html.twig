@@ -1,0 +1,80 @@
+{# Symfony form theme that renders widgets with DaisyUI 5 classes. #}
+{% use 'form_div_layout.html.twig' %}
+
+{%- block form_row -%}
+    {%- set row_attr = row_attr|merge({class: (row_attr.class|default('') ~ ' mb-4')|trim}) -%}
+    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {{- form_label(form) -}}
+        {{- form_widget(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock form_row -%}
+
+{%- block checkbox_row -%}
+    {%- set row_attr = row_attr|merge({class: (row_attr.class|default('') ~ ' mb-4')|trim}) -%}
+    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        <label class="label cursor-pointer justify-start gap-3">
+            {{- form_widget(form) -}}
+            <span class="label-text">{{ form.vars.label is same as(false) ? '' : (form.vars.label|default(name|humanize)|trans(label_translation_parameters, translation_domain))|raw }}</span>
+        </label>
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock checkbox_row -%}
+
+{%- block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' label')|trim}) -%}
+        {%- set label = label is empty ? (label_format is not empty ? label_format|replace({'%name%': name, '%id%': id}) : name|humanize) : label -%}
+        <label{% if id is defined %} for="{{ id }}"{% endif %}{% with {attr: label_attr} %}{{ block('attributes') }}{% endwith %}>
+            <span class="label-text font-medium">{{ translation_domain is same as(false) ? label : label|trans(label_translation_parameters, translation_domain) }}{% if required %} <span class="text-error">*</span>{% endif %}</span>
+        </label>
+    {%- endif -%}
+{%- endblock form_label -%}
+
+{%- block form_widget_simple -%}
+    {%- set type = type|default('text') -%}
+    {%- if type != 'hidden' -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input input-bordered w-full')|trim}) -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple -%}
+
+{%- block textarea_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' textarea textarea-bordered w-full')|trim}) -%}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}
+
+{%- block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' select select-bordered w-full')|trim}) -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block checkbox_widget -%}
+    {# Opt a field into a DaisyUI switch with attr.class 'toggle'; otherwise a checkbox. #}
+    {%- if 'toggle' in attr.class|default('') -%}
+        {%- set attr = attr|merge({class: (attr.class ~ ' toggle-primary')|trim}) -%}
+    {%- else -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' checkbox checkbox-primary')|trim}) -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock checkbox_widget -%}
+
+{%- block radio_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' radio radio-primary')|trim}) -%}
+    {{- parent() -}}
+{%- endblock radio_widget -%}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <p class="mt-1 text-sm text-error" role="alert">
+            {%- for error in errors -%}
+                {{ error.message }}{% if not loop.last %}<br>{% endif %}
+            {%- endfor -%}
+        </p>
+    {%- endif -%}
+{%- endblock form_errors -%}
+
+{%- block button_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('btn btn-primary'))|trim}) -%}
+    {{- parent() -}}
+{%- endblock button_widget -%}

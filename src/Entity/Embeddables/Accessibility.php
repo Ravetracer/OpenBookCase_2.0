@@ -6,42 +6,32 @@
 
 namespace App\Entity\Embeddables;
 
+use App\Enums\AccessibilityLevel;
+
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Groups;
+
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Embeddable]
 class Accessibility
 {
-    #[ORM\Column(type: Types::INTEGER, nullable: true)]
-    #[Groups(['bookcase'])]
-    private ?int $level = null;
+    // Traffic-light access level (None/Partial/Full). Int-backed enum on the
+    // existing INTEGER column. Excluded + exposed as a plain int via the virtual
+    // property below (the project's JMS pattern for enums — see Active::status).
+    #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: AccessibilityLevel::class)]
+    #[Serializer\Exclude]
+    public ?AccessibilityLevel $level = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['bookcase'])]
-    private ?string $description = null;
+    #[Serializer\Groups(['bookcase'])]
+    public ?string $description = null;
 
-    public function getLevel(): ?int
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('level')]
+    #[Serializer\Groups(['bookcase'])]
+    public function getLevelValue(): ?int
     {
-        return $this->level;
-    }
-
-    public function setLevel(?int $level): self
-    {
-        $this->level = $level;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
+        return $this->level?->value;
     }
 }

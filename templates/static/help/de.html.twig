@@ -1,0 +1,208 @@
+{% import 'components/icon.html.twig' as ui %}
+{% set ic = 'inline-block size-4 align-text-bottom' %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">Erste Schritte mit OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  OpenBookCase ist eine gemeinschaftliche Karte öffentlicher Bücherschränke und Give-Boxen. Diese Anleitung zeigt dir alles,
+  was du tun kannst — Einträge finden, hinzufügen und bearbeiten, Fotos, Wunschliste, Beobachtungsliste und mehr.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Schritte mit der Markierung <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+  benötigen ein kostenloses Konto. Stöbern, Suchen und Lesen funktionieren auch ohne Anmeldung.
+</p>
+
+{# ── Inhaltsverzeichnis ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#account" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Konto</a>
+  <a href="#search" class="badge badge-lg badge-ghost">{{ ui.icon('search', 'size-3') }} Bücherschränke finden</a>
+  <a href="#add" class="badge badge-lg badge-ghost">{{ ui.icon('plus', 'size-3') }} Hinzufügen</a>
+  <a href="#edit" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Bearbeiten</a>
+  <a href="#photos" class="badge badge-lg badge-ghost">{{ ui.icon('photo', 'size-3') }} Fotos</a>
+  <a href="#rating" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Bewerten</a>
+  <a href="#wishlist" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Wunschliste</a>
+  <a href="#watchlist" class="badge badge-lg badge-ghost">{{ ui.icon('eye', 'size-3') }} Beobachtungsliste</a>
+  <a href="#move" class="badge badge-lg badge-ghost">{{ ui.icon('location', 'size-3') }} Marker verschieben</a>
+  <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Zuhause</a>
+  <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Nachrichten</a>
+  <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Teilen</a>
+  <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Sprache &amp; Design</a>
+</div>
+
+{# ── Konto ── #}
+<section id="account" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Konto &amp; Anmeldung</h2>
+    <p class="text-base-content/70">Stöbern steht allen offen; mit einem Konto kannst du Einträge hinzufügen und bearbeiten, Fotos hochladen und die Wunschliste nutzen.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Registrieren:</strong> Klicke oben auf {{ ui.icon('user', ic) }} <em>Registrieren</em> und wähle Benutzername, E-Mail und Passwort. Du erhältst eine Bestätigungs-E-Mail — klicke auf den Link darin, um deine Adresse zu bestätigen.</li>
+      <li><strong>Anmelden:</strong> Klicke auf {{ ui.icon('login', ic) }} <em>Login</em>.</li>
+      <li><strong>Passwort vergessen?</strong> Öffne den Anmeldedialog und klicke auf <em>Passwort vergessen?</em>, gib deine E-Mail ein und folge dem Link, den wir dir senden, um ein neues Passwort zu setzen.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Finden ── #}
+<section id="search" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('search', 'size-5') }} Bücherschränke finden</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Suchleiste</strong> (oben links auf der Karte): Gib einen Schranknamen, einen Ort oder eine Adresse (über OpenStreetMap / Photon) oder Koordinaten wie <code>50.19, 8.8</code> ein. Wähle einen Vorschlag, um dorthin zu springen.</li>
+      <li><strong>Mein Standort:</strong> Die Schaltfläche {{ ui.icon('location', ic) }} neben den Zoom-Tasten zentriert die Karte auf deine Position und zeigt im Popup die Entfernung zu jedem Schrank.</li>
+      <li><strong>Listenansicht:</strong> Auf der Seite {{ ui.icon('list', ic) }} <em>Liste</em> kannst du suchen, Spalten sortieren und nach „Nächste zu mir“ ordnen. Über <em>Export</em> lädst du alle Einträge als JSON herunter.</li>
+      <li><strong>Markerfarben:</strong> Die Pins sind nach Barrierefreiheit eingefärbt (rot / gelb / grün); Give-Boxen und derzeit nicht verfügbare Einträge haben eigene Symbole.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Hinzufügen ── #}
+<section id="add" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('plus', 'size-5') }} Einen Eintrag hinzufügen
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+    </h2>
+    <p class="text-base-content/70">Es gibt drei Wege, einen Eintrag zu beginnen:</p>
+    <ul class="ml-1 list-disc space-y-1 pl-5">
+      <li>Die Schaltfläche {{ ui.icon('plus', ic) }} <em>Bücherschrank hinzufügen</em> oben in der Leiste.</li>
+      <li><strong>Rechtsklick</strong> irgendwo auf der Karte (oder <strong>langes Tippen</strong> auf dem Touchscreen) → <em>Bücherschrank hier hinzufügen</em>.</li>
+      <li>Aus dem <em>Mein Standort</em>-Popup → <em>Bücherschrank hier hinzufügen</em>.</li>
+    </ul>
+    <p class="mt-2 text-base-content/70">Fülle anschließend das Schnell-Formular aus:</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Gib einen <strong>Titel</strong>, den <strong>Typ</strong> (Bücherschrank oder Give-Box) und die <strong>Aufstellungsart</strong> an.</li>
+      <li>Setze die <strong>Koordinaten</strong> — sie sind vorausgefüllt, wenn du über die Karte gestartet bist. Du kannst auch einen <code>geo:lat,lon</code>-Text einfügen oder eine Adresse suchen, um sie zu setzen.</li>
+      <li>Klicke auf <strong>Hinzufügen</strong>. Der Pin erscheint sofort auf der Karte und ein Panel bietet an, <em>weitere Details</em> oder <em>Fotos</em> hinzuzufügen oder mit <em>Fertig</em> abzuschließen.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Bearbeiten ── #}
+<section id="edit" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Einen Eintrag bearbeiten
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Öffne einen Eintrag (Marker anklicken → <em>Details</em>) und klicke auf {{ ui.icon('edit', ic) }} <em>Bearbeiten</em>.</li>
+      <li>Passe Titel, Typ, Webseite und den Schalter <strong>fest / mobil</strong> an.</li>
+      <li>Lege die <strong>Barrierefreiheit</strong> über die rot / gelb / grüne Ampel samt optionaler Beschreibung fest.</li>
+      <li>Setze den <strong>Status</strong> (aktiv oder inaktiv). Bei inaktiven Einträgen kannst du einen Grund angeben, der auf der Karte und in der Detailansicht erscheint.</li>
+      <li>Ergänze <strong>Öffnungszeiten</strong> und <strong>Betreuer</strong> und klicke auf <strong>Speichern</strong>. Alle, die den Eintrag beobachten, werden über die Änderungen benachrichtigt.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Fotos ── #}
+<section id="photos" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('photo', 'size-5') }} Fotos verwalten
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Öffne einen Eintrag → {{ ui.icon('photo', ic) }} <em>Fotos</em>.</li>
+      <li><strong>Lade</strong> bis zu fünf Bilder hoch. Ein Urhebername ist erforderlich; du kannst eine kurze Beschreibung (Alternativtext) ergänzen, die Screenreader vorlesen.</li>
+      <li>Mit {{ ui.icon('rotate-cw', ic) }} drehst du ein Foto, bearbeitest seine Beschreibung oder löschst es mit {{ ui.icon('trash', ic) }}.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Bewerten ── #}
+<section id="rating" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Einen Bücherschrank bewerten</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Die Detailansicht zeigt die Durchschnittsbewertung als Herzen.</li>
+      <li>Angemeldet klickst du auf <em>Bewerten</em>, wählst deine Herzen, und es wird sofort gespeichert — der Durchschnitt aktualisiert sich live.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Wunschliste ── #}
+<section id="wishlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Wunschliste — Bücher wünschen &amp; übergeben</h2>
+    <p class="text-base-content/70">Mit der Wunschliste können Leute ein bestimmtes Buch an einem Schrank wünschen, und andere können ein Exemplar dort hinterlegen.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Öffne einen Eintrag → {{ ui.icon('heart', ic) }} <em>Wunschliste</em> und trage das gesuchte Buch ein (Titel, optional Autor).</li>
+      <li>Jemand, der dieses Buch besitzt, kann dort ein <strong>Exemplar hinterlegen</strong> — du wirst benachrichtigt.</li>
+      <li>Sobald du es abgeholt hast, markiere es als <strong>abgeholt</strong>; ist es weg, markiere es als <strong>nicht gefunden</strong>.</li>
+      <li>Ein Abzeichen am Karten-Marker zeigt, wie viele offene Wünsche ein Schrank hat.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Beobachtungsliste ── #}
+<section id="watchlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('eye', 'size-5') }} Beobachtungsliste — einem Eintrag folgen
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Klicke bei einem Eintrag auf {{ ui.icon('eye', ic) }} <em>Beobachten</em>, um ihm zu folgen.</li>
+      <li>Du erhältst eine Nachricht, sobald jemand ihn bearbeitet oder verschiebt.</li>
+      <li>In deinem Profil siehst und verwaltest du alles, dem du folgst.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Marker verschieben ── #}
+<section id="move" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('location', 'size-5') }} Einen Marker verschieben
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Angemeldet kannst du einen <strong>Marker einfach an die richtige Stelle ziehen</strong>.</li>
+      <li>Bestätige die Verschiebung und die neue Position wird gespeichert. Brichst du ab, springt der Marker zurück.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Zuhause ── #}
+<section id="home" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('home', 'size-5') }} Dein Zuhause
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} Konto</span>
+    </h2>
+    <p class="text-base-content/70">Lege einen persönlichen Startpunkt fest, damit die Karte dort öffnet, wo du möchtest.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Über die Karte:</strong> Rechtsklick (oder langes Tippen) auf einen Punkt → <em>Als Zuhause festlegen</em> (direkt unter der Hinzufügen-Schaltfläche; mit Bestätigung). Dabei werden der Punkt und dein aktueller Zoom gespeichert.</li>
+      <li><strong>Über dein Profil:</strong> Gib Breitengrad, Längengrad und Zoom ein und aktiviere den Schalter.</li>
+      <li>Wenn aktiviert, öffnet die Karte zentriert auf dein Zuhause und ein {{ ui.icon('home', ic) }} Marker zeigt den Punkt.</li>
+      <li>Entferne sie jederzeit über <em>Zuhause entfernen</em> in deinem Profil.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Nachrichten ── #}
+<section id="messages" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('inbox', 'size-5') }} Nachrichten &amp; Benachrichtigungen</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Das {{ ui.icon('inbox', ic) }} Postfach oben in der Leiste sammelt Systemnachrichten — Aktualisierungen aus Beobachtungs- und Wunschliste sowie Ankündigungen.</li>
+      <li>In deinem Profil legst du fest, wie du benachrichtigt wirst: in der App, per E-Mail oder beides.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Teilen ── #}
+<section id="share" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Einen Eintrag teilen</h2>
+    <p class="text-base-content/70">Die Detailansicht jedes Eintrags enthält einen schreibgeschützten Link mit einer <em>Kopieren</em>-Schaltfläche. Wer ihn öffnet, landet auf der Karte zentriert auf diesem Schrank mit geöffneten Details.</p>
+  </div>
+</section>
+
+{# ── Sprache & Design ── #}
+<section id="prefs" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('language', 'size-5') }} Sprache &amp; Design</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Wechsle die Oberflächensprache über die Auswahl {{ ui.icon('language', ic) }} oben in der Leiste.</li>
+      <li>Schalte mit dem Schalter {{ ui.icon('sun', ic) }} / {{ ui.icon('moon', ic) }} zwischen hellem und dunklem Design um. Deine Wahl wird auf diesem Gerät gespeichert.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="mt-8 text-center text-sm text-base-content/60">
+  Noch Fragen? Schreib uns an <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.
+</p>

@@ -2,10 +2,12 @@
 
 namespace App\Entity;
 
+use App\Enums\NotificationChannel;
 use App\Repository\UserRepository;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
@@ -18,76 +20,96 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this e-mail address')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
-    private ?Ulid $id = null;
+    public ?Ulid $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    private ?string $username = null;
+    public ?string $username = null;
 
     #[ORM\Column]
-    private array $roles = [];
+    public array $roles = [];
 
     #[ORM\Column]
-    private ?string $password = null;
+    public ?string $password = null;
 
     #[ORM\Column]
-    private ?string $email = null;
+    public ?string $email = null;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $isVerified = false;
+    public bool $isVerified = false;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: WishlistItem::class, orphanRemoval: true)]
-    private Collection $wishlistItems;
+    public Collection $wishlistItems;
 
     #[ORM\OneToMany(mappedBy: 'uploadedBy', targetEntity: Image::class)]
-    private Collection $images;
+    public Collection $images;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Rating::class, orphanRemoval: true)]
-    private Collection $ratings;
+    public Collection $ratings;
+
+    #[ORM\OneToMany(mappedBy: 'recipient', targetEntity: Message::class, orphanRemoval: true)]
+    public Collection $messages;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: WatchlistItem::class, orphanRemoval: true)]
+    public Collection $watchlistItems;
+
+    #[ORM\Column(length: 16, enumType: NotificationChannel::class, options: ['default' => 'internal'])]
+    public NotificationChannel $notificationChannel = NotificationChannel::Internal;
 
     #[ORM\Column(nullable: true)]
-    private ?int $legacyId = null;
+    public ?int $legacyId = null;
 
     #[ORM\Column(nullable: true)]
-    private ?string $legacyPassword = null;
+    public ?string $legacyPassword = null;
 
     #[ORM\Column(nullable: true)]
-    private bool $legacyUser = false;
+    public bool $legacyUser = false;
 
     #[ORM\Column(nullable: true)]
-    private bool $legacyMigrated = false;
+    public bool $legacyMigrated = false;
 
     #[ORM\Column(nullable: true)]
     #[Assert\Language]
-    private ?string $language = null;
+    public ?string $language = null;
+
+    // Personal default map view, applied on the map page when enabled.
+    #[ORM\Column(nullable: true)]
+    public ?float $homeLatitude = null;
+
+    #[ORM\Column(nullable: true)]
+    public ?float $homeLongitude = null;
+
+    #[ORM\Column(nullable: true)]
+    public ?int $homeZoom = null;
+
+    // Optional user-chosen name for the home position (e.g. "Home", "Office").
+    #[ORM\Column(length: 50, nullable: true)]
+    public ?string $homeLabel = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    public bool $useHomeLocation = false;
+
+    // Password reset: a one-time, hashed token (sha256) with an expiry. Cleared
+    // once used. Never stores the raw token.
+    #[ORM\Column(length: 64, nullable: true)]
+    public ?string $resetTokenHash = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    public ?\DateTimeImmutable $resetTokenExpiresAt = null;
 
     public function __construct()
     {
         $this->wishlistItems = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->ratings = new ArrayCollection();
-    }
-
-    public function getId(): ?Ulid
-    {
-        return $this->id;
-    }
-
-    public function getUsername(): ?string
-    {
-        return $this->username;
-    }
-
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-
-        return $this;
+        $this->messages = new ArrayCollection();
+        $this->watchlistItems = new ArrayCollection();
     }
 
     /**
@@ -110,13 +132,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
-    }
-
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
     }
 
     /**
@@ -143,43 +158,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function setEmail(?string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setIsVerified(bool $isVerified): self
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, WishlistItem>
-     */
-    public function getWishlistItems(): Collection
-    {
-        return $this->wishlistItems;
-    }
-
     public function addWishlistItem(WishlistItem $wishlistItem): self
     {
         if (!$this->wishlistItems->contains($wishlistItem)) {
             $this->wishlistItems->add($wishlistItem);
-            $wishlistItem->setUser($this);
+            $wishlistItem->user = $this;
         }
 
         return $this;
@@ -188,26 +171,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeWishlistItem(WishlistItem $wishlistItem): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->wishlistItems->removeElement($wishlistItem) && $wishlistItem->getUser() === $this) {
-            $wishlistItem->setUser(null);
+        if ($this->wishlistItems->removeElement($wishlistItem) && $wishlistItem->user === $this) {
+            $wishlistItem->user = null;
         }
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, Image>
-     */
-    public function getImages(): Collection
-    {
-        return $this->images;
     }
 
     public function addImage(Image $image): self
     {
         if (!$this->images->contains($image)) {
             $this->images->add($image);
-            $image->setUploadedBy($this);
+            $image->uploadedBy = $this;
         }
 
         return $this;
@@ -216,26 +191,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeImage(Image $image): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->images->removeElement($image) && $image->getUploadedBy() === $this) {
-            $image->setUploadedBy(null);
+        if ($image->uploadedBy === $this && $this->images->removeElement($image)) {
+            $image->uploadedBy = null;
         }
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, Rating>
-     */
-    public function getRatings(): Collection
-    {
-        return $this->ratings;
     }
 
     public function addRating(Rating $rating): self
     {
         if (!$this->ratings->contains($rating)) {
             $this->ratings->add($rating);
-            $rating->setUser($this);
+            $rating->user = $this;
         }
 
         return $this;
@@ -244,69 +211,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeRating(Rating $rating): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->ratings->removeElement($rating) && $rating->getUser() === $this) {
-            $rating->setUser(null);
+        if ($rating->user === $this && $this->ratings->removeElement($rating)) {
+            $rating->user = null;
         }
-
-        return $this;
-    }
-
-    public function getLegacyId(): ?int
-    {
-        return $this->legacyId;
-    }
-
-    public function setLegacyId(?int $legacyId): User
-    {
-        $this->legacyId = $legacyId;
-
-        return $this;
-    }
-
-    public function getLegacyPassword(): ?string
-    {
-        return $this->legacyPassword;
-    }
-
-    public function setLegacyPassword(?string $legacyPassword): User
-    {
-        $this->legacyPassword = $legacyPassword;
-
-        return $this;
-    }
-
-    public function isLegacyUser(): bool
-    {
-        return $this->legacyUser;
-    }
-
-    public function setLegacyUser(bool $legacyUser): User
-    {
-        $this->legacyUser = $legacyUser;
-
-        return $this;
-    }
-
-    public function isLegacyMigrated(): bool
-    {
-        return $this->legacyMigrated;
-    }
-
-    public function setLegacyMigrated(bool $legacyMigrated): User
-    {
-        $this->legacyMigrated = $legacyMigrated;
-
-        return $this;
-    }
-
-    public function getLanguage(): ?string
-    {
-        return $this->language;
-    }
-
-    public function setLanguage(?string $language): User
-    {
-        $this->language = $language;
 
         return $this;
     }

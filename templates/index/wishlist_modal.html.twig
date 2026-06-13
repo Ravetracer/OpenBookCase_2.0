@@ -1,0 +1,102 @@
+{% import 'components/icon.html.twig' as ui %}
+
+{% if items is empty %}
+  <p class="mb-4 text-base-content/60">{{ 'wishlist.none'|trans }}</p>
+{% else %}
+  <ul class="mb-4 divide-y divide-base-200 rounded-box border border-base-200">
+    {% for item in items %}
+      {% set isRequester = currentUserId is not null and (item.user.id ~ '') == currentUserId %}
+      {% set isFulfilled = item.status.value == 'fulfilled' %}
+      <li class="flex flex-col gap-2 px-3 py-3 {{ isFulfilled ? 'opacity-60' : '' }}" data-wl-item>
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="font-semibold">{{ item.title }}</p>
+            {% if item.author %}<p class="text-sm text-base-content/70">{{ 'wishlist.by'|trans({ '%author%': item.author }) }}</p>{% endif %}
+            {% if item.isbn %}<p class="text-xs text-base-content/50">{{ 'wishlist.isbn'|trans({ '%isbn%': item.isbn }) }}</p>{% endif %}
+            {% if item.misc %}<p class="mt-1 text-sm text-base-content/70">{{ item.misc }}</p>{% endif %}
+          </div>
+          <span class="badge {{ item.status.badgeClass }} badge-sm shrink-0">{{ ('wishlist.status_' ~ item.status.value)|trans }}</span>
+        </div>
+
+        {# ── Actions, decided by status + who is looking ── #}
+        {% if item.status.value == 'open' %}
+          {% if isRequester %}
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs text-base-content/50">{{ 'wishlist.waiting_drop'|trans }}</span>
+              <button type="button" class="btn btn-ghost btn-xs text-error gap-1"
+                      data-action="wishlist-modal#deleteItem" data-item-id="{{ item.id }}">
+                {{ ui.icon('trash', 'size-4') }} {{ 'wishlist.cancel'|trans }}
+              </button>
+            </div>
+          {% elseif is_granted('ROLE_USER') %}
+            <div>
+              <button type="button" class="btn btn-primary btn-sm gap-1"
+                      data-action="wishlist-modal#changeStatus" data-wl-action="drop" data-item-id="{{ item.id }}">
+                {{ ui.icon('inbox', 'size-4') }} {{ 'wishlist.i_dropped'|trans }}
+              </button>
+            </div>
+          {% else %}
+            <span class="text-xs text-base-content/50">{{ 'wishlist.login_to_drop'|trans }}</span>
+          {% endif %}
+
+        {% elseif item.status.value == 'dropped' %}
+          {% if isRequester %}
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn btn-success btn-sm gap-1"
+                      data-action="wishlist-modal#changeStatus" data-wl-action="fulfill" data-item-id="{{ item.id }}">
+                {{ ui.icon('heart', 'size-4') }} {{ 'wishlist.picked_up'|trans }}
+              </button>
+              <button type="button" class="btn btn-outline btn-sm gap-1"
+                      data-action="wishlist-modal#toggleNotFound">
+                {{ ui.icon('warning', 'size-4') }} {{ 'wishlist.not_found_action'|trans }}
+              </button>
+            </div>
+            <div class="hidden mt-1 space-y-2" data-notfound-box>
+              <textarea class="textarea textarea-bordered w-full" rows="2"
+                        placeholder="{{ 'wishlist.notfound_placeholder'|trans }}" data-notfound-comment></textarea>
+              <button type="button" class="btn btn-error btn-sm gap-1"
+                      data-action="wishlist-modal#changeStatus" data-wl-action="notfound" data-item-id="{{ item.id }}">
+                {{ ui.icon('warning', 'size-4') }} {{ 'wishlist.report_not_found'|trans }}
+              </button>
+            </div>
+          {% else %}
+            <span class="text-xs text-base-content/50">
+              {{ item.droppedBy
+                  ? 'wishlist.waiting_pickup_named'|trans({ '%name%': item.droppedBy.userIdentifier })
+                  : 'wishlist.waiting_pickup'|trans }}
+            </span>
+          {% endif %}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{# ── Add a new wish ── #}
+{% if is_granted('ROLE_USER') %}
+  <form class="space-y-3 border-t border-base-300 pt-4" data-action="submit->wishlist-modal#addItem" novalidate>
+    <p class="font-medium">{{ 'wishlist.add_title'|trans }}</p>
+    <div class="alert alert-error wishlist-error hidden py-2 text-sm" role="alert"></div>
+    <div>
+      <label class="label" for="wishlist-title"><span class="label-text">{{ 'wishlist.field_title'|trans }} <span class="text-error">*</span></span></label>
+      <input id="wishlist-title" type="text" name="title" class="input input-bordered w-full" required placeholder="{{ 'wishlist.field_title'|trans }}">
+    </div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div>
+        <label class="label" for="wishlist-author"><span class="label-text">{{ 'wishlist.field_author'|trans }}</span></label>
+        <input id="wishlist-author" type="text" name="author" class="input input-bordered w-full" placeholder="{{ 'wishlist.optional'|trans }}">
+      </div>
+      <div>
+        <label class="label" for="wishlist-isbn"><span class="label-text">{{ 'wishlist.field_isbn'|trans }}</span></label>
+        <input id="wishlist-isbn" type="text" name="isbn" class="input input-bordered w-full" placeholder="{{ 'wishlist.optional'|trans }}">
+      </div>
+    </div>
+    <div>
+      <label class="label" for="wishlist-misc"><span class="label-text">{{ 'wishlist.field_note'|trans }}</span></label>
+      <textarea id="wishlist-misc" name="misc" rows="2" class="textarea textarea-bordered w-full" placeholder="{{ 'wishlist.note_placeholder'|trans }}"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary gap-1">{{ ui.icon('heart', 'size-4') }} {{ 'wishlist.add_button'|trans }}</button>
+  </form>
+{% else %}
+  <p class="border-t border-base-300 pt-4 text-sm text-base-content/60">{{ 'wishlist.login_to_wish'|trans }}</p>
+{% endif %}

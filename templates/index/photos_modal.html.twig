@@ -1,0 +1,60 @@
+{% import 'components/icon.html.twig' as ui %}
+
+{% if bookcase.images is empty %}
+  <p class="text-base-content/60">{{ 'bookcase.no_photos'|trans }}</p>
+{% else %}
+  <div class="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+    {% for image in bookcase.images %}
+      <div class="card border border-base-300 bg-base-100" data-image-card>
+        <figure class="aspect-[4/3] bg-base-200">
+          <img src="/images/{{ image.filename }}" class="h-full w-full object-contain p-1" alt="{{ image.altText|default('')|e('html_attr') }}">
+        </figure>
+        <div class="card-body gap-2 p-2">
+          <p class="truncate text-xs text-base-content/60" title="{{ image.author|e('html_attr') }}">{{ image.author }}</p>
+          {# Editable screen-reader description (saved on blur). #}
+          <input type="text" class="input input-bordered input-sm w-full"
+                 value="{{ image.altText|default('')|e('html_attr') }}"
+                 placeholder="{{ 'bookcase.alt_text'|trans }}"
+                 aria-label="{{ 'bookcase.alt_text'|trans }}"
+                 data-action="change->photo-modal#saveAlt" data-image-id="{{ image.id }}">
+          <div class="join w-full">
+            <button type="button" class="btn join-item btn-sm flex-1"
+                    data-action="photo-modal#rotate" data-image-id="{{ image.id }}"
+                    data-direction="ccw" aria-label="Rotate counter-clockwise">{{ ui.icon('rotate-ccw', 'size-4') }}</button>
+            <button type="button" class="btn join-item btn-sm flex-1"
+                    data-action="photo-modal#rotate" data-image-id="{{ image.id }}"
+                    data-direction="cw" aria-label="Rotate clockwise">{{ ui.icon('rotate-cw', 'size-4') }}</button>
+            <button type="button" class="btn btn-error btn-outline join-item btn-sm flex-1"
+                    data-action="photo-modal#deleteImage" data-image-id="{{ image.id }}"
+                    aria-label="Delete image">{{ ui.icon('trash', 'size-4') }}</button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<p class="mb-3 text-sm text-base-content/60">{{ 'bookcase.photo_count'|trans({ '%count%': bookcase.images|length }) }}</p>
+
+{% if bookcase.images|length < 5 %}
+  <form class="space-y-3 border-t border-base-300 pt-4" data-action="submit->photo-modal#upload"
+        enctype="multipart/form-data" novalidate>
+    <div class="alert alert-error photo-error hidden py-2 text-sm" role="alert"></div>
+    <div>
+      <label class="label" for="photo-file-input"><span class="label-text font-medium">{{ 'bookcase.add_photo'|trans }}</span></label>
+      <input id="photo-file-input" type="file" name="imageFile" class="file-input file-input-bordered w-full"
+             accept="image/jpeg,image/png,image/webp,image/gif" required>
+    </div>
+    <div>
+      <label class="label" for="photo-author-input"><span class="label-text font-medium">{{ 'bookcase.photographer'|trans }}</span></label>
+      <input id="photo-author-input" type="text" name="author" class="input input-bordered w-full"
+             placeholder="{{ 'bookcase.required'|trans }}" required>
+    </div>
+    <div>
+      <label class="label" for="photo-alt-input"><span class="label-text font-medium">{{ 'bookcase.alt_text'|trans }}</span></label>
+      <input id="photo-alt-input" type="text" name="altText" class="input input-bordered w-full"
+             placeholder="{{ 'bookcase.alt_placeholder'|trans }}">
+    </div>
+    <button type="submit" class="btn btn-primary">{{ 'bookcase.upload'|trans }}</button>
+  </form>
+{% endif %}

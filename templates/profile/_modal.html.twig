@@ -1,0 +1,199 @@
+{% import 'components/icon.html.twig' as ui %}
+
+<form method="dialog">
+  <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+</form>
+
+<h3 class="mb-4 text-lg font-bold">{{ 'profile.title'|trans }}</h3>
+
+<div class="mb-4">
+  <label class="label"><span class="label-text font-medium">{{ 'profile.username'|trans }}</span></label>
+  <input type="text" class="input input-bordered w-full" value="{{ user.userIdentifier }}" readonly disabled>
+</div>
+
+{# Editable e-mail — saved via AJAX #}
+<form data-action="submit->profile#updateEmail" class="mb-1">
+  <input type="hidden" name="_token" value="{{ csrf_token('profile_email') }}">
+  <label class="label" for="profile-email"><span class="label-text font-medium">{{ 'profile.email'|trans }}</span></label>
+  <div class="join w-full">
+    <input id="profile-email" type="email" name="email" required value="{{ user.email }}"
+           class="input input-bordered join-item w-full" data-profile-target="email">
+    <button type="submit" class="btn btn-primary join-item">{{ 'profile.email_save'|trans }}</button>
+  </div>
+  <p data-profile-target="emailStatus" class="mt-1 text-sm" aria-live="polite"></p>
+</form>
+
+<div class="mb-6 flex items-center gap-1 text-sm text-base-content/60">
+  {% if user.isVerified %}
+    {{ ui.icon('user', 'size-4') }} {{ 'profile.verified'|trans }}
+  {% else %}
+    {{ ui.icon('info', 'size-4') }} {{ 'profile.email_not_verified'|trans }}
+  {% endif %}
+</div>
+
+{# Language — saved instantly via AJAX, then the page reloads to apply it #}
+<div class="mb-6">
+  <input type="hidden" value="{{ csrf_token('profile_language') }}" data-profile-target="languageToken">
+  <span class="label-text font-medium">{{ 'profile.language'|trans }}</span>
+  <p class="mb-2 text-sm text-base-content/60">{{ 'profile.language_help'|trans }}</p>
+  {% set activeLocale = user.language ?? app.request.locale %}
+  <div class="flex flex-wrap gap-2">
+    {% for code, label in app_locales %}
+      <label class="btn btn-sm {{ code == activeLocale ? 'btn-primary' : 'btn-outline' }}">
+        <input type="radio" name="profile-language" value="{{ code }}" class="hidden"
+               {{ code == activeLocale ? 'checked' : '' }}
+               data-action="change->profile#updateLanguage">
+        {{ label }}
+      </label>
+    {% endfor %}
+  </div>
+</div>
+
+{# Notification channel — saved instantly via AJAX #}
+<div class="mb-6">
+  <input type="hidden" name="_token" value="{{ csrf_token('profile_notifications') }}" data-profile-target="channelToken">
+  <span class="label-text font-medium">{{ 'profile.notifications'|trans }}</span>
+  <p class="mb-2 text-sm text-base-content/60">{{ 'profile.notifications_help'|trans }}</p>
+  <div class="join join-vertical w-full sm:join-horizontal">
+    {% for channel in ['internal', 'email', 'both'] %}
+      <label class="btn join-item flex-1 gap-2 {{ user.notificationChannel.value == channel ? 'btn-primary' : 'btn-outline' }}">
+        <input type="radio" name="notification-channel" value="{{ channel }}" class="hidden"
+               {{ user.notificationChannel.value == channel ? 'checked' : '' }}
+               data-action="change->profile#updateNotifications">
+        {{ ('profile.channel_' ~ channel)|trans }}
+      </label>
+    {% endfor %}
+  </div>
+  {% if not user.isVerified %}
+    <p class="mt-1 flex items-center gap-1 text-sm text-warning">
+      {{ ui.icon('warning', 'size-4') }} {{ 'profile.verify_hint'|trans }}
+    </p>
+  {% endif %}
+  <p data-profile-target="channelStatus" class="mt-1 text-sm" aria-live="polite"></p>
+</div>
+
+{# Home map location — applied on the map page when enabled. Can also be set
+   directly from the map (right-click / long-press → "Set as home"). #}
+<div class="mb-6">
+  <form data-action="submit->profile#updateHome">
+    <input type="hidden" name="_token" value="{{ csrf_token('profile_home') }}">
+    <span class="label-text font-medium">{{ 'profile.home_title'|trans }}</span>
+    <p class="mb-2 text-sm text-base-content/60">{{ 'profile.home_help'|trans }}</p>
+
+    <label class="label mb-2 cursor-pointer justify-start gap-2">
+      <input type="checkbox" name="enabled" value="1" class="toggle toggle-primary"
+             {{ user.useHomeLocation ? 'checked' : '' }}>
+      <span class="label-text">{{ 'profile.home_enable'|trans }}</span>
+    </label>
+
+    <div class="mb-2">
+      <label class="label" for="home-label"><span class="label-text text-xs">{{ 'profile.home_name_label'|trans }}</span></label>
+      <input id="home-label" type="text" name="label" maxlength="50" value="{{ user.homeLabel }}"
+             placeholder="{{ 'profile.home_name_placeholder'|trans }}"
+             class="input input-bordered input-sm w-full">
+    </div>
+
+    <div class="grid grid-cols-3 gap-2">
+      <div>
+        <label class="label" for="home-lat"><span class="label-text text-xs">{{ 'profile.home_latitude'|trans }}</span></label>
+        <input id="home-lat" type="number" step="any" name="latitude" value="{{ user.homeLatitude }}"
+               class="input input-bordered input-sm w-full">
+      </div>
+      <div>
+        <label class="label" for="home-lon"><span class="label-text text-xs">{{ 'profile.home_longitude'|trans }}</span></label>
+        <input id="home-lon" type="number" step="any" name="longitude" value="{{ user.homeLongitude }}"
+               class="input input-bordered input-sm w-full">
+      </div>
+      <div>
+        <label class="label" for="home-zoom"><span class="label-text text-xs">{{ 'profile.home_zoom'|trans }}</span></label>
+        <input id="home-zoom" type="number" min="1" max="19" name="zoom" value="{{ user.homeZoom ?? 13 }}"
+               class="input input-bordered input-sm w-full">
+      </div>
+    </div>
+
+    <div class="mt-2 flex flex-wrap items-center gap-2">
+      <button type="submit" class="btn btn-primary btn-sm">{{ 'profile.home_save'|trans }}</button>
+      <button type="button" class="btn btn-ghost btn-sm gap-1 text-error {{ user.homeLatitude is null ? 'hidden' : '' }}"
+              data-action="profile#removeHome" data-profile-target="homeRemove">
+        {{ ui.icon('trash', 'size-4') }} {{ 'profile.home_remove'|trans }}
+      </button>
+      <p data-profile-target="homeStatus" class="text-sm" aria-live="polite"></p>
+    </div>
+  </form>
+</div>
+
+{# Watchlist — bookcases the user follows. Kept live by the `watchlist:changed`
+   document event (dispatched from the bookcase detail dialog) so additions show
+   up here without a page reload. #}
+<div class="mb-6">
+  <span class="label-text font-medium">{{ 'profile.watchlist'|trans }}</span>
+  <p class="mb-2 text-sm text-base-content/60">{{ 'profile.watchlist_help'|trans }}</p>
+
+  <ul data-profile-target="watchlist"
+      class="divide-y divide-base-200 rounded-box border border-base-200 {{ user.watchlistItems is empty ? 'hidden' : '' }}">
+    {% for item in user.watchlistItems %}
+      <li class="flex items-center justify-between gap-2 px-3 py-2" data-watch-row data-bc-id="{{ item.bookcase.id }}">
+        <a href="{{ path('app_bookcase_show', { bookcase: item.bookcase.id }) }}" class="link link-hover truncate">
+          {{ item.bookcase.title }}
+        </a>
+        <button type="button" class="btn btn-ghost btn-xs text-error" aria-label="{{ 'profile.watchlist_remove'|trans }}"
+                data-watch-remove data-bc-id="{{ item.bookcase.id }}">
+          {{ ui.icon('trash', 'size-4') }}
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <p data-profile-target="watchlistEmpty"
+     class="text-sm text-base-content/60 {{ user.watchlistItems is empty ? '' : 'hidden' }}">
+    {{ 'profile.watchlist_empty'|trans }}
+  </p>
+
+  {# Prototype row cloned by the controller when a watch is added live. #}
+  <template data-profile-target="watchRowTemplate">
+    <li class="flex items-center justify-between gap-2 px-3 py-2" data-watch-row data-bc-id="">
+      <a href="" class="link link-hover truncate" data-watch-link></a>
+      <button type="button" class="btn btn-ghost btn-xs text-error" aria-label="{{ 'profile.watchlist_remove'|trans }}"
+              data-watch-remove data-bc-id="">
+        {{ ui.icon('trash', 'size-4') }}
+      </button>
+    </li>
+  </template>
+</div>
+
+{# My wishlist — books the user wished for, across all bookcases. Read-only overview;
+   open a bookcase to drop/pick-up/cancel from its wishlist modal. #}
+<div class="mb-6">
+  <span class="label-text font-medium">{{ 'profile.wishlist'|trans }}</span>
+  <p class="mb-2 text-sm text-base-content/60">{{ 'profile.wishlist_help'|trans }}</p>
+
+  {# Re-fetched live (app_profile_wishlist) on the wishlist:changed event — see profile_controller. #}
+  <div data-profile-target="wishlist">
+    {{ include('profile/_wishlist.html.twig') }}
+  </div>
+</div>
+
+{# Danger zone — explicit, two-step account deletion #}
+<div class="rounded-box border border-error/40 p-4">
+  <h4 class="flex items-center gap-1 font-semibold text-error">{{ ui.icon('warning', 'size-4') }} {{ 'profile.danger_title'|trans }}</h4>
+  <p class="mt-1 text-sm text-base-content/70">{{ 'profile.danger_help'|trans }}</p>
+
+  <button type="button" class="btn btn-error btn-outline btn-sm mt-3 gap-1"
+          data-action="profile#showConfirm" data-profile-target="deleteButton">
+    {{ ui.icon('trash', 'size-4') }} {{ 'profile.delete_button'|trans }}
+  </button>
+
+  <div class="mt-3 hidden" data-profile-target="confirm">
+    <input type="hidden" value="{{ csrf_token('profile_delete') }}" data-profile-target="deleteToken">
+    <label class="label cursor-pointer justify-start gap-2">
+      <input type="checkbox" class="checkbox checkbox-error" data-action="profile#toggleConfirm" data-profile-target="confirmCheck">
+      <span class="label-text">{{ 'profile.delete_confirm'|trans }}</span>
+    </label>
+    <div class="mt-2 flex gap-2">
+      <button type="button" class="btn btn-ghost btn-sm" data-action="profile#cancelConfirm">{{ 'profile.delete_cancel'|trans }}</button>
+      <button type="button" class="btn btn-error btn-sm" data-action="profile#deleteAccount"
+              data-profile-target="confirmButton" disabled>{{ 'profile.delete_confirm_button'|trans }}</button>
+    </div>
+    <p data-profile-target="deleteStatus" class="mt-1 text-sm text-error" aria-live="polite"></p>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'static.about.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-3xl p-4 sm:p-8">
+  <article class="prose max-w-none">
+    <h1>{{ 'static.about.title'|trans }}</h1>
+    <p class="lead text-base-content/70">{{ 'static.about.lead'|trans }}</p>
+
+    <p>{{ 'static.about.intro'|trans }}</p>
+
+    <h2>{{ 'static.about.how_title'|trans }}</h2>
+    <p>{{ 'static.about.how_body'|trans }}</p>
+
+    <h2>{{ 'static.about.contributing_title'|trans }}</h2>
+    <p>{{ 'static.about.contributing_body'|trans }}</p>
+
+    <h2>{{ 'static.about.contact_title'|trans }}</h2>
+    <p>{{ 'static.about.contact_body'|trans }} <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.</p>
+  </article>
+</div>
+{% endblock %}

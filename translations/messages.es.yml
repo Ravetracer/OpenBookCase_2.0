@@ -1,0 +1,439 @@
+# ── Legacy flat keys ──
+title: Título
+bctype: Tipo
+position: Posición
+latitude: Latitud
+longitude: Longitud
+accessibility: Accesibilidad
+installationType: Tipo de instalación
+activeState: Estado activo
+state: Estado
+description: Descripción
+digitalMediaAllowed: Medios digitales permitidos
+shareLink: Enlace para compartir
+caretaker: Responsable
+name: Nombre
+address:
+  title: Dirección
+  street: Calle
+  house_number: Número
+  city: Ciudad
+  zip_code: Código postal
+  additional_data: Datos adicionales
+openingTimes: Horario
+openTime: Hora de apertura
+twentyForSeven: 24/7
+author: Autor
+ratings: Valoraciones
+comment: Comentario
+webpage: Sitio web
+status: Estado
+inactive_notice: Actualmente no disponible
+rating: Valoración
+edit: Editar
+cancel: Cancelar
+save: Guardar
+save_changes: Guardar cambios
+ok: Ok
+close: Cerrar
+delete: Eliminar
+delete_reason_required: Es obligatorio indicar un motivo para eliminar una entrada.
+copy: Copiar
+edit_action: Editando
+mobility: Movilidad
+mobile: 'Móvil'
+fixed: 'Instalación fija'
+Details: Detalles
+
+# ── Navegación ──
+nav:
+  help: "Guía"
+  cookies: Cookies
+  bookcase_count: armarios de libros
+  map: Mapa
+  list: Lista
+  info: Información
+  about: Acerca de
+  imprint: Aviso legal
+  legal: Legal / Privacidad
+  licenses: Licencias
+  login: Iniciar sesión
+  logout: Cerrar sesión
+  register: Registrarse
+  profile: Mi perfil
+  language: Idioma
+  messages: Mensajes
+  toggle_theme: Cambiar modo oscuro
+  menu: Menú
+  add: 'Añadir estantería'
+
+# ── Autenticación ──
+auth:
+  username_or_email: "Usuario o correo electrónico"
+  email_placeholder: "tu@ejemplo.com"
+  forgot_password: "¿Olvidaste tu contraseña?"
+  login_title: Iniciar sesión
+  please_sign_in: Inicia sesión
+  sign_in: Iniciar sesión
+  username: Nombre de usuario
+  password: Contraseña
+  logged_in_as: 'Has iniciado sesión como %name%.'
+  register: Registrarse
+  agree_terms_pre: 'Acepto los'
+  terms: términos
+
+# ── Perfil ──
+profile:
+  home_remove: Eliminar posición de inicio
+  home_title: Ubicación de inicio en el mapa
+  home_name_label: "Nombre (opcional)"
+  home_name_placeholder: "p. ej. Casa, Oficina"
+  home_default_label: "Casa"
+  home_help: Abre el mapa centrado en una ubicación de tu elección, o defínela en el mapa (clic derecho / pulsación larga).
+  home_enable: Centrar el mapa en mi ubicación de inicio
+  home_latitude: Latitud
+  home_longitude: Longitud
+  home_zoom: Zoom
+  home_save: Guardar
+  title: Mi perfil
+  username: Nombre de usuario
+  email: Correo electrónico
+  email_save: Guardar
+  verified: Cuenta verificada
+  email_not_verified: Correo no verificado
+  notifications: Notificaciones
+  notifications_help: ¿Cómo quieres recibir los mensajes del sistema?
+  channel_internal: En el sitio web
+  channel_email: Por correo electrónico
+  channel_both: Ambos
+  verify_hint: Verifica tu correo para recibir notificaciones por correo.
+  language: Idioma
+  language_help: Elige el idioma de la interfaz.
+  watchlist: Lista de seguimiento
+  watchlist_help: Estanterías que sigues. Recibirás un mensaje cuando alguna cambie.
+  watchlist_empty: Aún no sigues ninguna estantería.
+  watchlist_remove: Quitar de la lista de seguimiento
+  wishlist: Mi lista de deseos
+  wishlist_help: Libros que has deseado. Abre una estantería para gestionar sus deseos.
+  wishlist_empty: Aún no has deseado ningún libro.
+  danger_title: Eliminar cuenta
+  danger_help: 'Esto elimina permanentemente tu cuenta y tus datos personales (tus valoraciones y lista de deseos). Las fotos que subiste permanecen en línea, pero ya no estarán vinculadas a ti. Esto no se puede deshacer.'
+  delete_button: Eliminar mi cuenta
+  delete_confirm: Entiendo que esto es permanente.
+  delete_cancel: Cancelar
+  delete_confirm_button: Sí, eliminar mi cuenta
+
+# ── Detalle de estantería / fotos ──
+bookcase:
+  watch: Seguir
+  watching: Siguiendo
+  photos: Fotos
+  wishlist: Lista de deseos
+  rate: Valorar
+  your_rating: Tu valoración
+  no_ratings: Aún no hay valoraciones
+  manage_photos: Gestionar fotos
+  no_photos: Aún no hay fotos.
+  photo_count: '%count% / 5 imágenes'
+  add_photo: Añadir foto
+  photographer: Nombre del fotógrafo / autor
+  required: Obligatorio
+  upload: Subir
+  add_caretaker: Añadir responsable
+  alt_text: 'Descripción de la imagen (para lectores de pantalla)'
+  alt_placeholder: 'p. ej. Una casita de libros de madera junto a un banco'
+
+# ── Página de lista ──
+list:
+  page_title: Lista de estanterías
+  heading: Todas las estanterías
+  entries: '%count% entradas'
+  export: Exportar JSON
+  none: Aún no se han encontrado estanterías.
+  col_title: Título
+  col_address: Dirección
+  col_type: Tipo
+  col_status: Estado
+  active: Activa
+  inactive: Inactiva
+  detail: Detalle
+  per_page: Por página
+  search_placeholder: 'Buscar título o dirección…'
+  col_lat: 'Latitud'
+  col_lon: 'Longitud'
+  col_distance: 'Distancia'
+  sort_by_distance: 'Más cercanas'
+  locating: 'Localizando…'
+  distance: '%km% km'
+  distance_m: '%m% m'
+  no_results: 'Ningún resultado para tu búsqueda.'
+
+# ── Lista de deseos ──
+wishlist:
+  title: Lista de deseos
+  none: Aún no hay deseos. Sé el primero en desear un libro aquí.
+  status_open: Abierto
+  status_dropped: Dejado
+  status_not_found: No encontrado
+  status_fulfilled: Cumplido
+  by: 'de %author%'
+  isbn: 'ISBN %isbn%'
+  waiting_drop: Esperando a que alguien deje un ejemplar.
+  cancel: Cancelar
+  i_dropped: Lo he dejado
+  login_to_drop: Inicia sesión para dejar un ejemplar.
+  picked_up: Lo he recogido
+  not_found_action: No lo encontré
+  notfound_placeholder: Nota opcional para quien lo dejó…
+  report_not_found: Informar como no encontrado
+  waiting_pickup_named: '%name% dejó un ejemplar — esperando a que lo recojan.'
+  waiting_pickup: Se dejó un ejemplar — esperando a que lo recojan.
+  add_title: Desear un libro
+  field_title: Título
+  field_author: Autor
+  field_isbn: ISBN
+  field_note: Nota
+  optional: Opcional
+  note_placeholder: 'Opcional — edición, estado, cualquier cosa útil'
+  add_button: Añadir a la lista de deseos
+  login_to_wish: Inicia sesión para desear un libro aquí.
+  open_badge: '%count% deseos abiertos'
+
+# ── Mensajes ──
+messages:
+  title: Mensajes
+  none: No tienes mensajes.
+  system: Sistema
+  view_bookcase: Ver estantería
+  new: nuevo
+
+# ── Textos de JavaScript ──
+js:
+  confirm_delete_bookcase: ¿Eliminar esta estantería? Esto no se puede deshacer.
+  confirm_delete_image: ¿Eliminar esta imagen? Esto no se puede deshacer.
+  confirm_remove_watch: ¿Quitar esta estantería de tu lista de seguimiento?
+  confirm_remove_home: '¿Eliminar tu posición de inicio guardada?'
+  confirm_cancel_wish: ¿Cancelar este deseo?
+  delete_unavailable: La eliminación no está disponible.
+  delete_reason: ¿Por qué se elimina esta entrada? Es obligatorio indicar un motivo.
+  saving_failed: Error al guardar. Inténtalo de nuevo.
+  upload_failed: Error al subir. Inténtalo de nuevo.
+  add_wish_failed: No se pudo añadir este deseo. Inténtalo de nuevo.
+  copied: ¡Copiado!
+  saved: Guardado
+  could_not_save: No se pudo guardar.
+  could_not_save_rating: No se pudo guardar la valoración
+  could_not_update_wish: No se pudo actualizar este deseo.
+  could_not_delete_account: No se pudo eliminar la cuenta.
+  something_wrong: Algo salió mal. Inténtalo de nuevo.
+  could_not_load: No se pudo cargar esta estantería.
+  create_failed: 'No se pudo añadir la estantería. Inténtalo de nuevo.'
+
+# ── Flash / errores de API ──
+flash:
+  auth_required: Autenticación requerida.
+  invalid_token: Token de seguridad no válido. Vuelve a cargar la página.
+  invalid_email: Introduce una dirección de correo válida.
+  unknown_channel: Canal de notificación desconocido.
+  unknown_language: Idioma desconocido.
+  rating_range: La valoración debe estar entre 1 y 5.
+  title_required: Se requiere un título de libro.
+  wish_cannot_drop: Ya no se puede dejar un ejemplar para este deseo.
+  only_requester_pickup: Solo quien lo pidió puede confirmar la recogida.
+  not_awaiting_pickup: Este deseo no está a la espera de recogida.
+  only_requester_missing: Solo quien lo pidió puede informar de un libro que falta.
+  only_requester_cancel: Solo quien lo pidió puede cancelar este deseo.
+  only_open_cancel: Solo se puede cancelar un deseo abierto.
+  unknown_action: Acción desconocida.
+  email_verified: Tu dirección de correo ha sido verificada. Ya puedes iniciar sesión.
+  check_email: '¡Casi listo! Hemos enviado un enlace de verificación a tu dirección de correo. Haz clic en él para activar tu cuenta antes de iniciar sesión.'
+  verify_failed: El enlace de verificación no es válido o ha caducado.
+  max_images: 'Se permiten como máximo %count% imágenes por entrada.'
+  no_file: No se ha subido ningún archivo.
+  author_required: El nombre del autor es obligatorio.
+  invalid_image_type: Solo se permiten imágenes JPEG, PNG, WebP o GIF.
+  invalid_direction: 'Dirección no válida. Usa «cw» o «ccw».'
+  invalid_position: 'Coordenadas no válidas.'
+
+# ── Notificaciones del sistema ──
+notify:
+  wishlist_new_subject: 'Nuevo deseo: %title%'
+  wishlist_new_body: '%user% busca "%detail%" en "%bookcase%". Si tienes un ejemplar, ¡déjalo allí!'
+  wishlist_dropped_subject: 'Tu libro deseado fue dejado: %title%'
+  wishlist_dropped_body: '%user% dejó "%title%" en "%bookcase%". ¡Ve a recogerlo!'
+  wishlist_fulfilled_subject: 'El libro que dejaste fue recogido: %title%'
+  wishlist_fulfilled_body: '%user% recogió "%title%" en "%bookcase%". ¡Gracias por dejarlo!'
+  wishlist_notfound_subject: 'Un libro que dejaste no se encontró: %title%'
+  wishlist_notfound_body: '%user% no pudo encontrar "%title%" en "%bookcase%".'
+  wishlist_notfound_note: 'Nota: %comment%'
+  bookcase_changed_subject: 'Estantería actualizada: %title%'
+  bookcase_changed_body: "%user% actualizó \"%title%\".\nCambiado: %fields%."
+
+# ── Correos electrónicos ──
+email:
+  notification_greeting: 'Hola %username%,'
+  notification_view: Ver la estantería
+  notification_footer: 'Recibes este correo porque elegiste las notificaciones por correo en tu perfil de OpenBookCase. Puedes cambiarlo en cualquier momento en los ajustes de tu perfil.'
+  notification_signoff: Saludos,
+  notification_team: El equipo de OpenBookCase
+  confirm_subject: Confirma tu correo electrónico
+  confirm_title: ¡Hola! ¡Confirma tu correo electrónico!
+  confirm_body: 'Confirma tu dirección de correo haciendo clic en el siguiente enlace:'
+  confirm_link: Confirmar mi correo
+  confirm_expires: 'Este enlace caducará en %duration%.'
+  confirm_cheers: ¡Saludos!
+
+# ── Etiquetas de campos de formulario ──
+form:
+  email: "Correo electrónico"
+  title: Título
+  entry_type: Tipo
+  map_symbol: Símbolo del mapa
+  installation_type: Tipo de instalación
+  webpage: Sitio web
+  is_mobile: 'Instalación móvil'
+  digital_media_allowed: Medios digitales permitidos
+  comment: Comentario
+  latitude: Latitud
+  longitude: Longitud
+  street: Calle
+  house_number: Número
+  zipcode: Código postal
+  city: Ciudad
+  additional_data: Datos adicionales
+  accessibility_level: Nivel de accesibilidad
+  accessibility_description: Descripción de accesibilidad
+  accessibility_description_placeholder: 'p. ej. uno o varios escalones, necesita ayuda de otros, detrás de una puerta cerrada, muy estrecho…'
+  active_status: Estado
+  active_status_description: Descripción del estado
+  open_time: Hora de apertura
+  twenty_four_seven: 24/7
+  caretaker_name: Nombre
+  caretaker_contact: Contacto
+  username: Nombre de usuario
+  password: Contraseña
+  agree_terms: Acepto los términos
+
+# ── Páginas estáticas ──
+static:
+  help:
+    title: "Guía de uso"
+  about:
+    title: Acerca de OpenBookCase
+    lead: ¿Qué es este proyecto?
+    intro: 'OpenBookCase es una plataforma impulsada por la comunidad para encontrar y compartir estanterías públicas y cajas de intercambio cerca de ti. Cualquiera puede descubrir una estantería en el mapa, ver su ubicación y detalles, y contribuir añadiendo nuevas entradas.'
+    how_title: Cómo funciona
+    how_body: 'Explora el mapa interactivo para encontrar estanterías en tu zona. Haz clic en cualquier marcador para ver detalles como el horario, la dirección y las fotos. Usa la vista de lista para tener una visión rápida de todas las entradas.'
+    contributing_title: Contribuir
+    contributing_body: 'Crea una cuenta gratuita para añadir nuevas estanterías, subir fotos, valorar ubicaciones y gestionar tu lista de deseos de libros que buscas.'
+    contact_title: Contacto
+    contact_body: '¿Preguntas o comentarios? Contáctanos en'
+  imprint:
+    title: Aviso legal
+    lead: Información legal
+    responsible_title: Responsable del contenido
+    responsible_body: Proyecto OpenBookCase
+    contact_title: Contacto
+    disclaimer_title: Descargo de responsabilidad
+    disclaimer_body: 'La información de este sitio web se proporciona de buena fe. No asumimos responsabilidad por la exactitud, integridad o actualidad del contenido.'
+  legal:
+    title: Aviso legal y política de privacidad
+    lead: Condiciones de uso y protección de datos
+    terms_title: Condiciones de uso
+    terms_body: 'Al usar OpenBookCase aceptas contribuir con contenido (entradas de estanterías, fotos, valoraciones) de forma responsable y solo para su finalidad prevista. No debes enviar información falsa ni contenido que infrinja los derechos de terceros.'
+    collect_title: Datos que recopilamos
+    collect_intro: 'Recopilamos los siguientes datos personales cuando te registras:'
+    collect_1: Nombre de usuario y dirección de correo (para la gestión de la cuenta y la verificación del correo)
+    collect_2: Contraseña cifrada (nunca almacenada en texto plano)
+    collect_public: 'Las contribuciones al mapa (ubicaciones de estanterías, fotos) son públicamente visibles.'
+    storage_title: Almacenamiento de datos
+    storage_body: 'Tus datos se almacenan en servidores dentro de la Unión Europea. No vendemos ni compartimos tus datos personales con terceros.'
+    rights_title: Tus derechos
+    rights_body: 'Tienes derecho a acceder, corregir o eliminar tus datos personales en cualquier momento. Contáctanos en'
+    cookies_title: Cookies
+    cookies_body: 'Este sitio usa una cookie de sesión necesaria para iniciar sesión y una cookie que recuerda el idioma que elegiste. No se usan cookies de seguimiento ni de análisis.'
+  licenses:
+    title: Licencias
+    lead: Cómo se licencian OpenBookCase y sus datos
+    intro: 'OpenBookCase es un proyecto abierto. Su código fuente y los datos recopilados se publican bajo licencias abiertas independientes, como ya ocurría con el proyecto anterior.'
+    code_title: Código fuente
+    code_body: 'El código fuente de OpenBookCase es de código abierto y se publica bajo la'
+    data_title: Base de datos
+    data_body: 'Los datos recopilados de casitas de libros y cajas de intercambio se publican como base de datos abierta bajo la'
+
+# ── Búsqueda en el mapa y ubicación ──
+search:
+  placeholder: Buscar dirección, coordenada o casita de libros…
+  group_bookcases: Casitas de libros
+  group_places: Lugares
+  no_results: Sin resultados
+  go_to_coordinate: Ir a la coordenada
+  use_my_location: Mostrar mi ubicación
+  geolocation_error: No se pudo determinar tu ubicación.
+  geolocation_unsupported: Tu navegador no admite la geolocalización.
+
+# ── Add / create entry ──
+add:
+  set_home: Establecer como ubicación de inicio
+  set_home_confirm: '¿Establecer este punto como tu ubicación de inicio? El mapa se abrirá aquí cuando inicies sesión.'
+  set_home_saved: Ubicación de inicio guardada.
+  set_home_failed: No se pudo guardar la ubicación de inicio.
+  title: 'Añadir una estantería'
+  here: 'Añadir estantería aquí'
+  submit: 'Añadir'
+  address_search: 'Busca una dirección para establecer las coordenadas'
+  geo_label: 'Pegar coordenadas geo:'
+  geo_placeholder: 'geo:50.19,8.8'
+  created_title: '¡Estantería añadida!'
+  created_question: '¿Quieres añadir más detalles?'
+  add_details: 'Añadir detalles'
+  add_photos: 'Añadir fotos'
+  done: 'Listo'
+
+# ── Move marker (drag to reposition) ──
+move:
+  confirm: 'Has movido este marcador. ¿Guardar la nueva posición?'
+  failed: 'No se pudo guardar la nueva posición. Inténtalo de nuevo.'
+
+# ── Accessibility traffic-light labels ──
+accessibility_level:
+  none: 'No accesible'
+  partial: 'Parcialmente accesible (con ayuda)'
+  full: 'Totalmente accesible'
+
+cookies:
+  title: "Cookies y privacidad"
+  intro: "OpenBookCase solo almacena lo necesario para funcionar. No usamos cookies de publicidad ni rastreo de terceros; la única analítica es nuestro propio Matomo, respetuoso con la privacidad y sin cookies."
+  essential_label: "Estrictamente necesarias"
+  essential_desc: "Una cookie de sesión te mantiene conectado y protege los formularios frente a CSRF. El sitio no funciona sin ella."
+  preferences_label: "Preferencias"
+  preferences_desc: "Tu idioma (la cookie «obc_locale») y tu elección de tema e idioma (guardados en el almacenamiento local de tu navegador). Solo se guardan cuando los cambias."
+  maps_label: "Mapa y búsqueda de direcciones"
+  maps_desc: "Las teselas del mapa provienen de OpenStreetMap y la búsqueda de direcciones usa Photon (komoot.io). Estos servicios reciben tu dirección IP para mostrar el mapa; no instalan cookies ni te rastrean."
+  analytics_label: "Medición de alcance"
+  analytics_desc: "Usamos Matomo (alojado en este sitio) para entender cómo se usa el sitio. Funciona sin cookies y con la dirección IP enmascarada, por lo que no se te identifica personalmente ni se te rastrea en otros sitios web."
+  no_tracking: "Sin publicidad. Sin venta de datos. Sin rastreo de terceros."
+  privacy_link: "Leer la política de privacidad"
+  accept: "Entendido"
+
+reset:
+  request_title: "Restablecer tu contraseña"
+  request_intro: "Introduce la dirección de correo de tu cuenta y te enviaremos un enlace para elegir una nueva contraseña."
+  email_label: "Dirección de correo electrónico"
+  send_button: "Enviar enlace de restablecimiento"
+  sent_title: "Revisa tu correo"
+  sent_message: "Si existe una cuenta con esa dirección, hemos enviado un enlace para restablecer la contraseña. El enlace es válido durante una hora."
+  new_title: "Elige una nueva contraseña"
+  new_password_label: "Nueva contraseña"
+  repeat_label: "Repite la nueva contraseña"
+  save_button: "Guardar nueva contraseña"
+  email_subject: "Restablece tu contraseña de OpenBookCase"
+  email_title: "Restablecer tu contraseña"
+  email_intro: "Hola %username%, hemos recibido una solicitud para restablecer tu contraseña de OpenBookCase. Haz clic en el enlace de abajo para elegir una nueva:"
+  email_button: "Restablecer mi contraseña"
+  email_expiry: "Este enlace es válido durante una hora."
+  email_ignore: "Si no lo solicitaste, puedes ignorar este correo: tu contraseña no cambiará."
+  invalid_or_expired: "Este enlace no es válido o ha caducado. Solicita uno nuevo."
+  password_too_short: "La contraseña debe tener al menos 6 caracteres."
+  password_mismatch: "Las contraseñas no coinciden."
+  success: "Tu contraseña se ha cambiado. Ya puedes iniciar sesión."

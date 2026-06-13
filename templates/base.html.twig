@@ -1,82 +1,276 @@
 <!DOCTYPE html>
-<html>
+{% import 'components/icon.html.twig' as ui %}
+<html lang="{{ app.request.locale }}">
     <head>
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <!-- Meta -->
+        <title>{% block title %}OpenBookCase 2.0{% endblock %}</title>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="OpenBookCase - Where's the nearest public book case">
         <meta name="author" content="Christian Nielebock">
-        <!-- Favicon -->
-        <link rel="icon" href="assets/images/favicon.png">
+        <link rel="icon" href="{{ asset('build/images/favicon.png') }}">
+
+        {# Apply the stored theme before paint to avoid a flash of the wrong theme #}
+        <script>
+            (function () {
+                var t = localStorage.getItem('theme');
+                if (t) document.documentElement.setAttribute('data-theme', t);
+            })();
+        </script>
+
+        {% if not app.user %}
+        {# Anonymous locale bridge: the choice lives in localStorage (as requested),
+           but server-side translation needs a cookie. If localStorage has a locale
+           the server isn't using yet, sync it into the cookie and reload once. #}
+        <script>
+            (function () {
+                var ls = localStorage.getItem('locale');
+                if (!ls) return;
+                var ck = (document.cookie.match(/(?:^|;\s*)obc_locale=([^;]+)/) || [])[1];
+                if (ck !== ls) {
+                    document.cookie = 'obc_locale=' + ls + ';path=/;max-age=31536000';
+                    location.reload();
+                }
+            })();
+        </script>
+        {% endif %}
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
     </head>
-    <body>
-        <div id="preloader">
-            <div class="preloader">
-                <span></span>
-                <span></span>
+    <body class="flex flex-col bg-base-100 text-base-content {% block body_class %}min-h-screen{% endblock %}">
+
+        {% if app.environment == 'prod' %}
+        {# Matomo — self-hosted, privacy-friendly analytics. Only loaded in production
+           (never in dev/test, so local visits don't pollute the stats). `disableCookies`
+           keeps it cookieless + consent-free, matching the privacy policy. #}
+        <script>
+          var _paq = window._paq = window._paq || [];
+          _paq.push(['disableCookies']);
+          _paq.push(['trackPageView']);
+          _paq.push(['enableLinkTracking']);
+          (function() {
+            var u="https://openbookcase.de/piwik/";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', '1']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+          })();
+        </script>
+        <noscript><p><img referrerpolicy="no-referrer-when-downgrade" src="https://openbookcase.de/piwik/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+        {% endif %}
+
+        {% include('navigation.html.twig') %}
+
+        {# Global success/error toast (e.g. after a password reset or registration). #}
+        {% set globalSuccess = app.flashes('reset_success')|merge(app.flashes('register_success')) %}
+        {% set globalError = app.flashes('register_error') %}
+        {% if globalSuccess or globalError %}
+            <div class="toast toast-top toast-center z-50">
+                {% for message in globalSuccess %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+                {% for message in globalError %}
+                    <div class="alert alert-error">{{ message }}</div>
+                {% endfor %}
             </div>
-        </div>
+        {% endif %}
 
-        <div class="main-container">
-            <div class="container-fluid">
-                {% include('navigation.html.twig') %}
-                {% block body %}{% endblock %}
-            </div><!-- / container -->
-        </div><!-- / main-container -->
+        <main class="flex-1 {% block main_class %}{% endblock %}">
+            {% block body %}{% endblock %}
+        </main>
 
-        <!-- core JavaScript -->
-        <script src="build/assets/js/jquery.min.js"></script>
-        <script src="build/assets/js/popper.min.js"></script>
-        <script src="build/assets/js/bootstrap.min.js"></script>
-        <!-- / core JavaScript -->
+        {# ───────────────────────── Login modal ───────────────────────── #}
+        {% set loginErrors = app.flashes('login_error') %}
+        {% set loginLastUsername = app.flashes('login_last_username')|first|default('') %}
+        <dialog id="loginModal" class="modal">
+            <div class="modal-box">
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+                </form>
+                <h3 class="mb-4 text-lg font-bold">{{ 'auth.login_title'|trans }}</h3>
+                <form method="post" action="{{ path('app_login') }}" class="space-y-4">
+                    {% for error in loginErrors %}
+                        <div class="alert alert-error" role="alert">{{ error|trans({}, 'security') }}</div>
+                    {% endfor %}
+                    <div>
+                        <label class="label" for="loginUsername"><span class="label-text font-medium">{{ 'auth.username_or_email'|trans }}</span></label>
+                        <input type="text" id="loginUsername" name="username" value="{{ loginLastUsername }}" class="input input-bordered w-full" autocomplete="username" required autofocus placeholder="{{ 'auth.username_or_email'|trans }}">
+                    </div>
+                    <div>
+                        <label class="label" for="loginPassword"><span class="label-text font-medium">{{ 'auth.password'|trans }}</span></label>
+                        <input type="password" id="loginPassword" name="password" class="input input-bordered w-full" autocomplete="current-password" required>
+                        <div class="mt-1 text-right">
+                            <a href="{{ path('app_forgot_password') }}" class="link link-hover text-sm text-base-content/70">{{ 'auth.forgot_password'|trans }}</a>
+                        </div>
+                    </div>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                    <div class="modal-action">
+                        <button type="button" class="btn btn-ghost" onclick="loginModal.close()">{{ 'cancel'|trans }}</button>
+                        <button type="submit" class="btn btn-primary">{{ 'auth.sign_in'|trans }}</button>
+                    </div>
+                </form>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
+        {% if loginErrors %}
+            <script>document.getElementById('loginModal').showModal();</script>
+        {% endif %}
 
-        <!-- preloader -->
-        <script src="build/assets/js/preloader.js"></script>
-        <!-- / preloader -->
+        {# ───────────────────────── Register modal ───────────────────────── #}
+        <dialog id="registerModal" class="modal">
+            <div class="modal-box">
+                {{ render(controller('App\\Controller\\RegistrationController::registerModal')) }}
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
 
-        <!-- smooth scroll -->
-        <script src="build/assets/js/jquery.easing.min.js"></script>
-        <script src="build/assets/js/smooth-scroll.js"></script>
-        <!-- / smooth scroll -->
+        {# ───────────────────────── Photo management modal ───────────────────────── #}
+        <dialog id="photoModal" class="modal" data-controller="photo-modal"
+                data-trans-confirm-delete="{{ 'js.confirm_delete_image'|trans }}"
+                data-trans-upload-failed="{{ 'js.upload_failed'|trans }}">
+            <div class="modal-box max-w-2xl">
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+                </form>
+                <h3 class="mb-4 text-lg font-bold">{{ 'bookcase.manage_photos'|trans }}</h3>
+                <div data-photo-modal-target="body">
+                    <div class="flex justify-center py-8"><span class="loading loading-spinner loading-lg"></span></div>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
 
-        <!-- hide nav -->
-        <script src="build/assets/js/hide-nav.js"></script>
-        <!-- / hide nav -->
+        {# ───────────────────────── Wishlist modal ───────────────────────── #}
+        <dialog id="wishlistModal" class="modal" data-controller="wishlist-modal"
+                data-trans-confirm-cancel="{{ 'js.confirm_cancel_wish'|trans }}"
+                data-trans-add-failed="{{ 'js.add_wish_failed'|trans }}"
+                data-trans-update-failed="{{ 'js.could_not_update_wish'|trans }}">
+            <div class="modal-box max-w-2xl">
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+                </form>
+                <h3 class="mb-4 text-lg font-bold">{{ 'wishlist.title'|trans }}</h3>
+                <div data-wishlist-modal-target="body">
+                    <div class="flex justify-center py-8"><span class="loading loading-spinner loading-lg"></span></div>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
 
-        <!-- ripple-effect -->
-        <script src="build/assets/js/jquery-pseudo-ripple.js"></script>
+        {# ───────────────────────── Messages modal ───────────────────────── #}
+        {% if app.user %}
+        <dialog id="messageModal" class="modal" data-controller="message-modal">
+            <div class="modal-box max-w-2xl">
+                <div data-message-modal-target="body">
+                    <div class="flex justify-center py-8"><span class="loading loading-spinner loading-lg"></span></div>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
+        {% endif %}
+
+        {# ───────────────────────── Profile modal ───────────────────────── #}
+        {% if app.user %}
+        <dialog id="profileModal" class="modal" data-controller="profile"
+                data-trans-saved="{{ 'js.saved'|trans }}"
+                data-trans-could-not-save="{{ 'js.could_not_save'|trans }}"
+                data-trans-confirm-remove-watch="{{ 'js.confirm_remove_watch'|trans }}"
+                data-trans-confirm-remove-home="{{ 'js.confirm_remove_home'|trans }}"
+                data-trans-could-not-delete="{{ 'js.could_not_delete_account'|trans }}">
+            <div class="modal-box max-w-lg">
+                {{ render(controller('App\\Controller\\ProfileController::modal')) }}
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
+        {% endif %}
+
+        {# ───────────────────────── Cookie / privacy notice ───────────────────────── #}
+        {# Shown once on the first visit (acknowledgement stored in localStorage).
+           Re-openable from the nav "Cookies" link. This site uses only essential +
+           functional first-party storage — no tracking/advertising/third-party cookies. #}
+        <dialog id="cookieModal" class="modal">
+            <div class="modal-box max-w-lg">
+                <h3 class="mb-2 flex items-center gap-2 text-lg font-bold">
+                    {{ ui.icon('info', 'size-5') }} {{ 'cookies.title'|trans }}
+                </h3>
+                <p class="mb-4 text-sm text-base-content/80">{{ 'cookies.intro'|trans }}</p>
+
+                <ul class="space-y-3 text-sm">
+                    <li>
+                        <p class="font-semibold">{{ 'cookies.essential_label'|trans }}</p>
+                        <p class="text-base-content/70">{{ 'cookies.essential_desc'|trans }}</p>
+                    </li>
+                    <li>
+                        <p class="font-semibold">{{ 'cookies.preferences_label'|trans }}</p>
+                        <p class="text-base-content/70">{{ 'cookies.preferences_desc'|trans }}</p>
+                    </li>
+                    <li>
+                        <p class="font-semibold">{{ 'cookies.maps_label'|trans }}</p>
+                        <p class="text-base-content/70">{{ 'cookies.maps_desc'|trans }}</p>
+                    </li>
+                    <li>
+                        <p class="font-semibold">{{ 'cookies.analytics_label'|trans }}</p>
+                        <p class="text-base-content/70">{{ 'cookies.analytics_desc'|trans }}</p>
+                    </li>
+                </ul>
+
+                <p class="mt-4 flex items-center gap-1 text-sm font-medium text-success">
+                    {{ ui.icon('check-circle', 'size-4') }} {{ 'cookies.no_tracking'|trans }}
+                </p>
+
+                <div class="modal-action items-center justify-between">
+                    <a href="{{ path('app_legal') }}" class="link link-hover text-sm">{{ 'cookies.privacy_link'|trans }}</a>
+                    <button type="button" class="btn btn-primary" id="cookieAccept">{{ 'cookies.accept'|trans }}</button>
+                </div>
+            </div>
+        </dialog>
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
 
         <script>
-            $('.btn').ripple({
-                duration: 1000,
+            window.addEventListener('DOMContentLoaded', function () {
+                {# There can be several theme toggles (desktop bar + mobile burger menu);
+                   wire them all and keep them in sync. #}
+                var toggles = document.querySelectorAll('[data-theme-toggle]');
+                if (!toggles.length) return;
+                var current = document.documentElement.getAttribute('data-theme')
+                    || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                toggles.forEach(function (t) { t.checked = current === 'dark'; });
+                toggles.forEach(function (t) {
+                    t.addEventListener('change', function () {
+                        var theme = t.checked ? 'dark' : 'light';
+                        document.documentElement.setAttribute('data-theme', theme);
+                        localStorage.setItem('theme', theme);
+                        toggles.forEach(function (o) { o.checked = t.checked; });
+                    });
+                });
             });
 
-            $('.menu-custom .nav-link').ripple({
-                duration: 1000,
+            {# Mirror the language choice to localStorage (the switch route sets the cookie). #}
+            document.addEventListener('click', function (event) {
+                var link = event.target.closest('[data-locale-link]');
+                if (link) localStorage.setItem('locale', link.dataset.locale);
             });
 
-            $('.menu-pills .nav-link').ripple({
-                duration: 1000,
-            });
-
-            $('.nav-tabs .nav-link').ripple({
-                duration: 1000,
-            });
-
-            $('.page-item.active .page-link').ripple({
-                duration: 1000,
-            });
+            {# Cookie / privacy notice: open once on the first visit; remember the
+               acknowledgement in localStorage. Re-openable via [data-open-cookies]. #}
+            (function () {
+                var modal = document.getElementById('cookieModal');
+                if (!modal) return;
+                function ack() { try { localStorage.setItem('cookieConsent', '1'); } catch (e) {} }
+                try {
+                    if (!localStorage.getItem('cookieConsent')) modal.showModal();
+                } catch (e) { /* storage unavailable */ }
+                var accept = document.getElementById('cookieAccept');
+                if (accept) accept.addEventListener('click', function () { ack(); modal.close(); });
+                modal.addEventListener('close', ack);
+                document.addEventListener('click', function (event) {
+                    if (event.target.closest('[data-open-cookies]')) { event.preventDefault(); modal.showModal(); }
+                });
+            })();
         </script>
-        <!-- / ripple-effect -->
     </body>
 </html>

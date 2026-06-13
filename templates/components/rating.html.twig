@@ -1,0 +1,23 @@
+{#
+  DaisyUI "mask-heart with multiple colors" rating.
+
+  hearts(selected, editable):
+    - selected: 1..5 highlights hearts up to that value; 0 / out-of-range = all grey.
+    - editable=false (view): disabled radios, just a graphical display (e.g. the average).
+    - editable=true  (edit): named radios the user can pick; the modal controller
+      POSTs the chosen value on change.
+#}
+{% macro hearts(selected, editable = false) %}
+  {% set colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-lime-400', 'bg-green-400'] %}
+  <div class="rating gap-1">
+    {% for i in 1..5 %}
+      <input type="radio"
+             name="{{ editable ? 'user-rating' : 'rating-view' }}"
+             value="{{ i }}"
+             aria-label="{{ i }} star{{ i > 1 ? 's' : '' }}"
+             class="mask mask-heart {{ colors[i - 1] }}"
+             {{ i == selected ? 'checked' : '' }}
+             {{ editable ? '' : 'disabled' }} />
+    {% endfor %}
+  </div>
+{% endmacro %}

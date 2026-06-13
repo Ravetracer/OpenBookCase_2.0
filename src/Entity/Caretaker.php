@@ -22,80 +22,31 @@ class Caretaker
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
     #[Groups(['caretaker'])]
-    private ?Ulid $id = null;
+    public ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['caretaker'])]
-    private ?string $name = null;
+    public ?string $name = null;
 
     #[ORM\Column(length: 512, nullable: true)]
     #[Groups(['caretaker'])]
-    private ?string $contact = null;
+    public ?string $contact = null;
 
     #[ORM\Embedded(class: Address::class)]
     #[Groups(['caretaker'])]
-    private ?Address $address = null;
+    public ?Address $address = null;
 
     #[ORM\ManyToMany(targetEntity: Bookcase::class, mappedBy: 'caretakers')]
     #[Groups(['caretaker'])]
-    private Collection $bookcases;
+    public Collection $bookcases;
 
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['caretaker'])]
-    private ?string $legacyContactData = null;
+    public ?string $legacyContactData = null;
 
     public function __construct()
     {
         $this->bookcases = new ArrayCollection();
-    }
-
-    public function getId(): ?Ulid
-    {
-        return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(?string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getContact(): ?string
-    {
-        return $this->contact;
-    }
-
-    public function setContact(?string $contact): self
-    {
-        $this->contact = $contact;
-
-        return $this;
-    }
-
-    public function getAddress(): ?Address
-    {
-        return $this->address;
-    }
-
-    public function setAddress(?Address $address): self
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Bookcase>
-     */
-    public function getBookcases(): Collection
-    {
-        return $this->bookcases;
     }
 
     public function addBookcase(Bookcase $bookcase): self
@@ -113,18 +64,6 @@ class Caretaker
         if ($this->bookcases->removeElement($bookcase)) {
             $bookcase->removeCaretaker($this);
         }
-
-        return $this;
-    }
-
-    public function getLegacyContactData(): ?string
-    {
-        return $this->legacyContactData;
-    }
-
-    public function setLegacyContactData(?string $legacyContactData): self
-    {
-        $this->legacyContactData = $legacyContactData;
 
         return $this;
     }

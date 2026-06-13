@@ -1,21 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}{{ 'auth.register'|trans }}{% endblock %}
 
 {% block body %}
-    {% for flash_error in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
+<div class="container mx-auto flex max-w-md flex-col gap-4 p-4 sm:p-8">
+  <div class="card border border-base-300 bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title">{{ 'auth.register'|trans }}</h1>
 
-    <h1>Register</h1>
+      {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-error" role="alert">{{ flash_error }}</div>
+      {% endfor %}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.username) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
+      {{ form_start(registrationForm) }}
+        {{ form_row(registrationForm.username, { label: 'form.username'|trans }) }}
+        {{ form_row(registrationForm.plainPassword, { label: 'form.password'|trans }) }}
         {{ form_row(registrationForm.agreeTerms) }}
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+        <button type="submit" class="btn btn-primary mt-2 w-full">{{ 'auth.register'|trans }}</button>
+      {{ form_end(registrationForm) }}
+    </div>
+  </div>
+</div>
 {% endblock %}

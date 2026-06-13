@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'static.imprint.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-3xl p-4 sm:p-8">
+  <article class="prose max-w-none">
+    {# German is the authoritative original; English is a convenience translation.
+       Any other locale falls back to English. #}
+    {% set localized = app.request.locale in ['de', 'en'] ? app.request.locale : 'en' %}
+    {{ include('static/imprint/' ~ localized ~ '.html.twig') }}
+  </article>
+</div>
+{% endblock %}

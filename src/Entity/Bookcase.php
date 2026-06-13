@@ -22,9 +22,9 @@ use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookcaseRepository::class)]
-#[ORM\Index(columns: ['position_latitude'], name: 'latitude')]
-#[ORM\Index(columns: ['position_longitude'], name: 'longitude')]
-#[ORM\Index(columns: ['legacy_id'], name: 'legacyId')]
+#[ORM\Index(name: 'latitude', columns: ['position_latitude'])]
+#[ORM\Index(name: 'longitude', columns: ['position_longitude'])]
+#[ORM\Index(name: 'legacyId', columns: ['legacy_id'])]
 class Bookcase
 {
     #[ORM\Id]
@@ -32,88 +32,96 @@ class Bookcase
     #[ORM\Column(type: 'ulid', unique: true)]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[Serializer\Groups(['bookcase'])]
-    private ?Ulid $id = null;
+    public ?Ulid $id = null;
+
+    // Short, unique code for the public share link (https://obc.onl/{shortCode}).
+    #[ORM\Column(length: 16, unique: true, nullable: true)]
+    #[Serializer\Groups(['bookcase'])]
+    public ?string $shortCode = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\NotNull]
+    // No links in the title — those belong in the website/comment fields (anti-spam).
+    #[Assert\Regex(pattern: '/https?:\/\/|www\./i', match: false, message: 'bookcase.title_no_url')]
     #[Serializer\Groups(['bookcase'])]
-    private ?string $title = null;
+    public ?string $title = null;
 
     #[ORM\Embedded(class: Position::class)]
     #[Assert\Valid]
     #[Serializer\Groups(['bookcase'])]
-    private ?Position $position = null;
+    public ?Position $position = null;
 
     #[ORM\Column(length: 1024, nullable: true)]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?string $webpage = null;
+    public ?string $webpage = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    // Whether the bookcase is a mobile installation (true) or a fixed one (false).
+    #[ORM\Column]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?string $mobility = null;
+    public bool $isMobile = false;
 
     #[ORM\Embedded(class: Accessibility::class)]
     #[Assert\Valid]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?Accessibility $accessibility = null;
+    public ?Accessibility $accessibility = null;
 
     #[ORM\Column(nullable: false, enumType: EntryType::class)]
     #[Serializer\Exclude]
-    private EntryType $entryType = EntryType::Bookcase;
+    public EntryType $entryType = EntryType::Bookcase;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?string $installationType = null;
+    public ?string $installationType = null;
 
     #[ORM\Column(nullable: false, enumType: MapSymbol::class)]
     #[Serializer\Exclude]
-    private MapSymbol $mapSymbol = MapSymbol::Standard;
+    public MapSymbol $mapSymbol = MapSymbol::Standard;
 
     #[ORM\Embedded(class: Active::class)]
     #[Serializer\Groups(['bookcase'])]
-    private ?Active $active = null;
+    public ?Active $active = null;
 
     #[ORM\Column]
     #[Serializer\Groups(['bookcase_detail'])]
-    private bool $digitalMediaAllowed = false;
+    public bool $digitalMediaAllowed = false;
 
-    #[ORM\Column(length: 128, nullable: true)]
+    #[ORM\ManyToMany(targetEntity: Caretaker::class, inversedBy: 'bookcases', cascade: ['persist'])]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?string $shareLink = null;
-
-    #[ORM\ManyToMany(targetEntity: Caretaker::class, inversedBy: 'bookcases')]
-    #[Serializer\Groups(['bookcase_detail'])]
-    private Collection $caretakers;
+    public Collection $caretakers;
 
     #[ORM\Embedded(class: Address::class)]
     #[Assert\Valid]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?Address $address = null;
+    public ?Address $address = null;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: OpeningTime::class)]
     #[Serializer\Groups(['bookcase_detail'])]
-    private Collection $openingTimes;
+    public Collection $openingTimes;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: WishlistItem::class, orphanRemoval: true)]
     #[Serializer\Groups(['wishlist'])]
-    private Collection $wishlistItems;
+    public Collection $wishlistItems;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: Image::class, orphanRemoval: true)]
     #[Serializer\Groups(['bookcase_detail'])]
-    private Collection $images;
+    public Collection $images;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     #[Serializer\Exclude]
-    private ?int $legacyId = null;
+    public ?int $legacyId = null;
 
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: Rating::class, orphanRemoval: true)]
     #[Serializer\Groups(['bookcase_detail'])]
-    private Collection $ratings;
+    public Collection $ratings;
+
+    #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: WatchlistItem::class, orphanRemoval: true)]
+    #[Serializer\Exclude]
+    public Collection $watchlistItems;
 
     #[ORM\Column(type: 'text', nullable: true)]
     #[Serializer\Groups(['bookcase_detail'])]
-    private ?string $comment = null;
+    public ?string $comment = null;
 
     public function __construct()
     {
@@ -125,88 +133,7 @@ class Bookcase
         $this->position = new Position();
         $this->active = new Active();
         $this->ratings = new ArrayCollection();
-    }
-
-    public function getId(): ?Ulid
-    {
-        return $this->id;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    public function getPosition(): ?Position
-    {
-        return $this->position;
-    }
-
-    public function setPosition(?Position $position): self
-    {
-        $this->position = $position;
-
-        return $this;
-    }
-
-    public function getWebpage(): ?string
-    {
-        return $this->webpage;
-    }
-
-    public function setWebpage(?string $webpage): self
-    {
-        $this->webpage = $webpage;
-
-        return $this;
-    }
-
-    public function getMobility(): ?string
-    {
-        return $this->mobility;
-    }
-
-    public function setMobility(?string $mobility): self
-    {
-        $this->mobility = $mobility;
-
-        return $this;
-    }
-
-    public function getAccessibility(): ?Accessibility
-    {
-        return $this->accessibility;
-    }
-
-    public function setAccessibility(?Accessibility $accessibility): self
-    {
-        $this->accessibility = $accessibility;
-
-        return $this;
-    }
-
-    public function getActive(): ?Active
-    {
-        return $this->active;
-    }
-
-    public function setActive(?Active $active): self
-    {
-        $this->active = $active;
-
-        return $this;
-    }
-
-    public function getEntryType(): EntryType
-    {
-        return $this->entryType;
+        $this->watchlistItems = new ArrayCollection();
     }
 
     #[Serializer\VirtualProperty]
@@ -217,75 +144,12 @@ class Bookcase
         return $this->entryType->value;
     }
 
-    public function setEntryType(EntryType $entryType): self
-    {
-        $this->entryType = $entryType;
-
-        return $this;
-    }
-
-    public function getInstallationType(): ?string
-    {
-        return $this->installationType;
-    }
-
-    public function setInstallationType(?string $installationType): self
-    {
-        $this->installationType = $installationType;
-
-        return $this;
-    }
-
-    public function getMapSymbol(): MapSymbol
-    {
-        return $this->mapSymbol;
-    }
-
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('mapSymbol')]
     #[Serializer\Groups(['bookcase'])]
     public function getMapSymbolValue(): ?string
     {
         return $this->mapSymbol->value;
-    }
-
-    public function setMapSymbol(MapSymbol $mapSymbol): self
-    {
-        $this->mapSymbol = $mapSymbol;
-
-        return $this;
-    }
-
-    public function isDigitalMediaAllowed(): ?bool
-    {
-        return $this->digitalMediaAllowed;
-    }
-
-    public function setDigitalMediaAllowed(bool $digitalMediaAllowed): self
-    {
-        $this->digitalMediaAllowed = $digitalMediaAllowed;
-
-        return $this;
-    }
-
-    public function getShareLink(): ?string
-    {
-        return $this->shareLink;
-    }
-
-    public function setShareLink(?string $shareLink): self
-    {
-        $this->shareLink = $shareLink;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Caretaker>
-     */
-    public function getCaretakers(): Collection
-    {
-        return $this->caretakers;
     }
 
     public function addCaretaker(Caretaker $caretaker): self
@@ -304,31 +168,11 @@ class Bookcase
         return $this;
     }
 
-    public function getAddress(): ?Address
-    {
-        return $this->address;
-    }
-
-    public function setAddress(?Address $address): self
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, OpeningTime>
-     */
-    public function getOpeningTimes(): Collection
-    {
-        return $this->openingTimes;
-    }
-
     public function addOpeningTime(OpeningTime $openingTime): self
     {
         if (!$this->openingTimes->contains($openingTime)) {
             $this->openingTimes->add($openingTime);
-            $openingTime->setBookcase($this);
+            $openingTime->bookcase = $this;
         }
 
         return $this;
@@ -337,26 +181,18 @@ class Bookcase
     public function removeOpeningTime(OpeningTime $openingTime): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->openingTimes->removeElement($openingTime) && $openingTime->getBookcase() === $this) {
-            $openingTime->setBookcase(null);
+        if ($openingTime->bookcase === $this && $this->openingTimes->removeElement($openingTime)) {
+            $openingTime->bookcase = null;
         }
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, WishlistItem>
-     */
-    public function getWishlistItems(): Collection
-    {
-        return $this->wishlistItems;
     }
 
     public function addWishlistItem(WishlistItem $wishlistItem): self
     {
         if (!$this->wishlistItems->contains($wishlistItem)) {
             $this->wishlistItems->add($wishlistItem);
-            $wishlistItem->setBookcase($this);
+            $wishlistItem->bookcase = $this;
         }
 
         return $this;
@@ -365,26 +201,18 @@ class Bookcase
     public function removeWishlistItem(WishlistItem $wishlistItem): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->wishlistItems->removeElement($wishlistItem) && $wishlistItem->getBookcase() === $this) {
-            $wishlistItem->setBookcase(null);
+        if ($wishlistItem->bookcase === $this && $this->wishlistItems->removeElement($wishlistItem)) {
+            $wishlistItem->bookcase = null;
         }
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, Image>
-     */
-    public function getImages(): Collection
-    {
-        return $this->images;
     }
 
     public function addImage(Image $image): self
     {
         if (!$this->images->contains($image)) {
             $this->images->add($image);
-            $image->setBookcase($this);
+            $image->bookcase = $this;
         }
 
         return $this;
@@ -393,38 +221,18 @@ class Bookcase
     public function removeImage(Image $image): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->images->removeElement($image) && $image->getBookcase() === $this) {
-            $image->setBookcase(null);
+        if ($image->bookcase === $this && $this->images->removeElement($image)) {
+            $image->bookcase = null;;
         }
 
         return $this;
-    }
-
-    public function getLegacyId(): ?int
-    {
-        return $this->legacyId;
-    }
-
-    public function setLegacyId(?int $legacyId): self
-    {
-        $this->legacyId = $legacyId;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Rating>
-     */
-    public function getRatings(): Collection
-    {
-        return $this->ratings;
     }
 
     public function addRating(Rating $rating): self
     {
         if (!$this->ratings->contains($rating)) {
             $this->ratings->add($rating);
-            $rating->setBookcase($this);
+            $rating->bookcase = $this;
         }
 
         return $this;
@@ -433,22 +241,10 @@ class Bookcase
     public function removeRating(Rating $rating): self
     {
         // set the owning side to null (unless already changed)
-        if ($this->ratings->removeElement($rating) && $rating->getBookcase() === $this) {
-            $rating->setBookcase(null);
+        if ($rating->bookcase === $this && $this->ratings->removeElement($rating)) {
+            $rating->bookcase = null;
         }
 
         return $this;
-    }
-
-    public function setComment(?string $comment): self
-    {
-        $this->comment = $comment;
-
-        return $this;
-    }
-
-    public function getComment(): ?string
-    {
-        return $this->comment;
     }
 }

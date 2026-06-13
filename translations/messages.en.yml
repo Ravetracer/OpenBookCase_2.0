@@ -1,20 +1,439 @@
+# ── Legacy flat keys (still referenced by infoRow labels & several views) ──
+title: Title
 bctype: Type
 position: Position
 latitude: Latitude
 longitude: Longitude
-accessibility: Accessiblity
+accessibility: Accessibility
 installationType: Kind of installation
 activeState: Active state
 state: State
 description: Description
 digitalMediaAllowed: Is digital media allowed
 shareLink: Share link
-caretakers: Caretakers
+caretaker: Caretaker
 name: Name
-address: Address
+address:
+  title: Address
+  street: Street
+  house_number: House number
+  city: City
+  zip_code: Zip code
+  additional_data: Additional data
 openingTimes: Opening times
 openTime: Open time
 twentyForSeven: 24/7
 author: Author
 ratings: Ratings
 comment: Comment
+webpage: Website
+status: Status
+inactive_notice: Currently unavailable
+rating: Rating
+edit: Edit
+cancel: Cancel
+save: Save
+save_changes: Save changes
+ok: Ok
+close: Close
+delete: Delete
+delete_reason_required: A reason is required to delete an entry.
+copy: Copy
+edit_action: Editing
+mobility: Mobility
+mobile: 'Mobile'
+fixed: 'Fixed installation'
+Details: Details
+
+# ── Navigation ──
+nav:
+  help: "Guide"
+  cookies: Cookies
+  bookcase_count: bookcases
+  map: Map
+  list: List
+  info: Info
+  about: About
+  imprint: Imprint
+  legal: Legal / Privacy
+  licenses: Licenses
+  login: Login
+  logout: Logout
+  register: Register
+  profile: My profile
+  language: Language
+  messages: Messages
+  toggle_theme: Toggle dark mode
+  menu: Menu
+  add: 'Add bookcase'
+
+# ── Authentication (login / register) ──
+auth:
+  username_or_email: "Username or e-mail"
+  email_placeholder: "you@example.com"
+  forgot_password: "Forgot your password?"
+  login_title: Login
+  please_sign_in: Please sign in
+  sign_in: Sign in
+  username: Username
+  password: Password
+  logged_in_as: 'You are logged in as %name%.'
+  register: Register
+  agree_terms_pre: 'I agree to the'
+  terms: terms
+
+# ── Profile modal ──
+profile:
+  home_remove: Remove home position
+  home_title: Home position on the map
+  home_name_label: "Name (optional)"
+  home_name_placeholder: "e.g. Home, Office"
+  home_default_label: "Home"
+  home_help: Open the map centred on a position of your choice — or set it from the map (right-click / long-press).
+  home_enable: Center the map on my home position
+  home_latitude: Latitude
+  home_longitude: Longitude
+  home_zoom: Zoom
+  home_save: Save
+  title: My Profile
+  username: Username
+  email: E-mail
+  email_save: Save
+  verified: Verified account
+  email_not_verified: E-mail not verified
+  notifications: Notifications
+  notifications_help: How would you like to receive system messages?
+  channel_internal: On the website
+  channel_email: By e-mail
+  channel_both: Both
+  verify_hint: Verify your e-mail to receive e-mail notifications.
+  language: Language
+  language_help: Choose the language of the interface.
+  watchlist: Watchlist
+  watchlist_help: Bookcases you follow. You get a message when one of them changes.
+  watchlist_empty: You are not watching any bookcases yet.
+  watchlist_remove: Remove from watchlist
+  wishlist: My wishlist
+  wishlist_help: Books you wished for. Open a bookcase to manage its wishes.
+  wishlist_empty: You haven't wished for any books yet.
+  danger_title: Delete account
+  danger_help: 'This permanently removes your account and personal data (your ratings and wishlist). Photos you uploaded stay online but are no longer linked to you. This cannot be undone.'
+  delete_button: Delete my account
+  delete_confirm: I understand this is permanent.
+  delete_cancel: Cancel
+  delete_confirm_button: Yes, delete my account
+
+# ── Bookcase detail / photos ──
+bookcase:
+  watch: Watch
+  watching: Watching
+  photos: Photos
+  wishlist: Wishlist
+  rate: Rate
+  your_rating: Your rating
+  no_ratings: No ratings yet
+  manage_photos: Manage Photos
+  no_photos: No photos yet.
+  photo_count: '%count% / 5 images'
+  add_photo: Add photo
+  photographer: Photographer / author name
+  required: Required
+  upload: Upload
+  add_caretaker: Add caretaker
+  alt_text: 'Image description (for screen readers)'
+  alt_placeholder: 'e.g. A wooden bookcase next to a park bench'
+
+# ── List page ──
+list:
+  page_title: Bookcase List
+  heading: All Bookcases
+  entries: '%count% entries'
+  export: Export JSON
+  none: No bookcases found yet.
+  col_title: Title
+  col_address: Address
+  col_type: Type
+  col_status: Status
+  active: Active
+  inactive: Inactive
+  detail: Detail
+  per_page: Per page
+  search_placeholder: 'Search title or address…'
+  col_lat: 'Latitude'
+  col_lon: 'Longitude'
+  col_distance: 'Distance'
+  sort_by_distance: 'Nearest to me'
+  locating: 'Locating…'
+  distance: '%km% km'
+  distance_m: '%m% m'
+  no_results: 'No entries match your search.'
+
+# ── Wishlist modal ──
+wishlist:
+  title: Wishlist
+  none: No wishes yet. Be the first to wish for a book here.
+  status_open: Open
+  status_dropped: Dropped
+  status_not_found: Not found
+  status_fulfilled: Fulfilled
+  by: 'by %author%'
+  isbn: 'ISBN %isbn%'
+  waiting_drop: Waiting for someone to drop a copy.
+  cancel: Cancel
+  i_dropped: I dropped this
+  login_to_drop: Log in to drop a copy.
+  picked_up: Picked it up
+  not_found_action: Couldn't find it
+  notfound_placeholder: Optional note for the person who dropped it…
+  report_not_found: Report not found
+  waiting_pickup_named: '%name% dropped a copy — waiting for pickup.'
+  waiting_pickup: A copy was dropped — waiting for pickup.
+  add_title: Wish for a book
+  field_title: Title
+  field_author: Author
+  field_isbn: ISBN
+  field_note: Note
+  optional: Optional
+  note_placeholder: 'Optional — edition, condition, anything helpful'
+  add_button: Add to wishlist
+  login_to_wish: Log in to wish for a book here.
+  open_badge: '%count% wishes open'
+
+# ── Messages inbox ──
+messages:
+  title: Messages
+  none: You have no messages.
+  system: System
+  view_bookcase: View bookcase
+  new: new
+
+# ── JavaScript (Stimulus) strings ──
+js:
+  confirm_delete_bookcase: Delete this bookcase? This cannot be undone.
+  confirm_delete_image: Delete this image? This cannot be undone.
+  confirm_remove_watch: Remove this bookcase from your watchlist?
+  confirm_remove_home: 'Remove your saved home position?'
+  confirm_cancel_wish: Cancel this wish?
+  delete_unavailable: Deletion is not available.
+  delete_reason: Why is this entry being deleted? A reason is required.
+  saving_failed: Saving failed. Please try again.
+  upload_failed: Upload failed. Please try again.
+  add_wish_failed: Could not add this wish. Please try again.
+  copied: Copied!
+  saved: Saved
+  could_not_save: Could not save.
+  could_not_save_rating: Could not save rating
+  could_not_update_wish: Could not update this wish.
+  could_not_delete_account: Could not delete account.
+  something_wrong: Something went wrong. Please try again.
+  could_not_load: This bookcase could not be loaded.
+  create_failed: 'Could not add the bookcase. Please try again.'
+
+# ── Flash / API error messages (PHP) ──
+flash:
+  auth_required: Authentication required.
+  invalid_token: Invalid security token. Please reload the page.
+  invalid_email: Please enter a valid e-mail address.
+  unknown_channel: Unknown notification channel.
+  unknown_language: Unknown language.
+  rating_range: Rating must be between 1 and 5.
+  title_required: A book title is required.
+  wish_cannot_drop: This wish can no longer be dropped.
+  only_requester_pickup: Only the requester can confirm the pick-up.
+  not_awaiting_pickup: This wish is not awaiting pick-up.
+  only_requester_missing: Only the requester can report a missing book.
+  only_requester_cancel: Only the requester can cancel this wish.
+  only_open_cancel: Only an open wish can be cancelled.
+  unknown_action: Unknown action.
+  email_verified: Your email address has been verified. You can now log in.
+  check_email: 'Almost there! We''ve sent a verification link to your email address. Please click it to activate your account before logging in.'
+  verify_failed: The verification link is invalid or has expired.
+  max_images: 'A maximum of %count% images per entry is allowed.'
+  no_file: No file uploaded.
+  author_required: Author name is required.
+  invalid_image_type: Only JPEG, PNG, WebP or GIF images are allowed.
+  invalid_direction: 'Invalid direction. Use "cw" or "ccw".'
+  invalid_position: 'Invalid coordinates.'
+
+# ── System notifications (translated in the recipient's language) ──
+notify:
+  wishlist_new_subject: 'New wish: %title%'
+  wishlist_new_body: '%user% is looking for "%detail%" at "%bookcase%". If you have a copy, drop it off!'
+  wishlist_dropped_subject: 'Your wished book was dropped: %title%'
+  wishlist_dropped_body: '%user% dropped "%title%" at "%bookcase%". Go pick it up!'
+  wishlist_fulfilled_subject: 'Your dropped book was picked up: %title%'
+  wishlist_fulfilled_body: '%user% picked up "%title%" at "%bookcase%". Thanks for dropping it off!'
+  wishlist_notfound_subject: "A book you dropped wasn't found: %title%"
+  wishlist_notfound_body: "%user% couldn't find \"%title%\" at \"%bookcase%\"."
+  wishlist_notfound_note: 'Note: %comment%'
+  bookcase_changed_subject: 'Bookcase updated: %title%'
+  bookcase_changed_body: "%user% updated \"%title%\".\nChanged: %fields%."
+
+# ── E-mails ──
+email:
+  notification_greeting: 'Hi %username%,'
+  notification_view: View the bookcase
+  notification_footer: 'You receive this e-mail because you chose e-mail notifications in your OpenBookCase profile. You can change this any time in your profile settings.'
+  notification_signoff: Cheers,
+  notification_team: The OpenBookCase team
+  confirm_subject: Please confirm your email
+  confirm_title: Hi! Please confirm your email!
+  confirm_body: 'Please confirm your email address by clicking the following link:'
+  confirm_link: Confirm my Email
+  confirm_expires: 'This link will expire in %duration%.'
+  confirm_cheers: Cheers!
+
+# ── Form field labels ──
+form:
+  email: "E-mail"
+  title: Title
+  entry_type: Type
+  map_symbol: Map symbol
+  installation_type: Kind of installation
+  webpage: Website
+  is_mobile: 'Mobile installation'
+  digital_media_allowed: Digital media allowed
+  comment: Comment
+  latitude: Latitude
+  longitude: Longitude
+  street: Street
+  house_number: House number
+  zipcode: Zip code
+  city: City
+  additional_data: Additional data
+  accessibility_level: Accessibility level
+  accessibility_description: Accessibility description
+  accessibility_description_placeholder: 'e.g. one or more steps, needs help from others, behind a closed door, very tight…'
+  active_status: Status
+  active_status_description: Status description
+  open_time: Open time
+  twenty_four_seven: 24/7
+  caretaker_name: Name
+  caretaker_contact: Contact
+  username: Username
+  password: Password
+  agree_terms: I agree to the terms
+
+# ── Static pages ──
+static:
+  help:
+    title: "User guide"
+  about:
+    title: About OpenBookCase
+    lead: What is this project?
+    intro: 'OpenBookCase is a community-driven platform for finding and sharing public bookcases and give-boxes near you. Anyone can discover a bookcase on the map, view its location and details, and contribute by adding new entries.'
+    how_title: How it works
+    how_body: 'Browse the interactive map to find bookcases in your area. Click any marker to see details such as opening times, address, and photos. Use the list view for a quick overview of all entries.'
+    contributing_title: Contributing
+    contributing_body: 'Create a free account to add new bookcases, upload photos, rate locations, and manage your wishlist of books you are looking for.'
+    contact_title: Contact
+    contact_body: 'Questions or feedback? Reach us at'
+  imprint:
+    title: Imprint
+    lead: Legal disclosure
+    responsible_title: Responsible for content
+    responsible_body: OpenBookCase Project
+    contact_title: Contact
+    disclaimer_title: Disclaimer
+    disclaimer_body: 'The information on this website is provided in good faith. We accept no liability for the accuracy, completeness, or timeliness of the content.'
+  legal:
+    title: Legal Notice & Privacy Policy
+    lead: Terms of use and data protection
+    terms_title: Terms of Use
+    terms_body: 'By using OpenBookCase you agree to contribute content (bookcase entries, photos, ratings) responsibly and only for its intended purpose. You must not submit false information or content that infringes third-party rights.'
+    collect_title: Data We Collect
+    collect_intro: 'We collect the following personal data when you register:'
+    collect_1: Username and e-mail address (for account management and email verification)
+    collect_2: Hashed password (never stored in plain text)
+    collect_public: 'Map contributions (bookcase locations, photos) are publicly visible.'
+    storage_title: Data Storage
+    storage_body: 'Your data is stored on servers within the European Union. We do not sell or share your personal data with third parties.'
+    rights_title: Your Rights
+    rights_body: 'You have the right to access, correct, or delete your personal data at any time. Contact us at'
+    cookies_title: Cookies
+    cookies_body: 'This site uses a session cookie required for login functionality, and a cookie remembering your chosen language. No tracking or analytics cookies are used.'
+  licenses:
+    title: Licenses
+    lead: How OpenBookCase and its data are licensed
+    intro: 'OpenBookCase is an open project. Its source code and the collected data are made available under separate open licenses — as was already the case with its predecessor project.'
+    code_title: Source code
+    code_body: 'The OpenBookCase source code is open source, released under the'
+    data_title: Database
+    data_body: 'The collected bookcase and give-box data is published as an open database under the'
+
+# ── Map search & geolocation ──
+search:
+  placeholder: Search address, coordinate or bookcase…
+  group_bookcases: Bookcases
+  group_places: Places
+  no_results: No results
+  go_to_coordinate: Go to coordinate
+  use_my_location: Show my location
+  geolocation_error: Could not determine your location.
+  geolocation_unsupported: Your browser does not support geolocation.
+
+# ── Add / create entry ──
+add:
+  set_home: Set as home position
+  set_home_confirm: 'Set this point as your home position? The map will open here when you''re logged in.'
+  set_home_saved: Home position saved.
+  set_home_failed: Could not save the home position.
+  title: 'Add a bookcase'
+  here: 'Add bookcase here'
+  submit: 'Add'
+  address_search: 'Search address to set coordinates'
+  geo_label: 'Paste geo: coordinates'
+  geo_placeholder: 'geo:50.19,8.8'
+  created_title: 'Bookcase added!'
+  created_question: 'Do you want to add more details?'
+  add_details: 'Add details'
+  add_photos: 'Add photos'
+  done: 'Done'
+
+# ── Move marker (drag to reposition) ──
+move:
+  confirm: 'You moved this marker. Save the new position?'
+  failed: 'Could not save the new position. Please try again.'
+
+# ── Accessibility traffic-light labels ──
+accessibility_level:
+  none: 'Not accessible'
+  partial: 'Partly accessible (with help)'
+  full: 'Fully accessible'
+
+cookies:
+  title: "Cookies & your privacy"
+  intro: "OpenBookCase stores only what it needs to work. We use no advertising cookies and no third-party tracking; the only analytics is our own privacy-friendly, cookieless Matomo."
+  essential_label: "Strictly necessary"
+  essential_desc: "A session cookie keeps you signed in and protects forms against CSRF. The site can't work without it."
+  preferences_label: "Preferences"
+  preferences_desc: "Your language (the “obc_locale” cookie) plus your theme and language choice (saved in your browser's local storage). Stored only when you change them."
+  maps_label: "Map & address search"
+  maps_desc: "Map tiles come from OpenStreetMap and address search uses Photon (komoot.io). These services receive your IP address to deliver the map — they set no cookies and don't track you."
+  analytics_label: "Reach measurement"
+  analytics_desc: "We use Matomo (self-hosted on this site) to understand how the site is used. It runs without cookies and with a masked IP address, so you aren't personally identified or tracked across other websites."
+  no_tracking: "No advertising. No data sold. No third-party tracking."
+  privacy_link: "Read the privacy policy"
+  accept: "Got it"
+
+reset:
+  request_title: "Reset your password"
+  request_intro: "Enter the e-mail address of your account and we'll send you a link to choose a new password."
+  email_label: "E-mail address"
+  send_button: "Send reset link"
+  sent_title: "Check your inbox"
+  sent_message: "If an account exists for that address, we've sent a link to reset the password. The link is valid for one hour."
+  new_title: "Choose a new password"
+  new_password_label: "New password"
+  repeat_label: "Repeat new password"
+  save_button: "Save new password"
+  email_subject: "Reset your OpenBookCase password"
+  email_title: "Reset your password"
+  email_intro: "Hi %username%, we received a request to reset your OpenBookCase password. Click the link below to choose a new one:"
+  email_button: "Reset my password"
+  email_expiry: "This link is valid for one hour."
+  email_ignore: "If you didn't request this, you can safely ignore this e-mail — your password won't change."
+  invalid_or_expired: "This reset link is invalid or has expired. Please request a new one."
+  password_too_short: "The password must be at least 6 characters."
+  password_mismatch: "The passwords don't match."
+  success: "Your password has been changed. You can now sign in."

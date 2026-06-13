@@ -13,8 +13,8 @@ class CaretakerType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name')
-            ->add('contact')
+            ->add('name', null, ['label' => 'form.caretaker_name'])
+            ->add('contact', null, ['label' => 'form.caretaker_contact'])
             ->add('address', AddressType::class)
         ;
     }

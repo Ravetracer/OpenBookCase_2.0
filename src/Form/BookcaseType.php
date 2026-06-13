@@ -23,15 +23,23 @@ class BookcaseType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title')
+            ->add('title', null, ['label' => 'form.title'])
             ->add('position', PositionType::class)
-            ->add('webpage')
-            ->add('mobility')
+            ->add('webpage', null, ['label' => 'form.webpage'])
+            ->add('isMobile', CheckboxType::class, ['required' => false, 'label' => 'form.is_mobile', 'attr' => ['class' => 'toggle']])
             ->add('accessibility', AccessibilityType::class)
-            ->add('entryType', EnumType::class, ['class' => EntryType::class, 'empty_data' => EntryType::Bookcase])
-            ->add('installationType')
+            ->add('entryType', EnumType::class, [
+                'class' => EntryType::class,
+                'empty_data' => EntryType::Bookcase,
+                'label' => 'form.entry_type',
+                // Translate the options (e.g. "bookcase" → "Bücherschrank") via the
+                // bookcasetypes domain, keyed by the enum value.
+                'choice_label' => fn (EntryType $case) => $case->value,
+                'choice_translation_domain' => 'bookcasetypes',
+            ])
+            ->add('installationType', null, ['label' => 'form.installation_type'])
             ->add('active', ActiveType::class)
-            ->add('digitalMediaAllowed', CheckboxType::class)
+            ->add('digitalMediaAllowed', CheckboxType::class, ['label' => 'form.digital_media_allowed'])
             ->add(
                 'caretakers',
                 CollectionType::class,
@@ -39,6 +47,7 @@ class BookcaseType extends AbstractType
                     'entry_type' => CaretakerType::class,
                     'allow_add' => true,
                     'allow_delete' => true,
+                    'by_reference' => false,
                 ]
             )
             ->add('address', AddressType::class)
@@ -51,8 +60,7 @@ class BookcaseType extends AbstractType
                     'allow_delete' => true,
                 ]
             )
-            ->add('shareLink')
-            ->add('comment')
+            ->add('comment', null, ['label' => 'form.comment'])
         ;
     }
 

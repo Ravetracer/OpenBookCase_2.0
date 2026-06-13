@@ -1,33 +1,163 @@
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">
-      <img id="obc_logo" src="{{ asset('build/images/obc2_logo.svg') }}" alt="OpenBookCase Logo"/>
-      <span class="badge bg-info-gradient rounded-pill">2.0</span>
-    </a>
-    <button class="navbar-toggler collapsed menu-text" type="button" data-bs-toggle="collapse" data-bs-target="#obcNavBarContent" aria-controls="obcNavBarContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="icon-bar top-bar"></span>
-      <span class="icon-bar middle-bar"></span>
-      <span class="icon-bar bottom-bar"></span>
-      <span class="sr-only">Navigation</span>
-    </button>
-    <div class="collapse navbar-collapse" id="obcNavBarContent">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Active</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Link</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navDropDown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-          <div class="dropdown-menu" aria-labelledby="dropdown">
-            <a class="dropdown-item" href="#">Entry 1</a>
-            <a class="dropdown-item" href="#">Entry 2</a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item">Last entry</a>
-          </div>
-        </li>
-      </ul>
+{% import 'components/icon.html.twig' as ui %}
+{% set path = app.request.pathInfo %}
+{% set currentLocale = app.request.locale %}
+<header class="navbar sticky top-0 z-[1100] border-b border-base-300 bg-base-100/95 px-2 shadow-sm backdrop-blur sm:px-4">
+    <div class="navbar-start">
+        {# Mobile / tablet menu — below lg the whole navbar collapses in here so nothing
+           crowds the logo on small screens (iPhone etc.). #}
+        <div class="dropdown lg:hidden">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-square" aria-label="{{ 'nav.menu'|trans }}">
+                {{ ui.icon('menu') }}
+            </div>
+            <ul tabindex="0" class="menu dropdown-content menu-lg z-40 mt-3 max-h-[80vh] w-72 flex-nowrap overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg">
+                {# Live bookcase count #}
+                <li class="menu-title">
+                    <span class="flex items-center gap-1 text-base-content/70">
+                        {{ ui.icon('book', 'size-4') }}
+                        <span class="font-semibold tabular-nums text-base-content">{{ bookcase_count()|number_format }}</span>
+                        {{ 'nav.bookcase_count'|trans }}
+                    </span>
+                </li>
+
+                <li><a href="{{ path('app_index') }}" class="{{ path == '/' ? 'active' : '' }}">{{ ui.icon('map', 'size-4') }} {{ 'nav.map'|trans }}</a></li>
+                <li><a href="{{ path('app_list') }}" class="{{ path starts with '/list' ? 'active' : '' }}">{{ ui.icon('list', 'size-4') }} {{ 'nav.list'|trans }}</a></li>
+                {% if app.user %}
+                    <li><a href="{{ path('app_index') }}?add=1" data-bc-create data-editable="1">{{ ui.icon('plus', 'size-4') }} {{ 'nav.add'|trans }}</a></li>
+                {% endif %}
+
+                <li>
+                    <details>
+                        <summary>{{ ui.icon('info', 'size-4') }} {{ 'nav.info'|trans }}</summary>
+                        <ul>
+                            <li><a href="{{ path('app_help') }}">{{ 'nav.help'|trans }}</a></li>
+                            <li><a href="{{ path('app_about') }}">{{ 'nav.about'|trans }}</a></li>
+                            <li><a href="{{ path('app_imprint') }}">{{ 'nav.imprint'|trans }}</a></li>
+                            <li><a href="{{ path('app_legal') }}">{{ 'nav.legal'|trans }}</a></li>
+                            <li><a href="{{ path('app_licenses') }}">{{ 'nav.licenses'|trans }}</a></li>
+                            <li><a href="#" data-open-cookies>{{ 'nav.cookies'|trans }}</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <li>
+                    <details>
+                        <summary>{{ ui.icon('language', 'size-4') }} {{ 'nav.language'|trans }}</summary>
+                        <ul>
+                            {% for code, label in app_locales %}
+                                <li><a href="{{ path('app_language_switch', { locale: code }) }}"
+                                       data-locale-link data-locale="{{ code }}"
+                                       class="{{ code == currentLocale ? 'active' : '' }}">{{ label }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                </li>
+
+                {# Theme toggle as a menu row (data-theme-toggle is synced with the desktop one) #}
+                <li>
+                    <label class="flex cursor-pointer items-center justify-between">
+                        <span class="flex items-center gap-2">{{ ui.icon('moon', 'size-4') }} {{ 'nav.toggle_theme'|trans }}</span>
+                        <input type="checkbox" class="toggle toggle-sm toggle-primary" data-theme-toggle aria-label="{{ 'nav.toggle_theme'|trans }}">
+                    </label>
+                </li>
+
+                {% if app.user %}
+                    <li class="menu-title">{{ app.user.userIdentifier }}</li>
+                    <li><a href="#" onclick="document.dispatchEvent(new CustomEvent('msg:open')); document.activeElement.blur(); return false;">{{ ui.icon('bell', 'size-4') }} {{ 'nav.messages'|trans }}</a></li>
+                    <li><a href="#" onclick="profileModal.showModal(); document.activeElement.blur(); return false;">{{ ui.icon('user', 'size-4') }} {{ 'nav.profile'|trans }}</a></li>
+                    <li><a href="{{ path('app_logout') }}">{{ ui.icon('logout', 'size-4') }} {{ 'nav.logout'|trans }}</a></li>
+                {% else %}
+                    <li><a href="#" onclick="loginModal.showModal(); document.activeElement.blur(); return false;">{{ ui.icon('login', 'size-4') }} {{ 'nav.login'|trans }}</a></li>
+                    <li><a href="#" onclick="registerModal.showModal(); document.activeElement.blur(); return false;">{{ ui.icon('plus', 'size-4') }} {{ 'nav.register'|trans }}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <a href="{{ path('app_index') }}" class="btn btn-ghost gap-2 px-2 text-xl">
+            {# Two variants: the dark-mode one adds a subtle outline so the dark-brown
+               wordmark/icon stay readable on a dark navbar. Swapped via CSS by theme. #}
+            <img src="{{ asset('build/images/obc2_logo.svg') }}" alt="OpenBookCase Logo" class="logo-light h-6 w-auto sm:h-8">
+            <img src="{{ asset('build/images/obc2_logo_dark.svg') }}" alt="OpenBookCase Logo" class="logo-dark h-6 w-auto sm:h-8">
+            <span class="badge badge-info badge-sm font-semibold">2.0</span>
+        </a>
+
+        {# Live count of bookcases — desktop only (mobile shows it in the burger menu). #}
+        <div class="ml-1 hidden items-center gap-1 rounded-full bg-base-200 px-3 py-1 text-sm lg:flex"
+             title="{{ 'nav.bookcase_count'|trans }}">
+            {{ ui.icon('book', 'size-4 opacity-70') }}
+            <span class="font-semibold tabular-nums">{{ bookcase_count()|number_format }}</span>
+            <span class="text-base-content/60">{{ 'nav.bookcase_count'|trans }}</span>
+        </div>
     </div>
-  </div>
-</nav>
+
+    {# Desktop links #}
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal gap-1">
+            <li><a href="{{ path('app_index') }}" class="{{ path == '/' ? 'active' : '' }}">{{ ui.icon('map', 'size-4') }} {{ 'nav.map'|trans }}</a></li>
+            <li><a href="{{ path('app_list') }}" class="{{ path starts with '/list' ? 'active' : '' }}">{{ ui.icon('list', 'size-4') }} {{ 'nav.list'|trans }}</a></li>
+            <li>
+                <details>
+                    <summary>{{ ui.icon('info', 'size-4') }} {{ 'nav.info'|trans }}</summary>
+                    <ul class="z-40 rounded-box bg-base-100 p-2 shadow-lg">
+                        <li><a href="{{ path('app_help') }}">{{ 'nav.help'|trans }}</a></li>
+                        <li><a href="{{ path('app_about') }}">{{ 'nav.about'|trans }}</a></li>
+                        <li><a href="{{ path('app_imprint') }}">{{ 'nav.imprint'|trans }}</a></li>
+                        <li><a href="{{ path('app_legal') }}">{{ 'nav.legal'|trans }}</a></li>
+                        <li><a href="{{ path('app_licenses') }}">{{ 'nav.licenses'|trans }}</a></li>
+                        <li><a href="#" data-open-cookies>{{ 'nav.cookies'|trans }}</a></li>
+                    </ul>
+                </details>
+            </li>
+        </ul>
+    </div>
+
+    {# Desktop action cluster — hidden below lg (those items live in the burger menu instead). #}
+    <div class="navbar-end hidden gap-1 lg:flex">
+        {% if app.user %}
+            {# Add a new entry. On the map page the modal controller intercepts this
+               click (no reload); on other pages it navigates to the map (?add=1). #}
+            <a href="{{ path('app_index') }}?add=1" data-bc-create data-editable="1"
+               class="btn btn-primary btn-sm gap-1" title="{{ 'nav.add'|trans }}">
+                {{ ui.icon('plus', 'size-4') }} <span>{{ 'nav.add'|trans }}</span>
+            </a>
+        {% endif %}
+
+        {# Language selector — endonyms only, never country flags (a language is not a country) #}
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-1" aria-label="{{ 'nav.language'|trans }}" title="{{ 'nav.language'|trans }}">
+                {{ ui.icon('language', 'size-4') }}
+                <span>{{ app_locales[currentLocale]|default(currentLocale) }}</span>
+            </div>
+            <ul tabindex="0" class="menu dropdown-content menu-sm z-40 mt-3 w-44 rounded-box bg-base-100 p-2 shadow-lg">
+                {% for code, label in app_locales %}
+                    <li>
+                        <a href="{{ path('app_language_switch', { locale: code }) }}"
+                           data-locale-link data-locale="{{ code }}"
+                           class="{{ code == currentLocale ? 'active' : '' }}">{{ label }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# Theme toggle #}
+        <label class="swap swap-rotate btn btn-ghost btn-circle" aria-label="{{ 'nav.toggle_theme'|trans }}">
+            <input type="checkbox" data-theme-toggle />
+            <span class="swap-off">{{ ui.icon('sun') }}</span>
+            <span class="swap-on">{{ ui.icon('moon') }}</span>
+        </label>
+
+        {% if app.user %}
+            {{ render(controller('App\\Controller\\MessageController::navIcon')) }}
+            <button type="button" class="btn btn-ghost btn-sm gap-1" onclick="profileModal.showModal()" title="{{ 'nav.profile'|trans }}">
+                {{ ui.icon('user', 'size-4') }} <span>{{ app.user.userIdentifier }}</span>
+            </button>
+            <a href="{{ path('app_logout') }}" class="btn btn-ghost btn-sm gap-1">
+                {{ ui.icon('logout', 'size-4') }} <span>{{ 'nav.logout'|trans }}</span>
+            </a>
+        {% else %}
+            <button type="button" class="btn btn-ghost btn-sm gap-1" onclick="loginModal.showModal()">
+                {{ ui.icon('login', 'size-4') }} <span>{{ 'nav.login'|trans }}</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="registerModal.showModal()">{{ 'nav.register'|trans }}</button>
+        {% endif %}
+    </div>
+</header>

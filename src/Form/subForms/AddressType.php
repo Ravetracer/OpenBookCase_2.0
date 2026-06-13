@@ -13,11 +13,11 @@ class AddressType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('street')
-            ->add('houseNumber')
-            ->add('city')
-            ->add('zipcode')
-            ->add('additionalData')
+            ->add('street', null, ['label' => 'form.street'])
+            ->add('houseNumber', null, ['label' => 'form.house_number'])
+            ->add('city', null, ['label' => 'form.city'])
+            ->add('zipcode', null, ['label' => 'form.zipcode'])
+            ->add('additionalData', null, ['label' => 'form.additional_data'])
         ;
     }
 

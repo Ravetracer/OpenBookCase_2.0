@@ -1,0 +1,138 @@
+{% import 'components/icon.html.twig' as ui %}
+
+{# Renders one caretaker entry. Shared by the existing-entries loop and the
+   add-prototype, so a newly added caretaker looks identical to existing ones. #}
+{% macro caretakerEntry(entry) %}
+  {% import 'components/icon.html.twig' as ui %}
+  <div class="mb-4 rounded-box border border-base-200 p-3" data-caretaker-entry>
+    <div class="mb-2 flex justify-end">
+      <button type="button" class="btn btn-ghost btn-xs gap-1 text-error" data-modal-action="remove-caretaker">
+        {{ ui.icon('trash', 'size-4') }} {{ 'delete'|trans }}
+      </button>
+    </div>
+    {{ form_row(entry.name) }}
+    {{ form_row(entry.contact) }}
+    {{ form_row(entry.address.street) }}
+    {{ form_row(entry.address.houseNumber) }}
+    {{ form_row(entry.address.zipcode) }}
+    {{ form_row(entry.address.city) }}
+    {{ form_row(entry.address.additionalData) }}
+  </div>
+{% endmacro %}
+
+<form method="dialog">
+  <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+</form>
+
+<h3 class="mb-4 pr-8 text-lg font-bold">{{ 'edit_action' | trans }} "{{ bookcase.title }}"</h3>
+
+<div data-edit-error class="alert alert-error mb-4 hidden" role="alert"></div>
+
+{{ form_start(form, {'attr': {'id': 'edit-form', 'data-bc-id': bookcase.id, 'novalidate': 'novalidate'}, 'action': path('api_bookcase_save_bookcase', {'bookcase': bookcase.id})}) }}
+
+  {{ form_row(form.title) }}
+  {{ form_row(form.entryType) }}
+  {{ form_row(form.installationType) }}
+  {{ form_row(form.webpage) }}
+  {{ form_row(form.isMobile) }}
+  {{ form_row(form.digitalMediaAllowed) }}
+
+  <p class="mt-4 mb-1 font-semibold">{{ 'position' | trans }}</p>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    {{ form_row(form.position.latitude) }}
+    {{ form_row(form.position.longitude) }}
+  </div>
+
+  <div class="collapse collapse-arrow mt-3 border border-base-300 bg-base-100">
+    <input type="checkbox" />
+    <div class="collapse-title font-medium">{{ 'address.title' | trans }}</div>
+    <div class="collapse-content">
+      {{ form_row(form.address.street) }}
+      {{ form_row(form.address.houseNumber) }}
+      {{ form_row(form.address.zipcode) }}
+      {{ form_row(form.address.city) }}
+      {{ form_row(form.address.additionalData) }}
+    </div>
+  </div>
+
+  <div class="collapse collapse-arrow mt-3 border border-base-300 bg-base-100">
+    <input type="checkbox" />
+    <div class="collapse-title font-medium">{{ 'accessibility' | trans }} &amp; {{ 'status' | trans }}</div>
+    <div class="collapse-content">
+      {# Traffic-light accessibility selector: red = not accessible, yellow = partly,
+         green = fully. Raw radios bound by the form field's name. #}
+      <div class="form-control mb-4">
+        <span class="label-text mb-2 block font-medium">{{ 'form.accessibility_level'|trans }}</span>
+        {% set lvlName = form.accessibility.level.vars.full_name %}
+        {% set lvlVal = form.accessibility.level.vars.value %}
+        <div class="flex flex-col gap-2 sm:flex-row sm:gap-6">
+          {% for val, color in {'1': 'error', '2': 'warning', '3': 'success'} %}
+            {% set key = {'1': 'none', '2': 'partial', '3': 'full'}[val] %}
+            <label class="flex cursor-pointer items-center gap-2">
+              <input type="radio" name="{{ lvlName }}" value="{{ val }}" class="radio radio-{{ color }}" {{ lvlVal == val ? 'checked' : '' }}>
+              <span class="status status-md status-{{ color }}" aria-hidden="true"></span>
+              <span class="text-sm">{{ ('accessibility_level.' ~ key)|trans }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% do form.accessibility.level.setRendered %}
+      {{ form_row(form.accessibility.description, {'attr': {'placeholder': 'form.accessibility_description_placeholder'|trans}}) }}
+      {{ form_row(form.active.status) }}
+      {{ form_row(form.active.statusDescription) }}
+    </div>
+  </div>
+
+  <div class="collapse collapse-arrow mt-3 border border-base-300 bg-base-100">
+    <input type="checkbox" />
+    <div class="collapse-title font-medium">{{ 'openingTimes' | trans }}</div>
+    <div class="collapse-content">
+      {% for openTimeEntry in form.openingTimes %}
+        <div class="mb-4 border-b border-base-200 pb-4 last:border-0">
+          {{ form_row(openTimeEntry.twenty_for_seven) }}
+          {{ form_row(openTimeEntry.open_time) }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="collapse collapse-arrow mt-3 border border-base-300 bg-base-100">
+    <input type="checkbox" {{ form.caretakers|length > 0 ? 'checked' : '' }} />
+    <div class="collapse-title font-medium">{{ 'caretaker' | trans }}</div>
+    <div class="collapse-content">
+      <div data-caretaker-collection
+           data-index="{{ form.caretakers|length }}"
+           data-prototype="{{ _self.caretakerEntry(form.caretakers.vars.prototype)|e('html_attr') }}">
+        {% for caretaker in form.caretakers %}
+          {{ _self.caretakerEntry(caretaker) }}
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline btn-primary gap-1" data-modal-action="add-caretaker">
+        {{ ui.icon('user', 'size-4') }} {{ 'bookcase.add_caretaker'|trans }}
+      </button>
+    </div>
+  </div>
+
+  {{ form_row(form.comment) }}
+
+  {# Mark the piecewise-rendered compounds as done so form_rest only emits the
+     CSRF token (and any field not explicitly placed above) — no duplicates. #}
+  {% do form.position.setRendered %}
+  {% do form.address.setRendered %}
+  {% do form.accessibility.setRendered %}
+  {% do form.active.setRendered %}
+  {% do form.openingTimes.setRendered %}
+  {% do form.caretakers.setRendered %}
+  {{ form_rest(form) }}
+{{ form_end(form, {'render_rest': false}) }}
+
+<div class="modal-action mt-6 flex-wrap items-center justify-between gap-2">
+  {# Delete is a management action, so it lives here in the edit dialog (left, danger). #}
+  <button type="button" class="btn btn-error btn-outline gap-1" data-modal-action="delete" data-bc-id="{{ bookcase.id }}">
+    {{ ui.icon('trash', 'size-4') }} {{ 'delete' | trans }}
+  </button>
+  <div class="flex gap-2">
+    <button type="button" class="btn btn-ghost" data-modal-action="detail" data-bc-id="{{ bookcase.id }}">{{ 'cancel' | trans }}</button>
+    <button type="button" class="btn btn-primary" data-modal-action="save" data-bc-id="{{ bookcase.id }}">{{ 'save' | trans }}</button>
+  </div>
+</div>

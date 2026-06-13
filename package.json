@@ -1,19 +1,32 @@
 {
+    "main": "assets/js/app.js",
     "devDependencies": {
         "@babel/core": "^7.17.0",
         "@babel/preset-env": "^7.16.0",
         "@hotwired/stimulus": "^3.0.0",
         "@symfony/stimulus-bridge": "^3.2.0",
-        "@symfony/webpack-encore": "^4.2.0",
+        "@symfony/ux-translator": "file:vendor/symfony/ux-translator/assets",
+        "@symfony/ux-vue": "file:vendor/symfony/ux-vue/assets",
+        "@symfony/webpack-encore": "^5.3.1",
+        "@tailwindcss/postcss": "^4.3.0",
+        "@tailwindcss/typography": "^0.5.20",
         "core-js": "^3.23.0",
+        "daisyui": "^5.5.23",
         "file-loader": "^6.2.0",
+        "intl-messageformat": "^10.5.11",
+        "postcss": "^8.5.15",
+        "postcss-loader": "^8.2.1",
         "regenerator-runtime": "^0.13.9",
         "sass": "^1.57.1",
-        "sass-loader": "^13.2.0",
+        "sass-loader": "^16.0.1",
+        "tailwindcss": "^4.3.0",
         "ts-loader": "^9.4.4",
         "typescript": "^5.1.6",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0",
+        "vue": "^3.5.14",
+        "vue-loader": "^17.4.2",
+        "vue-template-compiler": "^0.1.0",
+        "webpack": "^5.94.0",
+        "webpack-cli": "^6.0.1",
         "webpack-notifier": "^1.15.0"
     },
     "license": "UNLICENSED",
@@ -28,6 +41,6 @@
         "axios": "^1.2.2",
         "leaflet": "^1.9.3",
         "lit": "^2.8.0",
-        "webpack-dev-server": "^4.11.1"
+        "webpack-dev-server": "^5.2.3"
     }
 }

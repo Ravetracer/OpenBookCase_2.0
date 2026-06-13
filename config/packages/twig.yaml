@@ -1,5 +1,12 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
+    form_themes:
+        - 'form/daisyui_layout.html.twig'
+    globals:
+        # code => endonym map for the language selectors (navbar + profile)
+        app_locales: !php/const App\Config\Locales::LOCALES
+        # Base URL of the external URL shortener used for share links (no trailing slash).
+        shortener_base_url: '%env(SHORTENER_BASE_URL)%'
 
 when@test:
     twig:

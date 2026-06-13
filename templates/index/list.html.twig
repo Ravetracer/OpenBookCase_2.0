@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+
+{% block title %}{{ 'list.page_title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-6xl p-4 sm:p-6"
+     {{ stimulus_controller('list', {
+        fragmenturl: path('app_list_fragment'),
+        q: q,
+        sort: sort,
+        dir: dir,
+        page: page,
+        perpage: perPage,
+        userlat: userLat,
+        userlon: userLon,
+        geoerror: 'search.geolocation_error'|trans,
+        geounsupported: 'search.geolocation_unsupported'|trans
+     }) }}>
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <h1 class="text-2xl font-bold">{{ 'list.heading'|trans }}</h1>
+    <a href="{{ path('api_bookcase_export') }}" class="btn btn-outline btn-sm gap-1" download>
+      {{ ui.icon('external', 'size-4') }} {{ 'list.export'|trans }}
+    </a>
+  </div>
+
+  {# Toolbar: live search + sort-by-distance. #}
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <label class="input input-bordered flex flex-1 items-center gap-2 sm:max-w-md">
+      {{ ui.icon('search', 'size-5 opacity-60') }}
+      <input type="search" class="grow" autocomplete="off"
+             placeholder="{{ 'list.search_placeholder'|trans }}"
+             aria-label="{{ 'list.search_placeholder'|trans }}"
+             value="{{ q }}" data-list-target="search" data-action="input->list#onSearch">
+    </label>
+    <button type="button" class="btn btn-sm gap-1 {{ hasLocation ? 'btn-primary' : 'btn-outline' }}"
+            data-action="list#sortByDistance" data-list-target="distanceBtn">
+      {{ ui.icon('location', 'size-4') }} {{ 'list.sort_by_distance'|trans }}
+    </button>
+  </div>
+
+  {# Live-swapped table + pagination (server-rendered for the initial / no-JS load). #}
+  <div data-list-target="results">
+    {% include 'index/_list_table.html.twig' %}
+  </div>
+</div>
+
+{# Permanent dialog — the detail fragment is injected into the body target (same as the map page) #}
+<dialog id="bookcaseModal" class="modal" {{ stimulus_controller('bookcase-modal') }}
+        data-trans-confirm-delete="{{ 'js.confirm_delete_bookcase'|trans }}"
+        data-trans-delete-reason="{{ 'js.delete_reason'|trans }}"
+        data-trans-delete-unavailable="{{ 'js.delete_unavailable'|trans }}"
+        data-trans-saving-failed="{{ 'js.saving_failed'|trans }}"
+        data-trans-something-wrong="{{ 'js.something_wrong'|trans }}"
+        data-trans-could-not-load="{{ 'js.could_not_load'|trans }}"
+        data-trans-copied="{{ 'js.copied'|trans }}"
+        data-trans-saved="{{ 'js.saved'|trans }}"
+        data-trans-rating-failed="{{ 'js.could_not_save_rating'|trans }}"
+        data-trans-close="{{ 'close'|trans }}">
+  <div class="modal-box max-w-2xl" data-bookcase-modal-target="body"></div>
+  <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+</dialog>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% import 'components/icon.html.twig' as ui %}
+<button type="button" class="btn btn-ghost btn-circle" aria-label="{{ 'messages.title'|trans }}" title="{{ 'messages.title'|trans }}"
+        onclick="document.dispatchEvent(new CustomEvent('msg:open'))">
+    <div class="indicator">
+        {% if unread > 0 %}
+            <span class="badge badge-xs badge-primary indicator-item" data-message-badge>{{ unread > 9 ? '9+' : unread }}</span>
+        {% endif %}
+        {{ ui.icon('bell') }}
+    </div>
+</button>

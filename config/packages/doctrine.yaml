@@ -5,8 +5,13 @@ doctrine:
         # IMPORTANT: You MUST configure your server version,
         # either here or in the DATABASE_URL env var (see .env file)
         #server_version: '13'
+
+        # Override Symfony's ULID type so ids bind as BINARY (BLOB) instead of
+        # STRING (TEXT). Keeps ORM persists consistent with the raw-DBAL import
+        # and makes `WHERE id = :ulid` lookups match on SQLite. See BinaryUlidType.
+        types:
+            ulid: App\Doctrine\Type\BinaryUlidType
     orm:
-        auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
         mappings:
@@ -25,7 +30,6 @@ when@test:
 when@prod:
     doctrine:
         orm:
-            auto_generate_proxy_classes: false
             query_cache_driver:
                 type: pool
                 pool: doctrine.system_cache_pool

@@ -1,0 +1,130 @@
+{% import 'components/icon.html.twig' as ui %}
+
+{# Base query params carried by every sort/pagination link (so the URLs stay
+   shareable + work without JS); the `list` controller also intercepts the
+   data-* attributes for live AJAX swaps. #}
+{% set baseParams = {
+  q: q, perPage: perPage, sort: sort, dir: dir, userLat: userLat, userLon: userLon
+}|filter(v => v is not null and v != '') %}
+
+{% macro sortHeader(key, label, sort, dir, baseParams, extra = '') %}
+  {% set nextDir = (sort == key and dir == 'asc') ? 'desc' : 'asc' %}
+  <th class="{{ extra }}">
+    <a href="{{ path('app_list', baseParams|merge({sort: key, dir: nextDir, page: 1})) }}"
+       data-sort="{{ key }}"
+       class="inline-flex items-center gap-1 hover:text-primary {{ sort == key ? 'text-primary' : '' }}">
+      {{ label }}{% if sort == key %}<span aria-hidden="true">{{ dir == 'asc' ? '▲' : '▼' }}</span>{% endif %}
+    </a>
+  </th>
+{% endmacro %}
+{% import _self as h %}
+
+<p class="mb-3 text-sm text-base-content/60">{{ 'list.entries'|trans({ '%count%': total }) }}</p>
+
+{% if bookcases is empty %}
+  <div class="alert">{{ q is defined and q ? 'list.no_results'|trans : 'list.none'|trans }}</div>
+{% else %}
+  <div class="overflow-x-auto rounded-box border border-base-300">
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          {{ h.sortHeader('title', 'list.col_title'|trans, sort, dir, baseParams) }}
+          {{ h.sortHeader('address', 'list.col_address'|trans, sort, dir, baseParams) }}
+          {{ h.sortHeader('type', 'list.col_type'|trans, sort, dir, baseParams) }}
+          {{ h.sortHeader('status', 'list.col_status'|trans, sort, dir, baseParams) }}
+          {{ h.sortHeader('latitude', 'list.col_lat'|trans, sort, dir, baseParams, 'text-right') }}
+          {{ h.sortHeader('longitude', 'list.col_lon'|trans, sort, dir, baseParams, 'text-right') }}
+          {% if hasLocation %}
+            {{ h.sortHeader('distance', 'list.col_distance'|trans, sort, dir, baseParams, 'text-right') }}
+          {% endif %}
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bookcase in bookcases %}
+          <tr>
+            <td class="font-medium">{{ bookcase.title }}</td>
+            <td>
+              {% set a = bookcase.address %}
+              {% if a %}
+                {% set line1 = [a.street, a.houseNumber]|filter(v => v)|join(' ') %}
+                {% set line2 = [a.zipcode, a.city]|filter(v => v)|join(' ') %}
+                {% set structured = [line1, line2]|filter(v => v)|join(', ') %}
+                {# Imported data keeps the real address in the free-text field. #}
+                {{ structured ?: (a.additionalData ?: '–') }}
+              {% else %}–{% endif %}
+            </td>
+            <td>{{ bookcase.entryType ? bookcase.entryType.value|trans({}, 'bookcasetypes') : '–' }}</td>
+            <td>
+              {% if bookcase.active and bookcase.active.status.value == 'active' %}
+                <span class="badge badge-success">{{ 'list.active'|trans }}</span>
+              {% else %}
+                <span class="badge badge-ghost">{{ 'list.inactive'|trans }}</span>
+              {% endif %}
+            </td>
+            <td class="text-right tabular-nums">{{ bookcase.position ? bookcase.position.latitude|round(5) : '–' }}</td>
+            <td class="text-right tabular-nums">{{ bookcase.position ? bookcase.position.longitude|round(5) : '–' }}</td>
+            {% if hasLocation %}
+              <td class="text-right tabular-nums">
+                {% set km = distances[bookcase.id] is defined ? distances[bookcase.id] : null %}
+                {% if km is null %}–
+                {% elseif km < 1 %}{{ 'list.distance_m'|trans({ '%m%': (km * 1000)|round(0) }) }}
+                {% else %}{{ 'list.distance'|trans({ '%km%': km|round(1) }) }}{% endif %}
+              </td>
+            {% endif %}
+            <td class="text-right">
+              <div class="join">
+                <button type="button" class="btn btn-sm join-item gap-1" data-bc-open="{{ bookcase.id }}">
+                  {{ ui.icon('info', 'size-4') }} {{ 'list.detail'|trans }}
+                </button>
+                <a href="{{ path('app_bookcase_show', { bookcase: bookcase.id }) }}" class="btn btn-sm join-item gap-1">
+                  {{ ui.icon('map', 'size-4') }} {{ 'nav.map'|trans }}
+                </a>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ───────────────────────── Pagination controls ───────────────────────── #}
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <label class="label-text" for="perPage">{{ 'list.per_page'|trans }}</label>
+      <select id="perPage" name="perPage" class="select select-bordered select-sm" data-list-target="perPage">
+        {% for opt in perPageOptions %}
+          <option value="{{ opt }}" {{ opt == perPage ? 'selected' : '' }}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% if totalPages > 1 %}
+      <div class="join">
+        {% set start = max(1, page - 2) %}
+        {% set end = min(totalPages, page + 2) %}
+        {% if page > 1 %}
+          <a class="join-item btn btn-sm" href="{{ path('app_list', baseParams|merge({page: page - 1})) }}" data-page="{{ page - 1 }}" aria-label="Previous">{{ ui.icon('chevron-left', 'size-4') }}</a>
+        {% else %}
+          <span class="join-item btn btn-sm btn-disabled" aria-label="Previous">{{ ui.icon('chevron-left', 'size-4') }}</span>
+        {% endif %}
+        {% if start > 1 %}
+          <a class="join-item btn btn-sm" href="{{ path('app_list', baseParams|merge({page: 1})) }}" data-page="1">1</a>
+          {% if start > 2 %}<span class="join-item btn btn-sm btn-disabled">…</span>{% endif %}
+        {% endif %}
+        {% for p in start..end %}
+          <a class="join-item btn btn-sm {{ p == page ? 'btn-active' : '' }}" href="{{ path('app_list', baseParams|merge({page: p})) }}" data-page="{{ p }}">{{ p }}</a>
+        {% endfor %}
+        {% if end < totalPages %}
+          {% if end < totalPages - 1 %}<span class="join-item btn btn-sm btn-disabled">…</span>{% endif %}
+          <a class="join-item btn btn-sm" href="{{ path('app_list', baseParams|merge({page: totalPages})) }}" data-page="{{ totalPages }}">{{ totalPages }}</a>
+        {% endif %}
+        {% if page < totalPages %}
+          <a class="join-item btn btn-sm" href="{{ path('app_list', baseParams|merge({page: page + 1})) }}" data-page="{{ page + 1 }}" aria-label="Next">{{ ui.icon('chevron-right', 'size-4') }}</a>
+        {% else %}
+          <span class="join-item btn btn-sm btn-disabled" aria-label="Next">{{ ui.icon('chevron-right', 'size-4') }}</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

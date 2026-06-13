@@ -1,0 +1,439 @@
+# ── Legacy flat keys ──
+title: Titre
+bctype: Type
+position: Position
+latitude: Latitude
+longitude: Longitude
+accessibility: Accessibilité
+installationType: Type d'installation
+activeState: État actif
+state: État
+description: Description
+digitalMediaAllowed: Médias numériques autorisés
+shareLink: Lien de partage
+caretaker: Responsable
+name: Nom
+address:
+  title: Adresse
+  street: Rue
+  house_number: Numéro
+  city: Ville
+  zip_code: Code postal
+  additional_data: Informations complémentaires
+openingTimes: Horaires d'ouverture
+openTime: Heure d'ouverture
+twentyForSeven: 24h/24
+author: Auteur
+ratings: Évaluations
+comment: Commentaire
+webpage: Site web
+status: Statut
+inactive_notice: Actuellement indisponible
+rating: Évaluation
+edit: Modifier
+cancel: Annuler
+save: Enregistrer
+save_changes: Enregistrer les modifications
+ok: Ok
+close: Fermer
+delete: Supprimer
+delete_reason_required: Un motif est obligatoire pour supprimer une entrée.
+copy: Copier
+edit_action: Modification
+mobility: Mobilité
+mobile: 'Mobile'
+fixed: 'Installation fixe'
+Details: Détails
+
+# ── Navigation ──
+nav:
+  help: "Guide"
+  cookies: Cookies
+  bookcase_count: boîtes à livres
+  map: Carte
+  list: Liste
+  info: Infos
+  about: À propos
+  imprint: Mentions légales
+  legal: Mentions légales / Confidentialité
+  licenses: Licences
+  login: Connexion
+  logout: Déconnexion
+  register: S'inscrire
+  profile: Mon profil
+  language: Langue
+  messages: Messages
+  toggle_theme: Basculer le mode sombre
+  menu: Menu
+  add: 'Ajouter une boîte'
+
+# ── Authentification ──
+auth:
+  username_or_email: "Nom d'utilisateur ou e-mail"
+  email_placeholder: "toi@exemple.fr"
+  forgot_password: "Mot de passe oublié ?"
+  login_title: Connexion
+  please_sign_in: Veuillez vous connecter
+  sign_in: Se connecter
+  username: Nom d'utilisateur
+  password: Mot de passe
+  logged_in_as: 'Vous êtes connecté en tant que %name%.'
+  register: S'inscrire
+  agree_terms_pre: "J'accepte les"
+  terms: conditions
+
+# ── Profil ──
+profile:
+  home_remove: 'Supprimer la position d''accueil'
+  home_title: 'Position d''accueil sur la carte'
+  home_name_label: "Nom (facultatif)"
+  home_name_placeholder: "p. ex. Domicile, Bureau"
+  home_default_label: "Domicile"
+  home_help: Ouvre la carte centrée sur un lieu de ton choix — ou définis-le sur la carte (clic droit / appui long).
+  home_enable: 'Centrer la carte sur ma position d''accueil'
+  home_latitude: Latitude
+  home_longitude: Longitude
+  home_zoom: Zoom
+  home_save: Enregistrer
+  title: Mon profil
+  username: Nom d'utilisateur
+  email: E-mail
+  email_save: Enregistrer
+  verified: Compte vérifié
+  email_not_verified: E-mail non vérifié
+  notifications: Notifications
+  notifications_help: Comment souhaitez-vous recevoir les messages système ?
+  channel_internal: Sur le site
+  channel_email: Par e-mail
+  channel_both: Les deux
+  verify_hint: Vérifiez votre e-mail pour recevoir des notifications par e-mail.
+  language: Langue
+  language_help: Choisissez la langue de l'interface.
+  watchlist: Liste de suivi
+  watchlist_help: Boîtes à livres que vous suivez. Vous recevrez un message lorsque l'une d'elles change.
+  watchlist_empty: Vous ne suivez encore aucune boîte à livres.
+  watchlist_remove: Retirer de la liste de suivi
+  wishlist: Ma liste de souhaits
+  wishlist_help: Livres que vous avez souhaités. Ouvrez une boîte à livres pour gérer ses souhaits.
+  wishlist_empty: Vous n'avez encore souhaité aucun livre.
+  danger_title: Supprimer le compte
+  danger_help: 'Cela supprime définitivement votre compte et vos données personnelles (vos évaluations et votre liste de souhaits). Les photos que vous avez téléversées restent en ligne mais ne sont plus liées à vous. Cette action est irréversible.'
+  delete_button: Supprimer mon compte
+  delete_confirm: Je comprends que c'est définitif.
+  delete_cancel: Annuler
+  delete_confirm_button: Oui, supprimer mon compte
+
+# ── Détail de la boîte à livres / photos ──
+bookcase:
+  watch: Suivre
+  watching: Suivi
+  photos: Photos
+  wishlist: Liste de souhaits
+  rate: Évaluer
+  your_rating: Votre évaluation
+  no_ratings: Pas encore d'évaluation
+  manage_photos: Gérer les photos
+  no_photos: Pas encore de photos.
+  photo_count: '%count% / 5 images'
+  add_photo: Ajouter une photo
+  photographer: Nom du photographe / auteur
+  required: Obligatoire
+  upload: Téléverser
+  add_caretaker: Ajouter un responsable
+  alt_text: 'Description de l’image (pour lecteurs d’écran)'
+  alt_placeholder: 'p. ex. Une boîte à livres en bois près d’un banc'
+
+# ── Page de liste ──
+list:
+  page_title: Liste des boîtes à livres
+  heading: Toutes les boîtes à livres
+  entries: '%count% entrées'
+  export: Exporter en JSON
+  none: Aucune boîte à livres trouvée pour le moment.
+  col_title: Titre
+  col_address: Adresse
+  col_type: Type
+  col_status: Statut
+  active: Active
+  inactive: Inactive
+  detail: Détail
+  per_page: Par page
+  search_placeholder: 'Rechercher un titre ou une adresse…'
+  col_lat: 'Latitude'
+  col_lon: 'Longitude'
+  col_distance: 'Distance'
+  sort_by_distance: 'Les plus proches'
+  locating: 'Localisation…'
+  distance: '%km% km'
+  distance_m: '%m% m'
+  no_results: 'Aucune entrée ne correspond à votre recherche.'
+
+# ── Liste de souhaits ──
+wishlist:
+  title: Liste de souhaits
+  none: Pas encore de souhaits. Soyez le premier à souhaiter un livre ici.
+  status_open: Ouvert
+  status_dropped: Déposé
+  status_not_found: Introuvable
+  status_fulfilled: Réalisé
+  by: 'par %author%'
+  isbn: 'ISBN %isbn%'
+  waiting_drop: En attente que quelqu'un dépose un exemplaire.
+  cancel: Annuler
+  i_dropped: Je l'ai déposé
+  login_to_drop: Connectez-vous pour déposer un exemplaire.
+  picked_up: Je l'ai récupéré
+  not_found_action: Je ne l'ai pas trouvé
+  notfound_placeholder: Note facultative pour la personne qui l'a déposé…
+  report_not_found: Signaler comme introuvable
+  waiting_pickup_named: '%name% a déposé un exemplaire — en attente de récupération.'
+  waiting_pickup: Un exemplaire a été déposé — en attente de récupération.
+  add_title: Souhaiter un livre
+  field_title: Titre
+  field_author: Auteur
+  field_isbn: ISBN
+  field_note: Note
+  optional: Facultatif
+  note_placeholder: 'Facultatif — édition, état, toute information utile'
+  add_button: Ajouter à la liste de souhaits
+  login_to_wish: Connectez-vous pour souhaiter un livre ici.
+  open_badge: '%count% souhaits ouverts'
+
+# ── Messages ──
+messages:
+  title: Messages
+  none: Vous n'avez aucun message.
+  system: Système
+  view_bookcase: Voir la boîte à livres
+  new: nouveau
+
+# ── Textes JavaScript ──
+js:
+  confirm_delete_bookcase: Supprimer cette boîte à livres ? Cette action est irréversible.
+  confirm_delete_image: Supprimer cette image ? Cette action est irréversible.
+  confirm_remove_watch: Retirer cette boîte à livres de votre liste de suivi ?
+  confirm_remove_home: 'Supprimer ta position d''accueil enregistrée ?'
+  confirm_cancel_wish: Annuler ce souhait ?
+  delete_unavailable: La suppression n'est pas disponible.
+  delete_reason: Pourquoi cette entrée est-elle supprimée ? Un motif est obligatoire.
+  saving_failed: Échec de l'enregistrement. Veuillez réessayer.
+  upload_failed: Échec du téléversement. Veuillez réessayer.
+  add_wish_failed: Impossible d'ajouter ce souhait. Veuillez réessayer.
+  copied: Copié !
+  saved: Enregistré
+  could_not_save: Impossible d'enregistrer.
+  could_not_save_rating: Impossible d'enregistrer l'évaluation
+  could_not_update_wish: Impossible de mettre à jour ce souhait.
+  could_not_delete_account: Impossible de supprimer le compte.
+  something_wrong: Une erreur s'est produite. Veuillez réessayer.
+  could_not_load: Impossible de charger cette boîte à livres.
+  create_failed: 'Impossible d''ajouter la boîte à livres. Veuillez réessayer.'
+
+# ── Flash / erreurs d'API ──
+flash:
+  auth_required: Authentification requise.
+  invalid_token: Jeton de sécurité invalide. Veuillez recharger la page.
+  invalid_email: Veuillez saisir une adresse e-mail valide.
+  unknown_channel: Canal de notification inconnu.
+  unknown_language: Langue inconnue.
+  rating_range: L'évaluation doit être comprise entre 1 et 5.
+  title_required: Un titre de livre est requis.
+  wish_cannot_drop: Il n'est plus possible de déposer un exemplaire pour ce souhait.
+  only_requester_pickup: Seul le demandeur peut confirmer la récupération.
+  not_awaiting_pickup: Ce souhait n'est pas en attente de récupération.
+  only_requester_missing: Seul le demandeur peut signaler un livre manquant.
+  only_requester_cancel: Seul le demandeur peut annuler ce souhait.
+  only_open_cancel: Seul un souhait ouvert peut être annulé.
+  unknown_action: Action inconnue.
+  email_verified: Votre adresse e-mail a été vérifiée. Vous pouvez maintenant vous connecter.
+  check_email: 'Presque terminé ! Nous avons envoyé un lien de vérification à votre adresse e-mail. Veuillez cliquer dessus pour activer votre compte avant de vous connecter.'
+  verify_failed: Le lien de vérification est invalide ou a expiré.
+  max_images: "Un maximum de %count% images par entrée est autorisé."
+  no_file: Aucun fichier téléversé.
+  author_required: "Le nom de l'auteur est requis."
+  invalid_image_type: Seules les images JPEG, PNG, WebP ou GIF sont autorisées.
+  invalid_direction: 'Direction invalide. Utilisez « cw » ou « ccw ».'
+  invalid_position: 'Coordonnées invalides.'
+
+# ── Notifications système ──
+notify:
+  wishlist_new_subject: 'Nouveau souhait : %title%'
+  wishlist_new_body: '%user% recherche « %detail% » à « %bookcase% ». Si vous avez un exemplaire, déposez-le !'
+  wishlist_dropped_subject: 'Le livre que vous souhaitiez a été déposé : %title%'
+  wishlist_dropped_body: '%user% a déposé « %title% » à « %bookcase% ». Allez le récupérer !'
+  wishlist_fulfilled_subject: 'Le livre que vous avez déposé a été récupéré : %title%'
+  wishlist_fulfilled_body: "%user% a récupéré « %title% » à « %bookcase% ». Merci de l'avoir déposé !"
+  wishlist_notfound_subject: "Un livre que vous avez déposé est introuvable : %title%"
+  wishlist_notfound_body: "%user% n'a pas trouvé « %title% » à « %bookcase% »."
+  wishlist_notfound_note: 'Note : %comment%'
+  bookcase_changed_subject: 'Boîte à livres mise à jour : %title%'
+  bookcase_changed_body: "%user% a mis à jour « %title% ».\nModifié : %fields%."
+
+# ── E-mails ──
+email:
+  notification_greeting: 'Bonjour %username%,'
+  notification_view: Voir la boîte à livres
+  notification_footer: "Vous recevez cet e-mail parce que vous avez choisi les notifications par e-mail dans votre profil OpenBookCase. Vous pouvez le modifier à tout moment dans les paramètres de votre profil."
+  notification_signoff: Cordialement,
+  notification_team: L'équipe OpenBookCase
+  confirm_subject: Veuillez confirmer votre e-mail
+  confirm_title: Bonjour ! Veuillez confirmer votre e-mail !
+  confirm_body: 'Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant :'
+  confirm_link: Confirmer mon e-mail
+  confirm_expires: 'Ce lien expirera dans %duration%.'
+  confirm_cheers: Cordialement !
+
+# ── Libellés des champs de formulaire ──
+form:
+  email: "E-mail"
+  title: Titre
+  entry_type: Type
+  map_symbol: Symbole sur la carte
+  installation_type: Type d'installation
+  webpage: Site web
+  is_mobile: 'Installation mobile'
+  digital_media_allowed: Médias numériques autorisés
+  comment: Commentaire
+  latitude: Latitude
+  longitude: Longitude
+  street: Rue
+  house_number: Numéro
+  zipcode: Code postal
+  city: Ville
+  additional_data: Informations complémentaires
+  accessibility_level: Niveau d'accessibilité
+  accessibility_description: Description de l'accessibilité
+  accessibility_description_placeholder: 'p. ex. une ou plusieurs marches, aide d’autrui nécessaire, derrière une porte fermée, très étroit…'
+  active_status: Statut
+  active_status_description: Description du statut
+  open_time: Heure d'ouverture
+  twenty_four_seven: 24h/24
+  caretaker_name: Nom
+  caretaker_contact: Contact
+  username: Nom d'utilisateur
+  password: Mot de passe
+  agree_terms: J'accepte les conditions
+
+# ── Pages statiques ──
+static:
+  help:
+    title: "Guide d'utilisation"
+  about:
+    title: À propos d'OpenBookCase
+    lead: Qu'est-ce que ce projet ?
+    intro: "OpenBookCase est une plateforme communautaire pour trouver et partager des boîtes à livres et des give-boxes publiques près de chez vous. Chacun peut découvrir une boîte à livres sur la carte, voir son emplacement et ses détails, et contribuer en ajoutant de nouvelles entrées."
+    how_title: Comment ça marche
+    how_body: "Parcourez la carte interactive pour trouver des boîtes à livres dans votre région. Cliquez sur un marqueur pour voir des détails comme les horaires, l'adresse et les photos. Utilisez la vue en liste pour un aperçu rapide de toutes les entrées."
+    contributing_title: Contribuer
+    contributing_body: "Créez un compte gratuit pour ajouter de nouvelles boîtes à livres, téléverser des photos, évaluer des emplacements et gérer votre liste de souhaits de livres recherchés."
+    contact_title: Contact
+    contact_body: 'Des questions ou des commentaires ? Contactez-nous à'
+  imprint:
+    title: Mentions légales
+    lead: Informations légales
+    responsible_title: Responsable du contenu
+    responsible_body: Projet OpenBookCase
+    contact_title: Contact
+    disclaimer_title: Avertissement
+    disclaimer_body: "Les informations de ce site sont fournies de bonne foi. Nous n'assumons aucune responsabilité quant à l'exactitude, l'exhaustivité ou l'actualité du contenu."
+  legal:
+    title: Mentions légales et politique de confidentialité
+    lead: Conditions d'utilisation et protection des données
+    terms_title: Conditions d'utilisation
+    terms_body: "En utilisant OpenBookCase, vous acceptez de contribuer au contenu (entrées de boîtes à livres, photos, évaluations) de manière responsable et uniquement aux fins prévues. Vous ne devez pas soumettre de fausses informations ni de contenu portant atteinte aux droits de tiers."
+    collect_title: Données que nous collectons
+    collect_intro: 'Nous collectons les données personnelles suivantes lors de votre inscription :'
+    collect_1: Nom d'utilisateur et adresse e-mail (pour la gestion du compte et la vérification de l'e-mail)
+    collect_2: Mot de passe haché (jamais stocké en clair)
+    collect_public: 'Les contributions à la carte (emplacements des boîtes à livres, photos) sont publiquement visibles.'
+    storage_title: Stockage des données
+    storage_body: "Vos données sont stockées sur des serveurs situés au sein de l'Union européenne. Nous ne vendons ni ne partageons vos données personnelles avec des tiers."
+    rights_title: Vos droits
+    rights_body: "Vous avez le droit d'accéder à vos données personnelles, de les corriger ou de les supprimer à tout moment. Contactez-nous à"
+    cookies_title: Cookies
+    cookies_body: "Ce site utilise un cookie de session nécessaire à la connexion et un cookie mémorisant la langue que vous avez choisie. Aucun cookie de suivi ou d'analyse n'est utilisé."
+  licenses:
+    title: Licences
+    lead: Sous quelles licences sont publiés OpenBookCase et ses données
+    intro: "OpenBookCase est un projet ouvert. Son code source et les données collectées sont publiés sous des licences ouvertes distinctes, comme c'était déjà le cas pour le projet précédent."
+    code_title: Code source
+    code_body: "Le code source d'OpenBookCase est open source et publié sous la"
+    data_title: Base de données
+    data_body: 'Les données collectées sur les boîtes à livres et give-boxes sont publiées comme base de données ouverte sous la'
+
+# ── Recherche sur la carte & géolocalisation ──
+search:
+  placeholder: Rechercher une adresse, une coordonnée ou une boîte à livres…
+  group_bookcases: Boîtes à livres
+  group_places: Lieux
+  no_results: Aucun résultat
+  go_to_coordinate: Aller à la coordonnée
+  use_my_location: Afficher ma position
+  geolocation_error: Impossible de déterminer votre position.
+  geolocation_unsupported: Votre navigateur ne prend pas en charge la géolocalisation.
+
+# ── Add / create entry ──
+add:
+  set_home: 'Définir comme position d''accueil'
+  set_home_confirm: 'Définir ce point comme position d''accueil ? La carte s''ouvrira ici lorsque tu es connecté.'
+  set_home_saved: 'Position d''accueil enregistrée.'
+  set_home_failed: 'Impossible d''enregistrer la position d''accueil.'
+  title: 'Ajouter une boîte à livres'
+  here: 'Ajouter une boîte à livres ici'
+  submit: 'Ajouter'
+  address_search: 'Rechercher une adresse pour définir les coordonnées'
+  geo_label: 'Coller des coordonnées geo:'
+  geo_placeholder: 'geo:50.19,8.8'
+  created_title: 'Boîte à livres ajoutée !'
+  created_question: 'Voulez-vous ajouter plus de détails ?'
+  add_details: 'Ajouter des détails'
+  add_photos: 'Ajouter des photos'
+  done: 'Terminé'
+
+# ── Move marker (drag to reposition) ──
+move:
+  confirm: 'Vous avez déplacé ce marqueur. Enregistrer la nouvelle position ?'
+  failed: 'Impossible d''enregistrer la nouvelle position. Veuillez réessayer.'
+
+# ── Accessibility traffic-light labels ──
+accessibility_level:
+  none: 'Non accessible'
+  partial: 'Partiellement accessible (avec aide)'
+  full: 'Entièrement accessible'
+
+cookies:
+  title: "Cookies et confidentialité"
+  intro: "OpenBookCase ne stocke que le strict nécessaire pour fonctionner. Nous n'utilisons aucun cookie publicitaire ni pistage par des tiers ; la seule analyse est notre propre Matomo, respectueux de la vie privée et sans cookie."
+  essential_label: "Strictement nécessaires"
+  essential_desc: "Un cookie de session vous garde connecté et protège les formulaires contre le CSRF. Le site ne peut pas fonctionner sans lui."
+  preferences_label: "Préférences"
+  preferences_desc: "Votre langue (le cookie « obc_locale ») et votre choix de thème et de langue (enregistrés dans le stockage local de votre navigateur). Enregistrés uniquement lorsque vous les modifiez."
+  maps_label: "Carte et recherche d'adresse"
+  maps_desc: "Les tuiles de carte proviennent d'OpenStreetMap et la recherche d'adresse utilise Photon (komoot.io). Ces services reçoivent votre adresse IP pour afficher la carte ; ils ne déposent pas de cookies et ne vous suivent pas."
+  analytics_label: "Mesure d'audience"
+  analytics_desc: "Nous utilisons Matomo (hébergé sur ce site) pour comprendre comment le site est utilisé. Il fonctionne sans cookie et avec une adresse IP masquée ; vous n'êtes donc pas identifié personnellement ni suivi sur d'autres sites."
+  no_tracking: "Aucune publicité. Aucune revente de données. Aucun pistage par des tiers."
+  privacy_link: "Lire la politique de confidentialité"
+  accept: "J'ai compris"
+
+reset:
+  request_title: "Réinitialiser votre mot de passe"
+  request_intro: "Saisissez l'adresse e-mail de votre compte et nous vous enverrons un lien pour choisir un nouveau mot de passe."
+  email_label: "Adresse e-mail"
+  send_button: "Envoyer le lien de réinitialisation"
+  sent_title: "Vérifiez votre boîte mail"
+  sent_message: "Si un compte existe pour cette adresse, nous avons envoyé un lien pour réinitialiser le mot de passe. Le lien est valable une heure."
+  new_title: "Choisissez un nouveau mot de passe"
+  new_password_label: "Nouveau mot de passe"
+  repeat_label: "Répétez le nouveau mot de passe"
+  save_button: "Enregistrer le nouveau mot de passe"
+  email_subject: "Réinitialisez votre mot de passe OpenBookCase"
+  email_title: "Réinitialiser votre mot de passe"
+  email_intro: "Bonjour %username%, nous avons reçu une demande de réinitialisation de votre mot de passe OpenBookCase. Cliquez sur le lien ci-dessous pour en choisir un nouveau :"
+  email_button: "Réinitialiser mon mot de passe"
+  email_expiry: "Ce lien est valable une heure."
+  email_ignore: "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail — votre mot de passe ne changera pas."
+  invalid_or_expired: "Ce lien est invalide ou a expiré. Veuillez en demander un nouveau."
+  password_too_short: "Le mot de passe doit comporter au moins 6 caractères."
+  password_mismatch: "Les mots de passe ne correspondent pas."
+  success: "Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter."

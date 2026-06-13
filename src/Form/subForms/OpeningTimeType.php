@@ -14,8 +14,8 @@ class OpeningTimeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('openTime')
-            ->add('twentyForSeven', CheckboxType::class)
+            ->add('open_time', null, ['label' => 'form.open_time'])
+            ->add('twenty_for_seven', CheckboxType::class, ['label' => 'form.twenty_four_seven'])
         ;
     }
 

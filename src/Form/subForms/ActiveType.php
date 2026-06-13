@@ -15,8 +15,8 @@ class ActiveType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('status', EnumType::class, ['class' => ActiveStatus::class, 'empty_data' => ActiveStatus::Active])
-            ->add('statusDescription')
+            ->add('status', EnumType::class, ['class' => ActiveStatus::class, 'empty_data' => ActiveStatus::Active, 'label' => 'form.active_status'])
+            ->add('statusDescription', null, ['label' => 'form.active_status_description'])
         ;
     }
 

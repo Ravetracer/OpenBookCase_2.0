@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'static.licenses.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-3xl p-4 sm:p-8">
+  <article class="prose max-w-none">
+    <h1>{{ 'static.licenses.title'|trans }}</h1>
+    <p class="lead text-base-content/70">{{ 'static.licenses.lead'|trans }}</p>
+
+    <p>{{ 'static.licenses.intro'|trans }}</p>
+
+    <h2>{{ 'static.licenses.code_title'|trans }}</h2>
+    <p>{{ 'static.licenses.code_body'|trans }}
+      <a class="link link-primary" href="https://opensource.org/license/MIT" target="_blank" rel="noopener noreferrer">MIT License</a>.</p>
+
+    <h2>{{ 'static.licenses.data_title'|trans }}</h2>
+    <p>{{ 'static.licenses.data_body'|trans }}
+      <a class="link link-primary" href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener noreferrer">Open Database License (ODbL)</a>.</p>
+  </article>
+</div>
+{% endblock %}

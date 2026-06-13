@@ -1,0 +1,43 @@
+{% import 'components/icon.html.twig' as ui %}
+
+<form method="dialog">
+    <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+</form>
+
+<h3 class="mb-4 text-lg font-bold">{{ 'messages.title'|trans }}</h3>
+
+{% if messages is empty %}
+    <div class="flex flex-col items-center gap-2 py-10 text-base-content/60">
+        {{ ui.icon('inbox', 'size-10') }}
+        <p>{{ 'messages.none'|trans }}</p>
+    </div>
+{% else %}
+    <div class="max-h-[60vh] space-y-1 overflow-y-auto pr-1">
+        {% for message in messages %}
+            <div class="chat chat-start">
+                <div class="chat-image avatar avatar-placeholder">
+                    <div class="flex w-10 items-center justify-center rounded-full bg-primary text-primary-content">
+                        {{ ui.icon(message.type.icon, 'size-5') }}
+                    </div>
+                </div>
+                <div class="chat-header">
+                    {{ 'messages.system'|trans }}
+                    <time class="text-xs opacity-50" datetime="{{ message.createdAt|date('c') }}">{{ message.createdAt|date('d M Y, H:i') }}</time>
+                </div>
+                <div class="chat-bubble {{ message.readAt is null ? 'chat-bubble-primary' : '' }}">
+                    {% if message.subject %}<div class="font-semibold">{{ message.subject }}</div>{% endif %}
+                    <div class="whitespace-pre-line">{{ message.body }}</div>
+                    {% if message.relatedBookcase %}
+                        <a href="{{ path('app_bookcase_show', { bookcase: message.relatedBookcase.id }) }}"
+                           class="link link-hover mt-1 inline-flex items-center gap-1 text-sm">
+                            {{ ui.icon('map', 'size-4') }} {{ 'messages.view_bookcase'|trans }}
+                        </a>
+                    {% endif %}
+                </div>
+                {% if message.readAt is null %}
+                    <div class="chat-footer opacity-70"><span class="badge badge-xs badge-primary">{{ 'messages.new'|trans }}</span></div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

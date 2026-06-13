@@ -1,0 +1,439 @@
+# ── Legacy flat keys ──
+title: Titel
+bctype: Type
+position: Positie
+latitude: Breedtegraad
+longitude: Lengtegraad
+accessibility: Toegankelijkheid
+installationType: Soort installatie
+activeState: Actieve status
+state: Status
+description: Beschrijving
+digitalMediaAllowed: Digitale media toegestaan
+shareLink: Deel-link
+caretaker: Beheerder
+name: Naam
+address:
+  title: Adres
+  street: Straat
+  house_number: Huisnummer
+  city: Plaats
+  zip_code: Postcode
+  additional_data: Aanvullende gegevens
+openingTimes: Openingstijden
+openTime: Openingstijd
+twentyForSeven: 24/7
+author: Auteur
+ratings: Beoordelingen
+comment: Opmerking
+webpage: Website
+status: Status
+inactive_notice: Momenteel niet beschikbaar
+rating: Beoordeling
+edit: Bewerken
+cancel: Annuleren
+save: Opslaan
+save_changes: Wijzigingen opslaan
+ok: Ok
+close: Sluiten
+delete: Verwijderen
+delete_reason_required: Een reden is verplicht om een item te verwijderen.
+copy: Kopiëren
+edit_action: Bewerken
+mobility: Mobiliteit
+mobile: 'Mobiel'
+fixed: 'Vaste opstelling'
+Details: Details
+
+# ── Navigatie ──
+nav:
+  help: "Handleiding"
+  cookies: Cookies
+  bookcase_count: boekenkasten
+  map: Kaart
+  list: Lijst
+  info: Info
+  about: Over ons
+  imprint: Colofon
+  legal: Juridisch / Privacy
+  licenses: Licenties
+  login: Inloggen
+  logout: Uitloggen
+  register: Registreren
+  profile: Mijn profiel
+  language: Taal
+  messages: Berichten
+  toggle_theme: Donkere modus wisselen
+  menu: Menu
+  add: 'Kast toevoegen'
+
+# ── Authenticatie ──
+auth:
+  username_or_email: "Gebruikersnaam of e-mail"
+  email_placeholder: "jij@voorbeeld.nl"
+  forgot_password: "Wachtwoord vergeten?"
+  login_title: Inloggen
+  please_sign_in: Log in
+  sign_in: Inloggen
+  username: Gebruikersnaam
+  password: Wachtwoord
+  logged_in_as: 'Je bent ingelogd als %name%.'
+  register: Registreren
+  agree_terms_pre: 'Ik ga akkoord met de'
+  terms: voorwaarden
+
+# ── Profiel ──
+profile:
+  home_remove: Startpositie verwijderen
+  home_title: Startlocatie op de kaart
+  home_name_label: "Naam (optioneel)"
+  home_name_placeholder: "bijv. Thuis, Kantoor"
+  home_default_label: "Thuis"
+  home_help: Open de kaart gecentreerd op een door jou gekozen locatie — of stel deze in op de kaart (rechterklik / lang indrukken).
+  home_enable: Kaart op mijn startlocatie centreren
+  home_latitude: Breedtegraad
+  home_longitude: Lengtegraad
+  home_zoom: Zoom
+  home_save: Opslaan
+  title: Mijn profiel
+  username: Gebruikersnaam
+  email: E-mail
+  email_save: Opslaan
+  verified: Geverifieerd account
+  email_not_verified: E-mail niet geverifieerd
+  notifications: Meldingen
+  notifications_help: Hoe wil je systeemberichten ontvangen?
+  channel_internal: Op de website
+  channel_email: Per e-mail
+  channel_both: Beide
+  verify_hint: Verifieer je e-mail om e-mailmeldingen te ontvangen.
+  language: Taal
+  language_help: Kies de taal van de interface.
+  watchlist: Volglijst
+  watchlist_help: Boekenkasten die je volgt. Je krijgt een bericht wanneer een ervan verandert.
+  watchlist_empty: Je volgt nog geen boekenkasten.
+  watchlist_remove: Van volglijst verwijderen
+  wishlist: Mijn verlanglijst
+  wishlist_help: Boeken die je gewenst hebt. Open een boekenkast om de wensen te beheren.
+  wishlist_empty: Je hebt nog geen boeken gewenst.
+  danger_title: Account verwijderen
+  danger_help: 'Dit verwijdert je account en persoonlijke gegevens (je beoordelingen en verlanglijst) definitief. Foto’s die je hebt geüpload blijven online, maar zijn niet langer aan jou gekoppeld. Dit kan niet ongedaan worden gemaakt.'
+  delete_button: Mijn account verwijderen
+  delete_confirm: Ik begrijp dat dit definitief is.
+  delete_cancel: Annuleren
+  delete_confirm_button: Ja, verwijder mijn account
+
+# ── Boekenkastdetails / foto’s ──
+bookcase:
+  watch: Volgen
+  watching: Gevolgd
+  photos: Foto’s
+  wishlist: Verlanglijst
+  rate: Beoordelen
+  your_rating: Jouw beoordeling
+  no_ratings: Nog geen beoordelingen
+  manage_photos: Foto’s beheren
+  no_photos: Nog geen foto’s.
+  photo_count: '%count% / 5 afbeeldingen'
+  add_photo: Foto toevoegen
+  photographer: Naam fotograaf / auteur
+  required: Verplicht
+  upload: Uploaden
+  add_caretaker: Beheerder toevoegen
+  alt_text: 'Afbeeldingsbeschrijving (voor schermlezers)'
+  alt_placeholder: 'bijv. Een houten boekenkast naast een parkbank'
+
+# ── Lijstpagina ──
+list:
+  page_title: Boekenkastenlijst
+  heading: Alle boekenkasten
+  entries: '%count% items'
+  export: JSON exporteren
+  none: Nog geen boekenkasten gevonden.
+  col_title: Titel
+  col_address: Adres
+  col_type: Type
+  col_status: Status
+  active: Actief
+  inactive: Inactief
+  detail: Detail
+  per_page: Per pagina
+  search_placeholder: 'Zoek op titel of adres…'
+  col_lat: 'Breedte'
+  col_lon: 'Lengte'
+  col_distance: 'Afstand'
+  sort_by_distance: 'Dichtst bij mij'
+  locating: 'Locatie bepalen…'
+  distance: '%km% km'
+  distance_m: '%m% m'
+  no_results: 'Geen resultaten voor je zoekopdracht.'
+
+# ── Verlanglijst ──
+wishlist:
+  title: Verlanglijst
+  none: Nog geen wensen. Wens hier als eerste een boek.
+  status_open: Open
+  status_dropped: Achtergelaten
+  status_not_found: Niet gevonden
+  status_fulfilled: Vervuld
+  by: 'door %author%'
+  isbn: 'ISBN %isbn%'
+  waiting_drop: Wacht tot iemand een exemplaar achterlaat.
+  cancel: Annuleren
+  i_dropped: Ik heb dit achtergelaten
+  login_to_drop: Log in om een exemplaar achter te laten.
+  picked_up: Opgehaald
+  not_found_action: Kon het niet vinden
+  notfound_placeholder: Optionele notitie voor degene die het heeft achtergelaten…
+  report_not_found: Melden als niet gevonden
+  waiting_pickup_named: '%name% heeft een exemplaar achtergelaten — wacht op ophalen.'
+  waiting_pickup: Een exemplaar is achtergelaten — wacht op ophalen.
+  add_title: Een boek wensen
+  field_title: Titel
+  field_author: Auteur
+  field_isbn: ISBN
+  field_note: Notitie
+  optional: Optioneel
+  note_placeholder: 'Optioneel — editie, staat, alles wat nuttig is'
+  add_button: Aan verlanglijst toevoegen
+  login_to_wish: Log in om hier een boek te wensen.
+  open_badge: '%count% open wensen'
+
+# ── Berichten ──
+messages:
+  title: Berichten
+  none: Je hebt geen berichten.
+  system: Systeem
+  view_bookcase: Boekenkast bekijken
+  new: nieuw
+
+# ── JavaScript-teksten ──
+js:
+  confirm_delete_bookcase: Deze boekenkast verwijderen? Dit kan niet ongedaan worden gemaakt.
+  confirm_delete_image: Deze afbeelding verwijderen? Dit kan niet ongedaan worden gemaakt.
+  confirm_remove_watch: Deze boekenkast van je volglijst verwijderen?
+  confirm_remove_home: 'Je opgeslagen startpositie verwijderen?'
+  confirm_cancel_wish: Deze wens annuleren?
+  delete_unavailable: Verwijderen is niet beschikbaar.
+  delete_reason: Waarom wordt dit item verwijderd? Een reden is verplicht.
+  saving_failed: Opslaan mislukt. Probeer het opnieuw.
+  upload_failed: Uploaden mislukt. Probeer het opnieuw.
+  add_wish_failed: Kon deze wens niet toevoegen. Probeer het opnieuw.
+  copied: Gekopieerd!
+  saved: Opgeslagen
+  could_not_save: Kon niet worden opgeslagen.
+  could_not_save_rating: Kon beoordeling niet opslaan
+  could_not_update_wish: Kon deze wens niet bijwerken.
+  could_not_delete_account: Kon account niet verwijderen.
+  something_wrong: Er is iets misgegaan. Probeer het opnieuw.
+  could_not_load: Deze boekenkast kon niet worden geladen.
+  create_failed: 'Kon de boekenkast niet toevoegen. Probeer het opnieuw.'
+
+# ── Flash / API-foutmeldingen ──
+flash:
+  auth_required: Authenticatie vereist.
+  invalid_token: Ongeldig beveiligingstoken. Herlaad de pagina.
+  invalid_email: Voer een geldig e-mailadres in.
+  unknown_channel: Onbekend meldingskanaal.
+  unknown_language: Onbekende taal.
+  rating_range: De beoordeling moet tussen 1 en 5 liggen.
+  title_required: Een boektitel is vereist.
+  wish_cannot_drop: Voor deze wens kan geen exemplaar meer worden achtergelaten.
+  only_requester_pickup: Alleen de aanvrager kan het ophalen bevestigen.
+  not_awaiting_pickup: Deze wens wacht niet op ophalen.
+  only_requester_missing: Alleen de aanvrager kan een ontbrekend boek melden.
+  only_requester_cancel: Alleen de aanvrager kan deze wens annuleren.
+  only_open_cancel: Alleen een open wens kan worden geannuleerd.
+  unknown_action: Onbekende actie.
+  email_verified: Je e-mailadres is geverifieerd. Je kunt nu inloggen.
+  check_email: 'Bijna klaar! We hebben een verificatielink naar je e-mailadres gestuurd. Klik erop om je account te activeren voordat je inlogt.'
+  verify_failed: De verificatielink is ongeldig of verlopen.
+  max_images: 'Maximaal %count% afbeeldingen per item toegestaan.'
+  no_file: Geen bestand geüpload.
+  author_required: Naam van de auteur is verplicht.
+  invalid_image_type: Alleen JPEG-, PNG-, WebP- of GIF-afbeeldingen zijn toegestaan.
+  invalid_direction: 'Ongeldige richting. Gebruik "cw" of "ccw".'
+  invalid_position: 'Ongeldige coördinaten.'
+
+# ── Systeemmeldingen ──
+notify:
+  wishlist_new_subject: 'Nieuwe wens: %title%'
+  wishlist_new_body: '%user% zoekt "%detail%" bij "%bookcase%". Als je een exemplaar hebt, leg het er dan neer!'
+  wishlist_dropped_subject: 'Je gewenste boek is achtergelaten: %title%'
+  wishlist_dropped_body: '%user% heeft "%title%" bij "%bookcase%" achtergelaten. Ga het ophalen!'
+  wishlist_fulfilled_subject: 'Je achtergelaten boek is opgehaald: %title%'
+  wishlist_fulfilled_body: '%user% heeft "%title%" bij "%bookcase%" opgehaald. Bedankt voor het achterlaten!'
+  wishlist_notfound_subject: 'Een door jou achtergelaten boek is niet gevonden: %title%'
+  wishlist_notfound_body: '%user% kon "%title%" niet vinden bij "%bookcase%".'
+  wishlist_notfound_note: 'Notitie: %comment%'
+  bookcase_changed_subject: 'Boekenkast bijgewerkt: %title%'
+  bookcase_changed_body: "%user% heeft \"%title%\" bijgewerkt.\nGewijzigd: %fields%."
+
+# ── E-mails ──
+email:
+  notification_greeting: 'Hoi %username%,'
+  notification_view: Boekenkast bekijken
+  notification_footer: 'Je ontvangt deze e-mail omdat je in je OpenBookCase-profiel voor e-mailmeldingen hebt gekozen. Je kunt dit op elk moment wijzigen in je profielinstellingen.'
+  notification_signoff: Groeten,
+  notification_team: Het OpenBookCase-team
+  confirm_subject: Bevestig je e-mailadres
+  confirm_title: Hoi! Bevestig je e-mailadres!
+  confirm_body: 'Bevestig je e-mailadres door op de volgende link te klikken:'
+  confirm_link: Mijn e-mail bevestigen
+  confirm_expires: 'Deze link verloopt over %duration%.'
+  confirm_cheers: Groeten!
+
+# ── Labels van formuliervelden ──
+form:
+  email: "E-mail"
+  title: Titel
+  entry_type: Type
+  map_symbol: Kaartsymbool
+  installation_type: Soort installatie
+  webpage: Website
+  is_mobile: 'Mobiele opstelling'
+  digital_media_allowed: Digitale media toegestaan
+  comment: Opmerking
+  latitude: Breedtegraad
+  longitude: Lengtegraad
+  street: Straat
+  house_number: Huisnummer
+  zipcode: Postcode
+  city: Plaats
+  additional_data: Aanvullende gegevens
+  accessibility_level: Toegankelijkheidsniveau
+  accessibility_description: Beschrijving toegankelijkheid
+  accessibility_description_placeholder: 'bijv. een of meer treden, hulp van anderen nodig, achter een gesloten deur, erg krap…'
+  active_status: Status
+  active_status_description: Statusbeschrijving
+  open_time: Openingstijd
+  twenty_four_seven: 24/7
+  caretaker_name: Naam
+  caretaker_contact: Contact
+  username: Gebruikersnaam
+  password: Wachtwoord
+  agree_terms: Ik ga akkoord met de voorwaarden
+
+# ── Statische pagina’s ──
+static:
+  help:
+    title: "Handleiding"
+  about:
+    title: Over OpenBookCase
+    lead: Wat is dit project?
+    intro: 'OpenBookCase is een door de gemeenschap gedreven platform om openbare boekenkasten en weggeefkasten bij jou in de buurt te vinden en te delen. Iedereen kan een boekenkast op de kaart ontdekken, de locatie en details bekijken en bijdragen door nieuwe items toe te voegen.'
+    how_title: Hoe het werkt
+    how_body: 'Blader door de interactieve kaart om boekenkasten in jouw buurt te vinden. Klik op een markering om details te zien zoals openingstijden, adres en foto’s. Gebruik de lijstweergave voor een snel overzicht van alle items.'
+    contributing_title: Bijdragen
+    contributing_body: 'Maak een gratis account aan om nieuwe boekenkasten toe te voegen, foto’s te uploaden, locaties te beoordelen en je verlanglijst van gezochte boeken te beheren.'
+    contact_title: Contact
+    contact_body: 'Vragen of feedback? Bereik ons op'
+  imprint:
+    title: Colofon
+    lead: Wettelijke informatie
+    responsible_title: Verantwoordelijk voor de inhoud
+    responsible_body: OpenBookCase-project
+    contact_title: Contact
+    disclaimer_title: Disclaimer
+    disclaimer_body: 'De informatie op deze website wordt te goeder trouw verstrekt. Wij aanvaarden geen aansprakelijkheid voor de juistheid, volledigheid of actualiteit van de inhoud.'
+  legal:
+    title: Juridische kennisgeving & privacybeleid
+    lead: Gebruiksvoorwaarden en gegevensbescherming
+    terms_title: Gebruiksvoorwaarden
+    terms_body: 'Door OpenBookCase te gebruiken, ga je ermee akkoord inhoud (boekenkastvermeldingen, foto’s, beoordelingen) verantwoordelijk en alleen voor het beoogde doel bij te dragen. Je mag geen valse informatie of inhoud indienen die rechten van derden schendt.'
+    collect_title: Welke gegevens we verzamelen
+    collect_intro: 'Bij registratie verzamelen we de volgende persoonlijke gegevens:'
+    collect_1: Gebruikersnaam en e-mailadres (voor accountbeheer en e-mailverificatie)
+    collect_2: Gehasht wachtwoord (nooit in platte tekst opgeslagen)
+    collect_public: 'Bijdragen aan de kaart (locaties van boekenkasten, foto’s) zijn openbaar zichtbaar.'
+    storage_title: Gegevensopslag
+    storage_body: 'Je gegevens worden opgeslagen op servers binnen de Europese Unie. Wij verkopen of delen je persoonlijke gegevens niet met derden.'
+    rights_title: Jouw rechten
+    rights_body: 'Je hebt het recht om je persoonlijke gegevens op elk moment in te zien, te corrigeren of te verwijderen. Neem contact met ons op via'
+    cookies_title: Cookies
+    cookies_body: 'Deze site gebruikt een sessiecookie die nodig is voor het inloggen, en een cookie die je gekozen taal onthoudt. Er worden geen tracking- of analysecookies gebruikt.'
+  licenses:
+    title: Licenties
+    lead: Hoe OpenBookCase en zijn gegevens zijn gelicentieerd
+    intro: 'OpenBookCase is een open project. De broncode en de verzamelde gegevens worden onder afzonderlijke open licenties beschikbaar gesteld, zoals ook al bij het voorgangerproject het geval was.'
+    code_title: Broncode
+    code_body: 'De broncode van OpenBookCase is opensource en wordt uitgebracht onder de'
+    data_title: Database
+    data_body: 'De verzamelde gegevens over boekenkasten en give-boxen worden als open database gepubliceerd onder de'
+
+# ── Kaartzoeken & locatie ──
+search:
+  placeholder: Zoek adres, coördinaat of boekenkast…
+  group_bookcases: Boekenkasten
+  group_places: Plaatsen
+  no_results: Geen resultaten
+  go_to_coordinate: Ga naar coördinaat
+  use_my_location: Mijn locatie tonen
+  geolocation_error: Je locatie kon niet worden bepaald.
+  geolocation_unsupported: Je browser ondersteunt geen geolocatie.
+
+# ── Add / create entry ──
+add:
+  set_home: Instellen als startlocatie
+  set_home_confirm: 'Dit punt als startlocatie instellen? De kaart opent hier wanneer je bent ingelogd.'
+  set_home_saved: Startlocatie opgeslagen.
+  set_home_failed: Kon de startlocatie niet opslaan.
+  title: 'Boekenkast toevoegen'
+  here: 'Hier boekenkast toevoegen'
+  submit: 'Toevoegen'
+  address_search: 'Zoek een adres om coördinaten te bepalen'
+  geo_label: 'geo:-coördinaten plakken'
+  geo_placeholder: 'geo:50.19,8.8'
+  created_title: 'Boekenkast toegevoegd!'
+  created_question: 'Wil je meer details toevoegen?'
+  add_details: 'Details toevoegen'
+  add_photos: 'Foto''s toevoegen'
+  done: 'Klaar'
+
+# ── Move marker (drag to reposition) ──
+move:
+  confirm: 'Je hebt deze markering verplaatst. De nieuwe positie opslaan?'
+  failed: 'Kon de nieuwe positie niet opslaan. Probeer het opnieuw.'
+
+# ── Accessibility traffic-light labels ──
+accessibility_level:
+  none: 'Niet toegankelijk'
+  partial: 'Gedeeltelijk toegankelijk (met hulp)'
+  full: 'Volledig toegankelijk'
+
+cookies:
+  title: "Cookies & privacy"
+  intro: "OpenBookCase slaat alleen op wat nodig is om te werken. We gebruiken geen advertentiecookies en geen tracking door derden; de enige analyse is ons eigen, privacyvriendelijke Matomo zonder cookies."
+  essential_label: "Strikt noodzakelijk"
+  essential_desc: "Een sessiecookie houdt je ingelogd en beschermt formulieren tegen CSRF. Zonder dit cookie werkt de site niet."
+  preferences_label: "Voorkeuren"
+  preferences_desc: "Je taal (de cookie ‘obc_locale’) en je thema- en taalkeuze (opgeslagen in de lokale opslag van je browser). Alleen opgeslagen als je ze wijzigt."
+  maps_label: "Kaart & adres zoeken"
+  maps_desc: "Kaarttegels komen van OpenStreetMap en adres zoeken gebruikt Photon (komoot.io). Deze diensten ontvangen je IP-adres om de kaart te tonen — ze plaatsen geen cookies en volgen je niet."
+  analytics_label: "Bereikmeting"
+  analytics_desc: "We gebruiken Matomo (zelf gehost op deze site) om te begrijpen hoe de site wordt gebruikt. Het werkt zonder cookies en met een gemaskeerd IP-adres, zodat je niet persoonlijk wordt geïdentificeerd of over andere websites wordt gevolgd."
+  no_tracking: "Geen advertenties. Geen gegevensverkoop. Geen tracking door derden."
+  privacy_link: "Lees het privacybeleid"
+  accept: "Begrepen"
+
+reset:
+  request_title: "Wachtwoord opnieuw instellen"
+  request_intro: "Voer het e-mailadres van je account in en we sturen je een link om een nieuw wachtwoord te kiezen."
+  email_label: "E-mailadres"
+  send_button: "Resetlink versturen"
+  sent_title: "Controleer je inbox"
+  sent_message: "Als er een account met dat adres bestaat, hebben we een link gestuurd om het wachtwoord opnieuw in te stellen. De link is één uur geldig."
+  new_title: "Kies een nieuw wachtwoord"
+  new_password_label: "Nieuw wachtwoord"
+  repeat_label: "Herhaal nieuw wachtwoord"
+  save_button: "Nieuw wachtwoord opslaan"
+  email_subject: "Stel je OpenBookCase-wachtwoord opnieuw in"
+  email_title: "Wachtwoord opnieuw instellen"
+  email_intro: "Hoi %username%, we hebben een verzoek ontvangen om je OpenBookCase-wachtwoord opnieuw in te stellen. Klik op de onderstaande link om een nieuw wachtwoord te kiezen:"
+  email_button: "Mijn wachtwoord opnieuw instellen"
+  email_expiry: "Deze link is één uur geldig."
+  email_ignore: "Als je dit niet hebt aangevraagd, kun je deze e-mail negeren — je wachtwoord verandert niet."
+  invalid_or_expired: "Deze link is ongeldig of verlopen. Vraag een nieuwe aan."
+  password_too_short: "Het wachtwoord moet minstens 6 tekens bevatten."
+  password_mismatch: "De wachtwoorden komen niet overeen."
+  success: "Je wachtwoord is gewijzigd. Je kunt nu inloggen."

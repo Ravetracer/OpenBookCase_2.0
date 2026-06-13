@@ -1,0 +1,22 @@
+{# My-wishlist list body. Rendered inline by profile/_modal.html.twig and re-fetched
+   live via GET /profile/wishlist (app_profile_wishlist) when a wish is added/changed
+   elsewhere, so the profile reflects it without a page reload. #}
+{% if wishlistItems is empty %}
+  <p class="text-sm text-base-content/60">{{ 'profile.wishlist_empty'|trans }}</p>
+{% else %}
+  <ul class="divide-y divide-base-200 rounded-box border border-base-200">
+    {% for item in wishlistItems %}
+      <li class="flex items-center justify-between gap-2 px-3 py-2">
+        <div class="min-w-0">
+          <p class="truncate font-medium">{{ item.title }}{% if item.author %} <span class="font-normal text-base-content/60">{{ 'wishlist.by'|trans({ '%author%': item.author }) }}</span>{% endif %}</p>
+          {% if item.bookcase %}
+            <a href="{{ path('app_bookcase_show', { bookcase: item.bookcase.id }) }}" class="link link-hover truncate text-sm text-base-content/70">
+              {{ item.bookcase.title }}
+            </a>
+          {% endif %}
+        </div>
+        <span class="badge {{ item.status.badgeClass }} badge-sm shrink-0">{{ ('wishlist.status_' ~ item.status.value)|trans }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

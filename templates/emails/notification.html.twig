@@ -1,0 +1,18 @@
+{% set loc = locale|default(app.request.locale) %}
+<h1>OpenBookCase</h1>
+
+<p>{{ 'email.notification_greeting'|trans({ '%username%': username }, 'messages', loc) }}</p>
+
+{% if subject %}<h2>{{ subject }}</h2>{% endif %}
+
+<p style="white-space: pre-line;">{{ body }}</p>
+
+{% if bookcase %}
+    <p>
+        <a href="{{ url('app_bookcase_show', { bookcase: bookcase.id }) }}">{{ 'email.notification_view'|trans({}, 'messages', loc) }}</a>
+    </p>
+{% endif %}
+
+<p>{{ 'email.notification_footer'|trans({}, 'messages', loc) }}</p>
+
+<p>{{ 'email.notification_signoff'|trans({}, 'messages', loc) }}<br>{{ 'email.notification_team'|trans({}, 'messages', loc) }}</p>

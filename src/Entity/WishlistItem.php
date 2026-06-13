@@ -20,124 +20,45 @@ class WishlistItem
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
     #[Groups(['wishlist'])]
-    private ?Ulid $id = null;
+    public ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['wishlist'])]
-    private ?string $title = null;
+    public ?string $title = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['wishlist'])]
-    private ?string $isbn = null;
+    public ?string $isbn = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['wishlist'])]
-    private ?string $author = null;
+    public ?string $author = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['wishlist'])]
-    private ?string $misc = null;
+    public ?string $misc = null;
 
     #[ORM\ManyToOne(inversedBy: 'wishlistItems')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['wishlist'])]
-    private ?Bookcase $bookcase = null;
+    public ?Bookcase $bookcase = null;
 
     #[ORM\ManyToOne(inversedBy: 'wishlistItems')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['wishlist'])]
-    private ?User $user = null;
+    public ?User $user = null;
+
+    /**
+     * The user who dropped a copy of the wished book at the bookcase (set while
+     * the item is Dropped). Kept so the requester's pick-up / not-found
+     * confirmation can notify them. Unidirectional — no inverse on User.
+     */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['wishlist'])]
+    public ?User $droppedBy = null;
 
     #[ORM\Column(length: 255, enumType: WishlistItemStatus::class)]
     #[Groups(['wishlist'])]
-    private WishlistItemStatus $status = WishlistItemStatus::Open;
-
-    public function getId(): ?Ulid
-    {
-        return $this->id;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(?string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    public function getIsbn(): ?string
-    {
-        return $this->isbn;
-    }
-
-    public function setIsbn(?string $isbn): self
-    {
-        $this->isbn = $isbn;
-
-        return $this;
-    }
-
-    public function getAuthor(): ?string
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(?string $author): self
-    {
-        $this->author = $author;
-
-        return $this;
-    }
-
-    public function getMisc(): ?string
-    {
-        return $this->misc;
-    }
-
-    public function setMisc(?string $misc): self
-    {
-        $this->misc = $misc;
-
-        return $this;
-    }
-
-    public function getBookcase(): ?Bookcase
-    {
-        return $this->bookcase;
-    }
-
-    public function setBookcase(?Bookcase $bookcase): self
-    {
-        $this->bookcase = $bookcase;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    public function getStatus(): WishlistItemStatus
-    {
-        return $this->status;
-    }
-
-    public function setStatus(WishlistItemStatus $status): self
-    {
-        $this->status = $status;
-
-        return $this;
-    }
+    public WishlistItemStatus $status = WishlistItemStatus::Open;
 }

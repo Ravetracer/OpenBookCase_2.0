@@ -5,10 +5,11 @@ security:
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         # used to reload user from session & other features (e.g. switch_user)
+        # No `property:` so UserRepository::loadUserByIdentifier() is used, which
+        # accepts either the username or the e-mail address as the login identifier.
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: username
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -16,6 +17,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserChecker
             custom_authenticator: App\Security\AppAuthenticator
             logout:
                 path: app_logout

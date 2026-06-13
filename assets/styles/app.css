@@ -1,35 +1,94 @@
-html, body {
+@import "tailwindcss";
+
+/* Tailwind v4 scans these for class names */
+@source "../../templates";
+@source "../../assets/controllers";
+
+/* Accessibility traffic-light colours are applied via dynamic class names
+   (status-{{ color }} / radio-{{ color }}), which the scanner can't see — so
+   safelist the modifiers explicitly. */
+@source inline("status-error status-warning status-success radio-error radio-warning radio-success");
+
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+    themes: light --default, dark --prefersdark;
+}
+
+/* Atkinson Hyperlegible — the project's accessible default typeface */
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../webfonts/Atkinson-Hyperlegible-Regular-102a.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../webfonts/Atkinson-Hyperlegible-Italic-102a.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../webfonts/Atkinson-Hyperlegible-Bold-102a.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../webfonts/Atkinson-Hyperlegible-BoldItalic-102a.woff2") format("woff2");
+}
+
+:root {
+    --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
     height: 100%;
-    overflow: hidden;
-    width: 100%;
+    font-family: var(--font-sans);
 }
 
-#mapParent {
-    height: 100vh;
-    width: auto;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 0;
+/* Navbar logo swap: show the outlined variant in dark mode (explicit data-theme,
+   or OS-dark when the user hasn't chosen — matching DaisyUI's `dark --prefersdark`). */
+.logo-dark { display: none; }
+[data-theme="dark"] .logo-light { display: none; }
+[data-theme="dark"] .logo-dark  { display: inline; }
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .logo-light { display: none; }
+    html:not([data-theme]) .logo-dark  { display: inline; }
 }
 
+/* Leaflet sits below the navbar / dialogs */
 #map {
     height: 100%;
     width: 100%;
     z-index: 0;
 }
 
-#obc_logo {
-    width: 15em;
+/* Leaflet popup buttons inherit DaisyUI styling via classes; keep the popup tidy */
+.leaflet-popup-content {
+    margin: 0.75rem 1rem;
 }
 
-#loaderSpinner {
-    position: absolute;
-    top: 8em;
-    right: 2em;
+/* Leaflet's CSS hardcodes a white popup background; map it onto the DaisyUI theme
+   tokens so the popup follows light/dark mode (and re-themes live on toggle).
+   leaflet.css is imported after app.css, so !important is needed to win the
+   cascade against the vendored equal-specificity rule. */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: var(--color-base-100) !important;
+    color: var(--color-base-content) !important;
 }
-
-.offcanvas {
-    --bs-offcanvas-width: 600px;
+.leaflet-container a.leaflet-popup-close-button {
+    color: color-mix(in oklch, var(--color-base-content) 50%, transparent) !important;
+}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+    color: var(--color-base-content) !important;
 }

@@ -1,0 +1,439 @@
+# ── Legacy flat keys ──
+title: Titel
+bctype: Typ
+position: Position
+latitude: Breitengrad
+longitude: Längengrad
+accessibility: Barrierefreiheit
+installationType: Art der Installation
+activeState: Aktiver Status
+state: Status
+description: Beschreibung
+digitalMediaAllowed: Digitale Medien erlaubt
+shareLink: Link zum Teilen
+caretaker: Betreuungsperson
+name: Name
+address:
+  title: Adresse
+  street: Straße
+  house_number: Hausnummer
+  city: Stadt
+  zip_code: Postleitzahl
+  additional_data: Zusätzliche Angaben
+openingTimes: Öffnungszeiten
+openTime: Öffnungszeit
+twentyForSeven: 24/7
+author: Autor
+ratings: Bewertungen
+comment: Kommentar
+webpage: Webseite
+status: Status
+inactive_notice: Derzeit nicht verfügbar
+rating: Bewertung
+edit: Bearbeiten
+cancel: Abbrechen
+save: Speichern
+save_changes: Änderungen speichern
+ok: Ok
+close: Schließen
+delete: Löschen
+delete_reason_required: Zum Löschen eines Eintrags ist eine Begründung erforderlich.
+copy: Kopieren
+edit_action: Bearbeiten
+mobility: Mobilität
+mobile: 'Mobil'
+fixed: 'Feste Installation'
+Details: Details
+
+# ── Navigation ──
+nav:
+  help: "Anleitung"
+  cookies: Cookies
+  bookcase_count: Bücherschränke
+  map: Karte
+  list: Liste
+  info: Info
+  about: Über uns
+  imprint: Impressum
+  legal: Rechtliches / Datenschutz
+  licenses: Lizenzen
+  login: Anmelden
+  logout: Abmelden
+  register: Registrieren
+  profile: Mein Profil
+  language: Sprache
+  messages: Nachrichten
+  toggle_theme: Dunkelmodus umschalten
+  menu: Menü
+  add: 'Schrank hinzufügen'
+
+# ── Authentifizierung ──
+auth:
+  username_or_email: "Benutzername oder E-Mail"
+  email_placeholder: "du@beispiel.de"
+  forgot_password: "Passwort vergessen?"
+  login_title: Anmelden
+  please_sign_in: Bitte anmelden
+  sign_in: Anmelden
+  username: Benutzername
+  password: Passwort
+  logged_in_as: 'Du bist angemeldet als %name%.'
+  register: Registrieren
+  agree_terms_pre: 'Ich stimme den'
+  terms: Nutzungsbedingungen zu
+
+# ── Profil ──
+profile:
+  home_remove: Zuhause entfernen
+  home_title: Zuhause auf der Karte
+  home_name_label: "Name (optional)"
+  home_name_placeholder: "z. B. Zuhause, Büro"
+  home_default_label: "Zuhause"
+  home_help: Öffne die Karte zentriert auf einen Ort deiner Wahl – oder lege ihn direkt auf der Karte fest (Rechtsklick / langes Tippen).
+  home_enable: Karte beim Öffnen auf mein Zuhause zentrieren
+  home_latitude: Breitengrad
+  home_longitude: Längengrad
+  home_zoom: Zoom
+  home_save: Speichern
+  title: Mein Profil
+  username: Benutzername
+  email: E-Mail
+  email_save: Speichern
+  verified: Verifiziertes Konto
+  email_not_verified: E-Mail nicht verifiziert
+  notifications: Benachrichtigungen
+  notifications_help: Wie möchtest du Systemnachrichten erhalten?
+  channel_internal: Auf der Website
+  channel_email: Per E-Mail
+  channel_both: Beides
+  verify_hint: Verifiziere deine E-Mail, um E-Mail-Benachrichtigungen zu erhalten.
+  language: Sprache
+  language_help: Wähle die Sprache der Oberfläche.
+  watchlist: Beobachtungsliste
+  watchlist_help: Bücherschränke, denen du folgst. Du erhältst eine Nachricht, wenn sich einer davon ändert.
+  watchlist_empty: Du beobachtest noch keine Bücherschränke.
+  watchlist_remove: Von der Beobachtungsliste entfernen
+  wishlist: Meine Wunschliste
+  wishlist_help: Bücher, die du dir gewünscht hast. Öffne einen Bücherschrank, um seine Wünsche zu verwalten.
+  wishlist_empty: Du hast dir noch keine Bücher gewünscht.
+  danger_title: Konto löschen
+  danger_help: 'Dies entfernt dein Konto und deine persönlichen Daten (deine Bewertungen und Wunschliste) dauerhaft. Von dir hochgeladene Fotos bleiben online, sind aber nicht mehr mit dir verknüpft. Dies kann nicht rückgängig gemacht werden.'
+  delete_button: Mein Konto löschen
+  delete_confirm: Ich verstehe, dass dies endgültig ist.
+  delete_cancel: Abbrechen
+  delete_confirm_button: Ja, mein Konto löschen
+
+# ── Bücherschrank-Detail / Fotos ──
+bookcase:
+  watch: Beobachten
+  watching: Beobachtet
+  photos: Fotos
+  wishlist: Wunschliste
+  rate: Bewerten
+  your_rating: Deine Bewertung
+  no_ratings: Noch keine Bewertungen
+  manage_photos: Fotos verwalten
+  no_photos: Noch keine Fotos.
+  photo_count: '%count% / 5 Bilder'
+  add_photo: Foto hinzufügen
+  photographer: Name des Fotografen / Urhebers
+  required: Erforderlich
+  upload: Hochladen
+  add_caretaker: Betreuungsperson hinzufügen
+  alt_text: 'Bildbeschreibung (für Screenreader)'
+  alt_placeholder: 'z. B. Ein hölzerner Bücherschrank neben einer Parkbank'
+
+# ── Listenseite ──
+list:
+  page_title: Bücherschrank-Liste
+  heading: Alle Bücherschränke
+  entries: '%count% Einträge'
+  export: JSON exportieren
+  none: Noch keine Bücherschränke gefunden.
+  col_title: Titel
+  col_address: Adresse
+  col_type: Typ
+  col_status: Status
+  active: Aktiv
+  inactive: Inaktiv
+  detail: Detail
+  per_page: Pro Seite
+  search_placeholder: 'Titel oder Adresse suchen…'
+  col_lat: 'Breite'
+  col_lon: 'Länge'
+  col_distance: 'Entfernung'
+  sort_by_distance: 'In meiner Nähe'
+  locating: 'Standort wird ermittelt…'
+  distance: '%km% km'
+  distance_m: '%m% m'
+  no_results: 'Keine Einträge passen zu deiner Suche.'
+
+# ── Wunschliste ──
+wishlist:
+  title: Wunschliste
+  none: Noch keine Wünsche. Wünsch dir als Erstes ein Buch hier.
+  status_open: Offen
+  status_dropped: Abgegeben
+  status_not_found: Nicht gefunden
+  status_fulfilled: Erfüllt
+  by: 'von %author%'
+  isbn: 'ISBN %isbn%'
+  waiting_drop: Wartet darauf, dass jemand ein Exemplar abgibt.
+  cancel: Abbrechen
+  i_dropped: Ich habe es abgegeben
+  login_to_drop: Melde dich an, um ein Exemplar abzugeben.
+  picked_up: Abgeholt
+  not_found_action: Konnte es nicht finden
+  notfound_placeholder: Optionale Notiz für die Person, die es abgegeben hat …
+  report_not_found: Als nicht gefunden melden
+  waiting_pickup_named: '%name% hat ein Exemplar abgegeben – wartet auf Abholung.'
+  waiting_pickup: Ein Exemplar wurde abgegeben – wartet auf Abholung.
+  add_title: Ein Buch wünschen
+  field_title: Titel
+  field_author: Autor
+  field_isbn: ISBN
+  field_note: Notiz
+  optional: Optional
+  note_placeholder: 'Optional – Ausgabe, Zustand, alles Hilfreiche'
+  add_button: Zur Wunschliste hinzufügen
+  login_to_wish: Melde dich an, um dir hier ein Buch zu wünschen.
+  open_badge: '%count% offene Wünsche'
+
+# ── Nachrichten ──
+messages:
+  title: Nachrichten
+  none: Du hast keine Nachrichten.
+  system: System
+  view_bookcase: Bücherschrank ansehen
+  new: neu
+
+# ── JavaScript-Texte ──
+js:
+  confirm_delete_bookcase: Diesen Bücherschrank löschen? Dies kann nicht rückgängig gemacht werden.
+  confirm_delete_image: Dieses Bild löschen? Dies kann nicht rückgängig gemacht werden.
+  confirm_remove_watch: Diesen Bücherschrank von deiner Beobachtungsliste entfernen?
+  confirm_remove_home: 'Gespeichertes Zuhause entfernen?'
+  confirm_cancel_wish: Diesen Wunsch abbrechen?
+  delete_unavailable: Löschen ist nicht verfügbar.
+  delete_reason: Warum wird dieser Eintrag gelöscht? Eine Begründung ist erforderlich.
+  saving_failed: Speichern fehlgeschlagen. Bitte versuche es erneut.
+  upload_failed: Hochladen fehlgeschlagen. Bitte versuche es erneut.
+  add_wish_failed: Wunsch konnte nicht hinzugefügt werden. Bitte versuche es erneut.
+  copied: Kopiert!
+  saved: Gespeichert
+  could_not_save: Konnte nicht gespeichert werden.
+  could_not_save_rating: Bewertung konnte nicht gespeichert werden
+  could_not_update_wish: Dieser Wunsch konnte nicht aktualisiert werden.
+  could_not_delete_account: Konto konnte nicht gelöscht werden.
+  something_wrong: Etwas ist schiefgelaufen. Bitte versuche es erneut.
+  could_not_load: Dieser Bücherschrank konnte nicht geladen werden.
+  create_failed: 'Der Bücherschrank konnte nicht hinzugefügt werden. Bitte versuche es erneut.'
+
+# ── Flash / API-Fehlermeldungen ──
+flash:
+  auth_required: Anmeldung erforderlich.
+  invalid_token: Ungültiges Sicherheitstoken. Bitte lade die Seite neu.
+  invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
+  unknown_channel: Unbekannter Benachrichtigungskanal.
+  unknown_language: Unbekannte Sprache.
+  rating_range: Die Bewertung muss zwischen 1 und 5 liegen.
+  title_required: Ein Buchtitel ist erforderlich.
+  wish_cannot_drop: Für diesen Wunsch kann kein Exemplar mehr abgegeben werden.
+  only_requester_pickup: Nur die wünschende Person kann die Abholung bestätigen.
+  not_awaiting_pickup: Dieser Wunsch wartet nicht auf Abholung.
+  only_requester_missing: Nur die wünschende Person kann ein fehlendes Buch melden.
+  only_requester_cancel: Nur die wünschende Person kann diesen Wunsch abbrechen.
+  only_open_cancel: Nur ein offener Wunsch kann abgebrochen werden.
+  unknown_action: Unbekannte Aktion.
+  email_verified: Deine E-Mail-Adresse wurde verifiziert. Du kannst dich jetzt anmelden.
+  check_email: 'Fast geschafft! Wir haben dir einen Bestätigungslink an deine E-Mail-Adresse gesendet. Bitte klicke ihn an, um dein Konto zu aktivieren, bevor du dich anmeldest.'
+  verify_failed: Der Bestätigungslink ist ungültig oder abgelaufen.
+  max_images: 'Pro Eintrag sind maximal %count% Bilder erlaubt.'
+  no_file: Keine Datei hochgeladen.
+  author_required: Der Name des Urhebers ist erforderlich.
+  invalid_image_type: Nur JPEG-, PNG-, WebP- oder GIF-Bilder sind erlaubt.
+  invalid_direction: 'Ungültige Richtung. Verwende „cw" oder „ccw".'
+  invalid_position: 'Ungültige Koordinaten.'
+
+# ── Systembenachrichtigungen ──
+notify:
+  wishlist_new_subject: 'Neuer Wunsch: %title%'
+  wishlist_new_body: '%user% sucht "%detail%" im "%bookcase%". Wenn du ein Exemplar hast, gib es dort ab!'
+  wishlist_dropped_subject: 'Dein gewünschtes Buch wurde abgegeben: %title%'
+  wishlist_dropped_body: '%user% hat "%title%" im "%bookcase%" abgegeben. Hol es ab!'
+  wishlist_fulfilled_subject: 'Dein abgegebenes Buch wurde abgeholt: %title%'
+  wishlist_fulfilled_body: '%user% hat "%title%" im "%bookcase%" abgeholt. Danke fürs Abgeben!'
+  wishlist_notfound_subject: 'Ein von dir abgegebenes Buch wurde nicht gefunden: %title%'
+  wishlist_notfound_body: '%user% konnte "%title%" im "%bookcase%" nicht finden.'
+  wishlist_notfound_note: 'Notiz: %comment%'
+  bookcase_changed_subject: 'Bücherschrank aktualisiert: %title%'
+  bookcase_changed_body: "%user% hat \"%title%\" aktualisiert.\nGeändert: %fields%."
+
+# ── E-Mails ──
+email:
+  notification_greeting: 'Hallo %username%,'
+  notification_view: Bücherschrank ansehen
+  notification_footer: 'Du erhältst diese E-Mail, weil du in deinem OpenBookCase-Profil E-Mail-Benachrichtigungen gewählt hast. Du kannst dies jederzeit in deinen Profileinstellungen ändern.'
+  notification_signoff: Viele Grüße,
+  notification_team: Das OpenBookCase-Team
+  confirm_subject: Bitte bestätige deine E-Mail
+  confirm_title: Hallo! Bitte bestätige deine E-Mail!
+  confirm_body: 'Bitte bestätige deine E-Mail-Adresse, indem du auf den folgenden Link klickst:'
+  confirm_link: Meine E-Mail bestätigen
+  confirm_expires: 'Dieser Link läuft in %duration% ab.'
+  confirm_cheers: Viele Grüße!
+
+# ── Formularfeld-Bezeichnungen ──
+form:
+  email: "E-Mail"
+  title: Titel
+  entry_type: Typ
+  map_symbol: Kartensymbol
+  installation_type: Art der Installation
+  webpage: Webseite
+  is_mobile: 'Mobiler Bücherschrank'
+  digital_media_allowed: Digitale Medien erlaubt
+  comment: Kommentar
+  latitude: Breitengrad
+  longitude: Längengrad
+  street: Straße
+  house_number: Hausnummer
+  zipcode: Postleitzahl
+  city: Stadt
+  additional_data: Zusätzliche Angaben
+  accessibility_level: Barrierefreiheitsstufe
+  accessibility_description: Beschreibung der Barrierefreiheit
+  accessibility_description_placeholder: 'z. B. eine oder mehrere Stufen, Hilfe durch andere nötig, hinter verschlossener Tür, sehr eng…'
+  active_status: Status
+  active_status_description: Statusbeschreibung
+  open_time: Öffnungszeit
+  twenty_four_seven: 24/7
+  caretaker_name: Name
+  caretaker_contact: Kontakt
+  username: Benutzername
+  password: Passwort
+  agree_terms: Ich stimme den Nutzungsbedingungen zu
+
+# ── Statische Seiten ──
+static:
+  help:
+    title: "Anleitung"
+  about:
+    title: Über OpenBookCase
+    lead: Was ist dieses Projekt?
+    intro: 'OpenBookCase ist eine gemeinschaftsbasierte Plattform, um öffentliche Bücherschränke und Giveboxen in deiner Nähe zu finden und zu teilen. Jeder kann einen Bücherschrank auf der Karte entdecken, seinen Standort und seine Details ansehen und durch das Hinzufügen neuer Einträge beitragen.'
+    how_title: So funktioniert es
+    how_body: 'Durchstöbere die interaktive Karte, um Bücherschränke in deiner Umgebung zu finden. Klicke auf eine Markierung, um Details wie Öffnungszeiten, Adresse und Fotos zu sehen. Nutze die Listenansicht für einen schnellen Überblick über alle Einträge.'
+    contributing_title: Mitmachen
+    contributing_body: 'Erstelle ein kostenloses Konto, um neue Bücherschränke hinzuzufügen, Fotos hochzuladen, Standorte zu bewerten und deine Wunschliste der gesuchten Bücher zu verwalten.'
+    contact_title: Kontakt
+    contact_body: 'Fragen oder Feedback? Erreiche uns unter'
+  imprint:
+    title: Impressum
+    lead: Rechtliche Angaben
+    responsible_title: Verantwortlich für den Inhalt
+    responsible_body: OpenBookCase-Projekt
+    contact_title: Kontakt
+    disclaimer_title: Haftungsausschluss
+    disclaimer_body: 'Die Informationen auf dieser Website werden nach bestem Wissen bereitgestellt. Wir übernehmen keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der Inhalte.'
+  legal:
+    title: Rechtliche Hinweise & Datenschutz
+    lead: Nutzungsbedingungen und Datenschutz
+    terms_title: Nutzungsbedingungen
+    terms_body: 'Durch die Nutzung von OpenBookCase erklärst du dich bereit, Inhalte (Bücherschrank-Einträge, Fotos, Bewertungen) verantwortungsvoll und nur für ihren vorgesehenen Zweck beizutragen. Du darfst keine falschen Angaben oder Inhalte einreichen, die Rechte Dritter verletzen.'
+    collect_title: Welche Daten wir erheben
+    collect_intro: 'Bei der Registrierung erheben wir die folgenden personenbezogenen Daten:'
+    collect_1: Benutzername und E-Mail-Adresse (für die Kontoverwaltung und E-Mail-Verifizierung)
+    collect_2: Gehashtes Passwort (niemals im Klartext gespeichert)
+    collect_public: 'Beiträge zur Karte (Standorte von Bücherschränken, Fotos) sind öffentlich sichtbar.'
+    storage_title: Datenspeicherung
+    storage_body: 'Deine Daten werden auf Servern innerhalb der Europäischen Union gespeichert. Wir verkaufen oder teilen deine personenbezogenen Daten nicht mit Dritten.'
+    rights_title: Deine Rechte
+    rights_body: 'Du hast jederzeit das Recht, auf deine personenbezogenen Daten zuzugreifen, sie zu korrigieren oder zu löschen. Kontaktiere uns unter'
+    cookies_title: Cookies
+    cookies_body: 'Diese Seite verwendet ein für die Anmeldung erforderliches Sitzungs-Cookie sowie ein Cookie, das deine gewählte Sprache speichert. Es werden keine Tracking- oder Analyse-Cookies verwendet.'
+  licenses:
+    title: Lizenzen
+    lead: Wie OpenBookCase und seine Daten lizenziert sind
+    intro: 'OpenBookCase ist ein offenes Projekt. Der Quellcode und die gesammelten Daten stehen unter getrennten offenen Lizenzen – wie schon beim Vorgängerprojekt.'
+    code_title: Quellcode
+    code_body: 'Der Quellcode von OpenBookCase ist Open Source und steht unter der'
+    data_title: Datenbank
+    data_body: 'Die gesammelten Daten zu Bücherschränken und Giveboxen werden als offene Datenbank unter der'
+
+# ── Kartensuche & Standort ──
+search:
+  placeholder: Adresse, Koordinate oder Bücherschrank suchen…
+  group_bookcases: Bücherschränke
+  group_places: Orte
+  no_results: Keine Ergebnisse
+  go_to_coordinate: Zur Koordinate springen
+  use_my_location: Meinen Standort anzeigen
+  geolocation_error: Dein Standort konnte nicht ermittelt werden.
+  geolocation_unsupported: Dein Browser unterstützt keine Standortbestimmung.
+
+# ── Add / create entry ──
+add:
+  set_home: Als Zuhause festlegen
+  set_home_confirm: 'Diesen Punkt als dein Zuhause festlegen? Die Karte öffnet sich hier, wenn du angemeldet bist.'
+  set_home_saved: Zuhause gespeichert.
+  set_home_failed: Zuhause konnte nicht gespeichert werden.
+  title: 'Bücherschrank hinzufügen'
+  here: 'Hier Bücherschrank hinzufügen'
+  submit: 'Hinzufügen'
+  address_search: 'Adresse suchen, um Koordinaten zu bestimmen'
+  geo_label: 'geo:-Koordinaten einfügen'
+  geo_placeholder: 'geo:50.19,8.8'
+  created_title: 'Bücherschrank hinzugefügt!'
+  created_question: 'Möchtest du weitere Details hinzufügen?'
+  add_details: 'Details hinzufügen'
+  add_photos: 'Fotos hinzufügen'
+  done: 'Fertig'
+
+# ── Move marker (drag to reposition) ──
+move:
+  confirm: 'Du hast diesen Marker verschoben. Neue Position speichern?'
+  failed: 'Die neue Position konnte nicht gespeichert werden. Bitte versuche es erneut.'
+
+# ── Accessibility traffic-light labels ──
+accessibility_level:
+  none: 'Nicht barrierefrei'
+  partial: 'Teilweise barrierefrei (mit Hilfe)'
+  full: 'Voll barrierefrei'
+
+cookies:
+  title: "Cookies & Datenschutz"
+  intro: "OpenBookCase speichert nur das Nötigste. Wir verwenden keine Werbe-Cookies und kein Tracking durch Dritte; die einzige Analyse ist unser eigenes, datenschutzfreundliches und cookieloses Matomo."
+  essential_label: "Unbedingt erforderlich"
+  essential_desc: "Ein Sitzungs-Cookie hält dich angemeldet und schützt Formulare vor CSRF. Ohne dieses Cookie funktioniert die Seite nicht."
+  preferences_label: "Einstellungen"
+  preferences_desc: "Deine Sprache (Cookie „obc_locale“) sowie deine Theme- und Sprachwahl (im lokalen Speicher deines Browsers). Wird nur gespeichert, wenn du sie änderst."
+  maps_label: "Karte & Adresssuche"
+  maps_desc: "Kartenkacheln kommen von OpenStreetMap, die Adresssuche nutzt Photon (komoot.io). Diese Dienste erhalten deine IP-Adresse, um die Karte anzuzeigen – sie setzen keine Cookies und tracken dich nicht."
+  analytics_label: "Reichweitenmessung"
+  analytics_desc: "Wir nutzen Matomo (selbst gehostet auf dieser Seite), um zu verstehen, wie die Seite genutzt wird. Es läuft ohne Cookies und mit gekürzter IP-Adresse, sodass du nicht persönlich identifiziert oder über andere Websites hinweg verfolgt wirst."
+  no_tracking: "Keine Werbung. Keine Datenweitergabe. Kein Tracking durch Dritte."
+  privacy_link: "Datenschutzerklärung lesen"
+  accept: "Verstanden"
+
+reset:
+  request_title: "Passwort zurücksetzen"
+  request_intro: "Gib die E-Mail-Adresse deines Kontos ein, und wir senden dir einen Link, um ein neues Passwort zu wählen."
+  email_label: "E-Mail-Adresse"
+  send_button: "Link zum Zurücksetzen senden"
+  sent_title: "Sieh in dein Postfach"
+  sent_message: "Falls ein Konto mit dieser Adresse existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet. Der Link ist eine Stunde gültig."
+  new_title: "Neues Passwort wählen"
+  new_password_label: "Neues Passwort"
+  repeat_label: "Neues Passwort wiederholen"
+  save_button: "Neues Passwort speichern"
+  email_subject: "Setze dein OpenBookCase-Passwort zurück"
+  email_title: "Passwort zurücksetzen"
+  email_intro: "Hallo %username%, wir haben eine Anfrage erhalten, dein OpenBookCase-Passwort zurückzusetzen. Klicke auf den Link unten, um ein neues zu wählen:"
+  email_button: "Mein Passwort zurücksetzen"
+  email_expiry: "Dieser Link ist eine Stunde gültig."
+  email_ignore: "Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren – dein Passwort wird nicht geändert."
+  invalid_or_expired: "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an."
+  password_too_short: "Das Passwort muss mindestens 6 Zeichen lang sein."
+  password_mismatch: "Die Passwörter stimmen nicht überein."
+  success: "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden."

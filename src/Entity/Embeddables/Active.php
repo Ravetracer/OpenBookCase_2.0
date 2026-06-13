@@ -18,16 +18,11 @@ class Active
 {
     #[ORM\Column(nullable: false, enumType: ActiveStatus::class)]
     #[Serializer\Exclude]
-    private ActiveStatus $status = ActiveStatus::Active;
+    public ActiveStatus $status = ActiveStatus::Active;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Serializer\Groups(['bookcase'])]
-    private ?string $statusDescription = null;
-
-    public function getStatus(): ActiveStatus
-    {
-        return $this->status;
-    }
+    public ?string $statusDescription = null;
 
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('status')]
@@ -35,24 +30,5 @@ class Active
     public function getStatusValue(): ?string
     {
         return $this->status->value;
-    }
-
-    public function setStatus(ActiveStatus $status): self
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getStatusDescription(): ?string
-    {
-        return $this->statusDescription;
-    }
-
-    public function setStatusDescription(?string $statusDescription): self
-    {
-        $this->statusDescription = $statusDescription;
-
-        return $this;
     }
 }

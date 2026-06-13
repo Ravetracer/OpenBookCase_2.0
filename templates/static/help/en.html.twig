@@ -1,0 +1,208 @@
+{% import 'components/icon.html.twig' as ui %}
+{% set ic = 'inline-block size-4 align-text-bottom' %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">Getting started with OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  OpenBookCase is a community map of public bookcases and give-boxes. This guide walks you through everything you can do —
+  finding entries, adding and editing them, photos, wishlists, watchlists and more.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Steps marked <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+  need a free account. Browsing, searching and reading work without signing in.
+</p>
+
+{# ── Table of contents ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#account" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Account</a>
+  <a href="#search" class="badge badge-lg badge-ghost">{{ ui.icon('search', 'size-3') }} Finding bookcases</a>
+  <a href="#add" class="badge badge-lg badge-ghost">{{ ui.icon('plus', 'size-3') }} Adding</a>
+  <a href="#edit" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Editing</a>
+  <a href="#photos" class="badge badge-lg badge-ghost">{{ ui.icon('photo', 'size-3') }} Photos</a>
+  <a href="#rating" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Rating</a>
+  <a href="#wishlist" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Wishlist</a>
+  <a href="#watchlist" class="badge badge-lg badge-ghost">{{ ui.icon('eye', 'size-3') }} Watchlist</a>
+  <a href="#move" class="badge badge-lg badge-ghost">{{ ui.icon('location', 'size-3') }} Moving markers</a>
+  <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Home position</a>
+  <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Messages</a>
+  <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Sharing</a>
+  <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Language &amp; theme</a>
+</div>
+
+{# ── Account ── #}
+<section id="account" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Account &amp; sign-in</h2>
+    <p class="text-base-content/70">Browsing is open to everyone; an account lets you add and edit entries, upload photos and use wishlists.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Register:</strong> click {{ ui.icon('user', ic) }} <em>Register</em> in the top bar and choose a username, email and password. You'll get a confirmation email — click the link in it to verify your address.</li>
+      <li><strong>Log in:</strong> click {{ ui.icon('login', ic) }} <em>Login</em>.</li>
+      <li><strong>Forgot your password?</strong> Open the login dialog and click <em>Forgot your password?</em>, enter your email, and follow the link we send you to set a new password.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Finding bookcases ── #}
+<section id="search" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('search', 'size-5') }} Finding bookcases</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Search bar</strong> (top-left of the map): type a bookcase name, a place or address (powered by OpenStreetMap / Photon), or coordinates like <code>50.19, 8.8</code>. Pick a suggestion to fly there.</li>
+      <li><strong>Locate me:</strong> the {{ ui.icon('location', ic) }} button next to the zoom controls centres the map on your position and shows the distance to each bookcase in its popup.</li>
+      <li><strong>List view:</strong> the {{ ui.icon('list', ic) }} <em>List</em> page lets you search, sort columns and order by “Nearest to me”. You can also download every entry as JSON with <em>Export</em>.</li>
+      <li><strong>Marker colours:</strong> pins are coloured by accessibility (red / yellow / green); give-boxes and currently-unavailable entries have their own icons.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Adding ── #}
+<section id="add" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('plus', 'size-5') }} Adding an entry
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <p class="text-base-content/70">There are three ways to start adding:</p>
+    <ul class="ml-1 list-disc space-y-1 pl-5">
+      <li>The {{ ui.icon('plus', ic) }} <em>Add bookcase</em> button in the top bar.</li>
+      <li><strong>Right-click</strong> anywhere on the map (or <strong>long-press</strong> on touch) → <em>Add bookcase here</em>.</li>
+      <li>From the <em>Locate me</em> popup → <em>Add bookcase here</em>.</li>
+    </ul>
+    <p class="mt-2 text-base-content/70">Then complete the quick-add form:</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Enter a <strong>title</strong>, the <strong>type</strong> (bookcase or give-box) and the <strong>installation type</strong>.</li>
+      <li>Set the <strong>coordinates</strong> — they're prefilled when you started from the map. You can also paste a <code>geo:lat,lon</code> string or search for an address to place them.</li>
+      <li>Click <strong>Add</strong>. The pin drops on the map immediately and a panel offers to <em>add full details</em>, <em>add photos</em>, or finish with <em>Done</em>.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Editing ── #}
+<section id="edit" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Editing an entry
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Open an entry (click its marker → <em>Details</em>), then click {{ ui.icon('edit', ic) }} <em>Edit</em>.</li>
+      <li>Adjust the title, type, website and the <strong>fixed / mobile</strong> toggle.</li>
+      <li>Set <strong>accessibility</strong> with the red / yellow / green traffic light and an optional description.</li>
+      <li>Set the <strong>status</strong> (active or inactive). For inactive entries you can add a reason that's shown on the map and in the detail view.</li>
+      <li>Add <strong>opening times</strong> and <strong>caretakers</strong>, then <strong>Save</strong>. Anyone watching the entry is notified of what changed.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Photos ── #}
+<section id="photos" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('photo', 'size-5') }} Managing photos
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Open an entry → {{ ui.icon('photo', ic) }} <em>Photos</em>.</li>
+      <li><strong>Upload</strong> up to five images. An author name is required; you can add a short description (alt text) that screen readers read aloud.</li>
+      <li>Use {{ ui.icon('rotate-cw', ic) }} to rotate a photo, edit its description, or {{ ui.icon('trash', ic) }} delete it.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Rating ── #}
+<section id="rating" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Rating a bookcase</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>The detail view shows the average rating as hearts.</li>
+      <li>When signed in, click <em>Rate</em>, pick your hearts, and it saves instantly — the average updates live.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Wishlist ── #}
+<section id="wishlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Wishlist — request &amp; hand over books</h2>
+    <p class="text-base-content/70">The wishlist lets people ask for a specific book at a bookcase and lets others drop off a copy.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Open an entry → {{ ui.icon('heart', ic) }} <em>Wishlist</em> and add the book you're looking for (title, optional author).</li>
+      <li>Someone who owns that book can <strong>drop a copy</strong> there — you're notified when they do.</li>
+      <li>Once you've collected it, mark it <strong>picked up</strong>; if it's gone, mark it <strong>not found</strong>.</li>
+      <li>A badge on the map marker shows how many open wishes a bookcase has.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Watchlist ── #}
+<section id="watchlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('eye', 'size-5') }} Watchlist — follow an entry
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>On an entry, click {{ ui.icon('eye', ic) }} <em>Watch</em> to follow it.</li>
+      <li>You'll get a message whenever someone edits or moves it.</li>
+      <li>See and manage everything you follow in your profile.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Moving markers ── #}
+<section id="move" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('location', 'size-5') }} Moving a marker
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>When signed in, simply <strong>drag a marker</strong> to its correct spot.</li>
+      <li>Confirm the move and the new position is saved. If you cancel, the marker snaps back.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Home position ── #}
+<section id="home" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('home', 'size-5') }} Your home position
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <p class="text-base-content/70">Set a personal starting point so the map opens where you want it.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>From the map:</strong> right-click (or long-press) a spot → <em>Set as home location</em> (just below the add button; it asks for confirmation). This stores the spot and your current zoom.</li>
+      <li><strong>From your profile:</strong> enter latitude, longitude and zoom, and turn on the toggle.</li>
+      <li>When enabled, the map opens centred on your home and a {{ ui.icon('home', ic) }} marker shows the spot.</li>
+      <li>Remove it anytime with <em>Remove home position</em> in your profile.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Messages ── #}
+<section id="messages" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('inbox', 'size-5') }} Messages &amp; notifications</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>The {{ ui.icon('inbox', ic) }} inbox in the top bar collects system messages — watchlist and wishlist updates and announcements.</li>
+      <li>Choose how you're notified in your profile: in the app, by email, or both.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Sharing ── #}
+<section id="share" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Sharing an entry</h2>
+    <p class="text-base-content/70">Every entry's detail view has a read-only link with a <em>Copy</em> button. Anyone who opens it lands on the map centred on that bookcase with its details open.</p>
+  </div>
+</section>
+
+{# ── Language & theme ── #}
+<section id="prefs" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('language', 'size-5') }} Language &amp; theme</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Switch the interface language with the {{ ui.icon('language', ic) }} selector in the top bar.</li>
+      <li>Toggle light and dark mode with the {{ ui.icon('sun', ic) }} / {{ ui.icon('moon', ic) }} switch. Your choice is remembered on this device.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="mt-8 text-center text-sm text-base-content/60">
+  Still stuck? Reach us at <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.
+</p>

@@ -8,6 +8,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -17,11 +19,32 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserLoaderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
+    }
+
+    /**
+     * Lets users log in with either their username or their e-mail address.
+     * Username takes precedence if a username and an e-mail ever collide.
+     */
+    public function loadUserByIdentifier(string $identifier): ?UserInterface
+    {
+        $byUsername = $this->findOneBy(['username' => $identifier]);
+        if ($byUsername !== null) {
+            return $byUsername;
+        }
+
+        $rows = $this->createQueryBuilder('u')
+            ->where('LOWER(u.email) = LOWER(:id)')
+            ->setParameter('id', $identifier)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult();
+
+        return $rows[0] ?? null;
     }
 
     public function add(User $entity, bool $flush = false): void

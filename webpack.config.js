@@ -33,11 +33,6 @@ Encore
     })
 
     .copyFiles({
-        from: './assets/fonts',
-        to: 'assets/fonts/[path][name].[ext]'
-    })
-
-    .copyFiles({
         from: './assets/webfonts',
         to: 'assets/webfonts/[path][name].[ext]'
     })
@@ -47,6 +42,8 @@ Encore
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
+
+    // .enableVueLoader()
 
     // will require an extra script tag for runtime.js
     // but, you probably want this, unless you're building a single-page app
@@ -76,8 +73,8 @@ Encore
         config.corejs = '3.23';
     })
 
-    // enables Sass/SCSS support
-    .enableSassLoader()
+    // enables Tailwind CSS v4 / DaisyUI via PostCSS
+    .enablePostCssLoader()
 
     // uncomment if you use TypeScript
     // .enableTypeScriptLoader()

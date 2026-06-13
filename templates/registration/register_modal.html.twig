@@ -1,0 +1,32 @@
+{% import 'components/icon.html.twig' as ui %}
+
+<form method="dialog">
+  <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+</form>
+
+<h3 class="mb-4 text-lg font-bold">{{ 'auth.register'|trans }}</h3>
+
+{{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+  {% for flash_error in app.flashes('verify_email_error') %}
+    <div class="alert alert-error mb-3" role="alert">{{ flash_error }}</div>
+  {% endfor %}
+
+  {{ form_row(registrationForm.username, {'label': 'form.username'|trans, 'attr': {'placeholder': 'auth.username'|trans}}) }}
+  {{ form_row(registrationForm.email, {'label': 'form.email'|trans, 'attr': {'placeholder': 'auth.email_placeholder'|trans, 'autocomplete': 'email'}}) }}
+  {{ form_row(registrationForm.plainPassword, {'label': 'form.password'|trans, 'attr': {'placeholder': 'auth.password'|trans}}) }}
+
+  <div class="mb-4">
+    {# Plain flex (not DaisyUI .label) + items-start so the terms text/link wraps
+       freely onto a new line instead of being cut off on narrow screens. #}
+    <label class="flex cursor-pointer items-start gap-3">
+      {{ form_widget(registrationForm.agreeTerms) }}
+      <span class="text-sm leading-snug">{{ 'auth.agree_terms_pre'|trans }} <a class="link link-primary" href="{{ path('app_legal') }}" target="_blank">{{ 'auth.terms'|trans }}</a></span>
+    </label>
+    {{ form_errors(registrationForm.agreeTerms) }}
+  </div>
+
+  <div class="modal-action">
+    <button type="button" class="btn btn-ghost" onclick="registerModal.close()">{{ 'cancel'|trans }}</button>
+    <button type="submit" class="btn btn-primary">{{ 'auth.register'|trans }}</button>
+  </div>
+{{ form_end(registrationForm) }}

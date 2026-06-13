@@ -1,0 +1,56 @@
+{% import 'components/icon.html.twig' as ui %}
+
+<form method="dialog">
+  <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+</form>
+
+<h3 class="mb-4 pr-8 text-lg font-bold">{{ 'add.title'|trans }}</h3>
+
+<div data-edit-error class="alert alert-error mb-4 hidden" role="alert"></div>
+
+{{ form_start(form, {'attr': {'id': 'create-form', 'novalidate': 'novalidate'}, 'action': path('api_bookcase_create')}) }}
+
+  {{ form_row(form.title) }}
+  {{ form_row(form.entryType) }}
+  {{ form_row(form.installationType) }}
+
+  <p class="mt-4 mb-1 font-semibold">{{ 'position'|trans }}</p>
+
+  {% if editable %}
+    {# Address search → fills the coordinate inputs below (navbar entry point). #}
+    <div class="relative mb-3">
+      <label class="input input-bordered flex items-center gap-2">
+        {{ ui.icon('search', 'size-4 opacity-60') }}
+        <input type="search" class="grow" autocomplete="off"
+               placeholder="{{ 'add.address_search'|trans }}"
+               aria-label="{{ 'add.address_search'|trans }}"
+               data-create-address-search>
+      </label>
+      <ul class="menu menu-sm absolute z-10 mt-1 hidden max-h-60 w-full flex-nowrap overflow-y-auto rounded-box border border-base-300 bg-base-100 shadow-lg"
+          data-create-address-results></ul>
+    </div>
+  {% endif %}
+
+  {# geo: paste — present in every add dialog; overwrites the coordinates below. #}
+  <label class="label" for="geo-input"><span class="label-text">{{ 'add.geo_label'|trans }}</span></label>
+  <input id="geo-input" type="text" class="input input-bordered mb-3 w-full"
+         placeholder="{{ 'add.geo_placeholder'|trans }}" data-geo-input>
+
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    {% if editable %}
+      {{ form_row(form.position.latitude) }}
+      {{ form_row(form.position.longitude) }}
+    {% else %}
+      {{ form_row(form.position.latitude, {'attr': {'readonly': 'readonly'}}) }}
+      {{ form_row(form.position.longitude, {'attr': {'readonly': 'readonly'}}) }}
+    {% endif %}
+  </div>
+
+  {% do form.position.setRendered %}
+  {{ form_rest(form) }}
+{{ form_end(form, {'render_rest': false}) }}
+
+<div class="modal-action mt-6 justify-between">
+  <button type="button" class="btn btn-ghost" data-modal-action="close">{{ 'cancel'|trans }}</button>
+  <button type="button" class="btn btn-primary gap-1" data-modal-action="create">{{ ui.icon('plus', 'size-4') }} {{ 'add.submit'|trans }}</button>
+</div>

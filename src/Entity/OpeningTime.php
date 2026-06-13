@@ -18,58 +18,17 @@ class OpeningTime
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     #[ORM\Column(type: 'ulid', unique: true)]
     #[Groups(['bookcase'])]
-    private ?Ulid $id = null;
+    public ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['bookcase'])]
-    private ?string $open_time = null;
+    public ?string $open_time = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(['bookcase'])]
-    private ?bool $twenty_for_seven = null;
+    public ?bool $twenty_for_seven = null;
 
     #[ORM\ManyToOne(inversedBy: 'openingTimes')]
     #[Groups(['bookcase'])]
-    private ?Bookcase $bookcase = null;
-
-    public function getId(): ?Ulid
-    {
-        return $this->id;
-    }
-
-    public function getOpenTime(): ?string
-    {
-        return $this->open_time;
-    }
-
-    public function setOpenTime(?string $open_time): self
-    {
-        $this->open_time = $open_time;
-
-        return $this;
-    }
-
-    public function isTwentyForSeven(): ?bool
-    {
-        return $this->twenty_for_seven;
-    }
-
-    public function setTwentyForSeven(bool $twenty_for_seven): self
-    {
-        $this->twenty_for_seven = $twenty_for_seven;
-
-        return $this;
-    }
-
-    public function getBookcase(): ?Bookcase
-    {
-        return $this->bookcase;
-    }
-
-    public function setBookcase(?Bookcase $bookcase): self
-    {
-        $this->bookcase = $bookcase;
-
-        return $this;
-    }
+    public ?Bookcase $bookcase = null;
 }

@@ -2,26 +2,16 @@ import './bootstrap.js';
 /*
  * Welcome to your app's main JavaScript file!
  *
- * We recommend including the built version of this JavaScript file
- * (and its CSS file) in your base layout (base.html.twig).
+ * The single stylesheet (app.css) pulls in Tailwind CSS v4 + DaisyUI and the
+ * app layout. Stimulus controllers live in assets/controllers/.
  */
 
-import './styles/bootstrap.min.css';
-import './styles/animate.css';
-import './styles/jquery-pseudo-ripple.css';
-import './styles/style.css';
-import './styles/Roboto.css';
-import './styles/fontawesome-all.min.css';
-import './styles/material_icons.css';
+// Tailwind + DaisyUI + app layout
+import './styles/app.css';
 
-// Leaflet.css
+// Leaflet map
 import './styles/leaflet.css';
 import './styles/MarkerCluster.css';
 import './styles/MarkerCluster.Default.css';
-
-import './styles/app.css';
-
-// start the Stimulus application
 import './js/leaflet';
 import './js/leaflet.markercluster';
-import './bootstrap';

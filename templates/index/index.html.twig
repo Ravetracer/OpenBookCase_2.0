@@ -2,50 +2,201 @@
 
 {% block title %}OpenBookCase 2.0{% endblock %}
 
+{# Map page fills the viewport and must not scroll #}
+{% block body_class %}h-screen overflow-hidden{% endblock %}
+{% block main_class %}relative{% endblock %}
+
 {% block body %}
-  <div id="mapParent">
-    <div id="map" {{ stimulus_controller('map', {'detailstrans': 'Details'|trans }) }}></div>
-  </div>
+    {% import 'components/icon.html.twig' as ui %}
+    {% set initial = initialBookcase|default(null) %}
+    <div class="relative h-full" {{ stimulus_controller('map', {
+        'detailstrans': 'Details'|trans,
+        'wishesopen': 'wishlist.open_badge'|trans,
+        'inactive': 'inactive_notice'|trans,
+        'searchbookcases': 'search.group_bookcases'|trans,
+        'searchplaces': 'search.group_places'|trans,
+        'searchnoresults': 'search.no_results'|trans,
+        'searchcoordinate': 'search.go_to_coordinate'|trans,
+        'geoerror': 'search.geolocation_error'|trans,
+        'geounsupported': 'search.geolocation_unsupported'|trans,
+        'geolocate': 'search.use_my_location'|trans,
+        'canadd': app.user ? true : false,
+        'addhere': 'add.here'|trans,
+        'moveconfirm': 'move.confirm'|trans,
+        'movefailed': 'move.failed'|trans,
+        'initialId': initial ? initial.id : '',
+        'initialLat': initial and initial.position ? initial.position.latitude : '',
+        'initialLon': initial and initial.position ? initial.position.longitude : '',
+        'homeEnabled': app.user and app.user.useHomeLocation ? true : false,
+        'homeLat': app.user and app.user.homeLatitude is not null ? app.user.homeLatitude : '',
+        'homeLon': app.user and app.user.homeLongitude is not null ? app.user.homeLongitude : '',
+        'homeZoom': app.user and app.user.homeZoom is not null ? app.user.homeZoom : '',
+        'homeToken': app.user ? csrf_token('profile_home') : '',
+        'homelabel': 'profile.home_default_label'|trans,
+        'homecustomlabel': app.user and app.user.homeLabel is not null ? app.user.homeLabel : '',
+        'sethere': 'add.set_home'|trans,
+        'sethomeconfirm': 'add.set_home_confirm'|trans,
+        'sethomesaved': 'add.set_home_saved'|trans,
+        'sethomefailed': 'add.set_home_failed'|trans,
+        'watchedids': watchedIds|default([])
+    }) }}>
+        <div id="map" class="h-full w-full"></div>
 
-  <div class="spinner-border hidden" role="status" id="loaderSpinner">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="bookcaseDetails" aria-labelledby="bookcaseDetailsLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="bookcaseDetailsLabel">--- title ---</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-labelledby="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div class="row">
-        <div class="col-lg-6">
-          <div id="imageControls" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner" id="bookcase_images_items"></div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#imageControls" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#imageControls" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
-            </button>
-          </div>
+        {# Search overlay — sits beside the top-left zoom control. Lives outside #map so
+           Leaflet never intercepts its pointer/scroll events. The right edge leaves
+           room for the filter button on small screens. #}
+        <div class="absolute left-14 right-16 top-3 z-[1000] sm:right-auto sm:w-96" role="search">
+            <label class="input input-bordered flex items-center gap-2 bg-base-100 shadow-lg">
+                {{ ui.icon('search', 'size-5 opacity-60') }}
+                <input type="search" autocomplete="off"
+                       class="grow"
+                       placeholder="{{ 'search.placeholder'|trans }}"
+                       aria-label="{{ 'search.placeholder'|trans }}"
+                       data-map-target="searchInput"
+                       data-action="input->map#onSearchInput keydown->map#onSearchKeydown focus->map#onSearchInput">
+                <button type="button" class="opacity-60 hover:opacity-100 hidden"
+                        aria-label="{{ 'close'|trans }}"
+                        data-map-target="searchClear"
+                        data-action="map#clearSearch">
+                    {{ ui.icon('close', 'size-4') }}
+                </button>
+            </label>
+            <ul class="menu menu-sm absolute mt-1 hidden max-h-80 w-full flex-nowrap overflow-y-auto rounded-box bg-base-100 shadow-lg"
+                data-map-target="searchResults"></ul>
         </div>
-      </div>
 
-      {{ include('index/snippets/infoRow.html.twig', {label: 'bctype', fieldId: 'view_bc_type', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'installationType', fieldId: 'view_bc_instType', margin: true}) }}
-      {{ include('index/snippets/subheadline.twig', {label: 'position'}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'latitude', fieldId: 'view_bc_lat', extraClasses: 'ps-4'}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'longitude', fieldId: 'view_bc_lon', extraClasses: 'ps-4', margin: true }) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'address', fieldId: 'view_bc_address', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'openingTimes', fieldId: 'view_bc_openingTimes', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'caretaker', fieldId: 'view_bc_caretaker', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'webpage', fieldId: 'view_bc_webpage', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'accessibility', fieldId: 'view_bc_accessibility', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'status', fieldId: 'view_bc_status', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'shareLink', fieldId: 'view_bc_shareLink', margin: true}) }}
-      {{ include('index/snippets/infoRow.html.twig', {label: 'rating', fieldId: 'view_bc_rating', margin: true}) }}
+        {# Filter control — top-right; toggles a panel of marker filters. Lives
+           outside #map so Leaflet never intercepts its events. #}
+        <div class="absolute right-3 top-3 z-[1001]" data-map-target="filterContainer">
+            <button type="button"
+                    class="btn btn-square relative bg-base-100 shadow-lg"
+                    aria-label="{{ 'filter.title'|trans }}"
+                    title="{{ 'filter.title'|trans }}"
+                    data-action="map#toggleFilterPanel">
+                {{ ui.icon('filter', 'size-5') }}
+                <span class="badge badge-primary badge-sm absolute -right-2 -top-2 hidden"
+                      data-map-target="filterBadge"></span>
+            </button>
+
+            <div class="absolute right-0 mt-2 hidden max-h-[75vh] w-72 overflow-y-auto rounded-box bg-base-100 p-4 shadow-xl"
+                 data-map-target="filterPanel"
+                 data-action="change->map#applyFilters">
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="font-semibold">{{ 'filter.title'|trans }}</h2>
+                    <button type="button" class="btn btn-ghost btn-xs" data-action="map#resetFilters">{{ 'filter.reset'|trans }}</button>
+                </div>
+
+                {# Accessibility level #}
+                <fieldset class="mb-3">
+                    <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.accessibility'|trans }}</legend>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-accessibility" value="green" checked>
+                        <span class="label-text">{{ 'filter.acc_full'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-accessibility" value="yellow" checked>
+                        <span class="label-text">{{ 'filter.acc_partial'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-accessibility" value="red" checked>
+                        <span class="label-text">{{ 'filter.acc_none'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-accessibility" value="unset" checked>
+                        <span class="label-text">{{ 'filter.acc_unknown'|trans }}</span>
+                    </label>
+                </fieldset>
+
+                {# Status #}
+                <fieldset class="mb-3">
+                    <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.status'|trans }}</legend>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-status" value="active" checked>
+                        <span class="label-text">{{ 'list.active'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-status" value="inactive" checked>
+                        <span class="label-text">{{ 'list.inactive'|trans }}</span>
+                    </label>
+                </fieldset>
+
+                {# Type #}
+                <fieldset class="mb-3">
+                    <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.type'|trans }}</legend>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-type" value="bookcase" checked>
+                        <span class="label-text">{{ 'filter.type_bookcase'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-type" value="givebox" checked>
+                        <span class="label-text">{{ 'filter.type_givebox'|trans }}</span>
+                    </label>
+                </fieldset>
+
+                {# Installation (mobile vs fixed) #}
+                <fieldset class="mb-3">
+                    <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.mobility'|trans }}</legend>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-mobility" value="fixed" checked>
+                        <span class="label-text">{{ 'filter.fixed'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="f-mobility" value="mobile" checked>
+                        <span class="label-text">{{ 'filter.mobile'|trans }}</span>
+                    </label>
+                </fieldset>
+
+                {# Minimum average rating #}
+                <label class="mb-3 block">
+                    <span class="mb-1 block text-sm font-medium opacity-70">{{ 'filter.rating'|trans }}</span>
+                    <select class="select select-bordered select-sm w-full" name="f-rating">
+                        <option value="0">{{ 'filter.rating_any'|trans }}</option>
+                        <option value="1">★ 1+</option>
+                        <option value="2">★ 2+</option>
+                        <option value="3">★ 3+</option>
+                        <option value="4">★ 4+</option>
+                        <option value="5">★ 5</option>
+                    </select>
+                </label>
+
+                {# Open wishlist items #}
+                <label class="label cursor-pointer justify-between py-1">
+                    <span class="label-text">{{ 'filter.wishlist'|trans }}</span>
+                    <input type="checkbox" class="toggle toggle-sm toggle-primary" name="f-wishlist">
+                </label>
+
+                {% if app.user %}
+                    {# Entries the user is watching #}
+                    <label class="label cursor-pointer justify-between py-1">
+                        <span class="label-text">{{ 'filter.watching'|trans }}</span>
+                        <input type="checkbox" class="toggle toggle-sm toggle-primary" name="f-watching">
+                    </label>
+                {% endif %}
+            </div>
+        </div>
+
+        <span id="loaderSpinner" class="loading loading-spinner loading-lg absolute right-6 top-20 z-[1000] text-primary" role="status" aria-label="Loading" hidden></span>
     </div>
-  </div>
+
+    {# Permanent dialog — detail & edit fragments are injected into the body target #}
+    <dialog id="bookcaseModal" class="modal" {{ stimulus_controller('bookcase-modal') }}
+            data-trans-confirm-delete="{{ 'js.confirm_delete_bookcase'|trans }}"
+            data-trans-delete-reason="{{ 'js.delete_reason'|trans }}"
+            data-trans-delete-unavailable="{{ 'js.delete_unavailable'|trans }}"
+            data-trans-saving-failed="{{ 'js.saving_failed'|trans }}"
+            data-trans-something-wrong="{{ 'js.something_wrong'|trans }}"
+            data-trans-could-not-load="{{ 'js.could_not_load'|trans }}"
+            data-trans-copied="{{ 'js.copied'|trans }}"
+            data-trans-saved="{{ 'js.saved'|trans }}"
+            data-trans-rating-failed="{{ 'js.could_not_save_rating'|trans }}"
+            data-trans-create-failed="{{ 'js.create_failed'|trans }}"
+            data-trans-created-title="{{ 'add.created_title'|trans }}"
+            data-trans-created-question="{{ 'add.created_question'|trans }}"
+            data-trans-add-details="{{ 'add.add_details'|trans }}"
+            data-trans-add-photos="{{ 'add.add_photos'|trans }}"
+            data-trans-done="{{ 'add.done'|trans }}"
+            data-trans-close="{{ 'close'|trans }}">
+        <div class="modal-box max-w-2xl" data-bookcase-modal-target="body"></div>
+        <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+    </dialog>
 {% endblock %}
