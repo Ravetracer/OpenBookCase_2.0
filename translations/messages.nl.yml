@@ -359,7 +359,8 @@ static:
     lead: Hoe OpenBookCase en zijn gegevens zijn gelicentieerd
     intro: 'OpenBookCase is een open project. De broncode en de verzamelde gegevens worden onder afzonderlijke open licenties beschikbaar gesteld, zoals ook al bij het voorgangerproject het geval was.'
     code_title: Broncode
-    code_body: 'De broncode van OpenBookCase is opensource en wordt uitgebracht onder de'
+    source_code_term: broncode
+    code_body: 'De %source_code% van OpenBookCase is opensource en wordt uitgebracht onder de'
     data_title: Database
     data_body: 'De verzamelde gegevens over boekenkasten en give-boxen worden als open database gepubliceerd onder de'
 

@@ -359,7 +359,8 @@ static:
     lead: Sous quelles licences sont publiés OpenBookCase et ses données
     intro: "OpenBookCase est un projet ouvert. Son code source et les données collectées sont publiés sous des licences ouvertes distinctes, comme c'était déjà le cas pour le projet précédent."
     code_title: Code source
-    code_body: "Le code source d'OpenBookCase est open source et publié sous la"
+    source_code_term: code source
+    code_body: "Le %source_code% d'OpenBookCase est open source et publié sous la"
     data_title: Base de données
     data_body: 'Les données collectées sur les boîtes à livres et give-boxes sont publiées comme base de données ouverte sous la'
 

@@ -359,7 +359,8 @@ static:
     lead: Wie OpenBookCase und seine Daten lizenziert sind
     intro: 'OpenBookCase ist ein offenes Projekt. Der Quellcode und die gesammelten Daten stehen unter getrennten offenen Lizenzen – wie schon beim Vorgängerprojekt.'
     code_title: Quellcode
-    code_body: 'Der Quellcode von OpenBookCase ist Open Source und steht unter der'
+    source_code_term: Quellcode
+    code_body: 'Der %source_code% von OpenBookCase ist Open Source und steht unter der'
     data_title: Datenbank
     data_body: 'Die gesammelten Daten zu Bücherschränken und Giveboxen werden als offene Datenbank unter der'
 

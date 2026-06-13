@@ -359,7 +359,8 @@ static:
     lead: How OpenBookCase and its data are licensed
     intro: 'OpenBookCase is an open project. Its source code and the collected data are made available under separate open licenses — as was already the case with its predecessor project.'
     code_title: Source code
-    code_body: 'The OpenBookCase source code is open source, released under the'
+    source_code_term: source code
+    code_body: 'The OpenBookCase %source_code% is open source, released under the'
     data_title: Database
     data_body: 'The collected bookcase and give-box data is published as an open database under the'
 

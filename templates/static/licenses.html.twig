@@ -11,7 +11,8 @@
     <p>{{ 'static.licenses.intro'|trans }}</p>
 
     <h2>{{ 'static.licenses.code_title'|trans }}</h2>
-    <p>{{ 'static.licenses.code_body'|trans }}
+    {% set source_code_link %}<a class="link link-primary" href="https://github.com/Ravetracer/OpenBookCase_2.0" target="_blank" rel="noopener noreferrer">{{ 'static.licenses.source_code_term'|trans }}</a>{% endset %}
+    <p>{{ 'static.licenses.code_body'|trans({'%source_code%': source_code_link})|raw }}
       <a class="link link-primary" href="https://opensource.org/license/MIT" target="_blank" rel="noopener noreferrer">MIT License</a>.</p>
 
     <h2>{{ 'static.licenses.data_title'|trans }}</h2>
