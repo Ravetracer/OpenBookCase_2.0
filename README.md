@@ -19,7 +19,7 @@ Find, share, and care for public bookcases (_Bücherschränke_) and give-boxes n
 
 OpenBookCase is a community-driven web app for discovering and maintaining **public bookcases and give-boxes**. Anyone can browse the map to find a location near them; registered users can add new entries, upload photos, rate locations, and keep a wishlist of books they're hoping to find.
 
-It is the modern rebuild of an older platform, and supports **migrating the legacy data** so nothing is lost.
+It is the modern rebuild of an older platform.
 
 ### Features
 
@@ -140,19 +140,7 @@ php -S localhost:8000 -t public/
 
 Then open **http://localhost:8000**.
 
-## Importing Legacy Data
-
-OpenBookCase can ingest data from the older platform and a third-party export:
-
-```bash
-# Bulk import from a PHPMyAdmin JSON export (upserts by legacy id; --fresh wipes & reimports)
-php bin/console app:import-phpmyadmin-json -f path/to/export.json
-
-# Import only NEW bookcases from a Lesestunden export (coordinate-based dedup)
-php bin/console app:import-lesestunden -f var/lesestunden.json
-```
-
-Other useful commands:
+## Useful commands
 
 ```bash
 php bin/console app:generate-short-codes   # backfill short share codes
