@@ -640,7 +640,8 @@ class BookcaseController extends AbstractController
         }
 
         // One rating per user per bookcase: update the existing one or create it.
-        $rating = $this->ratingRepository->findOneBy(['bookcase' => $bookcase, 'user' => $user]) ?? new Rating();
+        $existing = $this->ratingRepository->findOneBy(['bookcase' => $bookcase, 'user' => $user]);
+        $rating = $existing ?? new Rating();
         $rating->bookcase = $bookcase;
         $rating->user = $user;
         $rating->value = $value;
@@ -648,8 +649,14 @@ class BookcaseController extends AbstractController
         $this->entityManager->persist($rating);
         $this->entityManager->flush();
 
-        // ratings is a lazy collection on the freshly-resolved bookcase, so reading it
-        // here loads the current rows from the DB (including the one just saved).
+        // Keep the in-memory ratings collection in sync. If it was already
+        // initialized (empty) earlier in the request, a brand-new rating wouldn't
+        // show up in it — so ratingStats() would report a stale count/average on
+        // the very first rating. addRating() is a no-op when it's already present.
+        if ($existing === null) {
+            $bookcase->addRating($rating);
+        }
+
         $stats = $this->ratingStats($bookcase);
 
         return new JsonResponse([
