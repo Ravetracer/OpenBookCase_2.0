@@ -38,8 +38,40 @@ symfony server:start
 php -S localhost:8000 -t public/
 
 # Tests
-php bin/phpunit
+vendor/bin/phpunit                          # whole suite
+vendor/bin/phpunit --testsuite unit          # one suite (unit | integration | functional)
+php -d pcov.enabled=1 -d xdebug.mode=off vendor/bin/phpunit --coverage-text   # coverage
 ```
+
+## Testing
+
+> **Keep tests in lockstep with code.** Any change — new feature, bug fix, refactor, new controller/service/command/repository method — must come with matching new/updated tests, and a bug fix must add a regression test that fails without the fix. Run the suite to green before considering the work done.
+
+### Stack & layout
+
+| Piece | Choice |
+|---|---|
+| Runner | PHPUnit 11 (`vendor/bin/phpunit`; config `phpunit.xml.dist`) |
+| DB isolation | **dama/doctrine-test-bundle** — wraps every test in a transaction that is rolled back (fast, no per-test rebuild) |
+| Fixtures | **zenstruck/foundry** — factories in `tests/Factory/`; auto-creates the schema once per run |
+| Test DB | dedicated SQLite from `.env.test` (`var/test.db`), `MAILER_DSN=null://null` |
+| Coverage | **pcov** (installed); ~70% lines / 252 tests at last count |
+
+Three suites, each its own directory:
+- `tests/Unit/` — no DB/kernel. Pure logic: enums, value objects, `ShortCodeGenerator`, `TwentyFourSevenDetector`, `BinaryUlidType`, `Locales`, `LocaleSubscriber`, entity helpers.
+- `tests/Integration/` — `KernelTestCase` + DB. Repositories (incl. all custom finders), services (`MessageService` per channel), security, ULID persistence, and CLI **commands** under `tests/Integration/Command/`.
+- `tests/Functional/` — `WebTestCase` (HTTP). Every controller; extend `App\Tests\Functional\FunctionalTestCase` (gives `$this->client`, `loginAsUser()`, `json()`).
+
+### Conventions / gotchas
+
+- **Schema is created via schema-create, NOT migrations** — this project's migrations can't build an empty DB (see Legacy Migration / `app:dev:db-init`). Foundry's reset mode handles this; don't point tests at the migration path.
+- **ULID gotcha applies in tests too** — `BinaryUlidTypeTest` guards the BLOB binding; keep id-based lookups working.
+- Foundry `createOne()` / `createMany()` return **real entities** (no `->_real()`).
+- Use PHPUnit 11 **`#[DataProvider]` attributes**, never `@dataProvider` docblocks (they deprecate).
+- **Parallel/isolated runs:** prefix with `TEST_TOKEN=<n>` to get a per-process DB (`doctrine.yaml` appends the suffix) — used when fanning test writing out across agents.
+- Commands that issue `PRAGMA` / their own transactions (e.g. `app:import-osm`) are incompatible with DAMA's wrapping transaction — mark those test classes `#[DAMA\DoctrineTestBundle\PHPUnit\SkipDatabaseRollback]` and clean their tables manually in `setUp`/`tearDown`.
+- Mailer: assert sent mail in a `WebTestCase` via `$client->enableProfiler()` + the `MailerAssertionsTrait` helpers (`assertEmailCount`, `getMailerMessage`).
+- All of the above is dev-only: production runs `composer install --no-dev`, so dama/foundry aren't installed and their bundles stay gated to `dev`/`test` in `config/bundles.php`.
 
 ## Architecture Overview
 
