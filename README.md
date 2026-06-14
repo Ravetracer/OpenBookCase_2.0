@@ -95,9 +95,22 @@ Key variables:
 
 ### 3. Set up the database
 
+Create a clean, empty database with the current schema:
+
 ```bash
-php bin/console doctrine:migrations:migrate
+php bin/console app:dev:db-init
 ```
+
+> ℹ️ Use `app:dev:db-init`, **not** `doctrine:migrations:migrate`, for a fresh
+> install. The migrations are *incremental* (the first one alters an
+> already-existing `bookcase` table — the original schema came from the legacy
+> SQL dump), so they can't build a database from scratch. `app:dev:db-init`
+> drops any existing database, creates the schema from the entity mappings, and
+> marks every migration as applied so future `doctrine:migrations:migrate` runs
+> work normally.
+
+Want sample data to click through right away? See
+[Local development data](#local-development-data) below.
 
 (Optional — verify the schema matches the entities:)
 
@@ -144,6 +157,59 @@ Other useful commands:
 ```bash
 php bin/console app:generate-short-codes   # backfill short share codes
 php bin/console app:message:send           # send a system inbox message
+```
+
+## Local development data
+
+Three `app:dev:*` helper commands get a new developer up and running fast.
+They're meant for **local development only** — never run them against a
+database with real data.
+
+### Clean database — `app:dev:db-init`
+
+Drops the database, rebuilds the schema from the entity mappings, and marks all
+migrations as applied. This is the recommended way to set up a fresh database
+(see [step 3](#3-set-up-the-database) for why plain migrations don't work from
+scratch).
+
+```bash
+php bin/console app:dev:db-init       # asks for confirmation (it's destructive)
+php bin/console app:dev:db-init -n    # skip the prompt (CI / scripts)
+```
+
+### Sample data — `app:dev:fixtures`
+
+Seeds realistic sample data so you can click through the map, list, detail
+dialogs and ratings immediately. The curated bookcases deliberately cover every
+state the UI renders differently: active/inactive, each accessibility level
+(plus "unset"), bookcase vs give-box, all map symbols (standard/give-box/Tardis),
+mobile vs fixed, BookCrossing zones, the digital-media flag, structured address
+vs additional-data-only (address fallback), with/without caretakers, opening
+times (24/7, fixed, none) and a spread of ratings. It also scatters extra random
+pins around German cities so clustering is visible.
+
+```bash
+php bin/console app:dev:fixtures              # seed on top of the current database
+php bin/console app:dev:fixtures --fresh      # reset the database first, then seed
+php bin/console app:dev:fixtures --count=80   # also scatter 80 extra random pins (default 40)
+```
+
+It creates two ready-to-use logins (password **`password`** for both):
+
+| Username | E-mail              | Role         |
+|----------|---------------------|--------------|
+| `dev`    | `dev@example.com`   | `ROLE_USER`  |
+| `admin`  | `admin@example.com` | `ROLE_ADMIN` |
+
+### Create a user on the fly — `app:dev:create-user`
+
+Creates an already-verified account so you can log in without going through the
+registration + e-mail-verification flow.
+
+```bash
+php bin/console app:dev:create-user dev dev@example.com secret123          # ROLE_USER
+php bin/console app:dev:create-user admin admin@example.com secret123 --admin
+php bin/console app:dev:create-user                                        # prompts for the values
 ```
 
 ## Testing
