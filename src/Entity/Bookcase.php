@@ -117,6 +117,25 @@ class Bookcase
     #[Serializer\Exclude]
     public ?int $legacyId = null;
 
+    // Stable OpenStreetMap element reference for entries imported from OSM, stored
+    // as "{type}{id}" (e.g. "n123456789") so node/way/relation ids never collide.
+    // Unique (multiple NULLs allowed on SQLite) — re-imports match on this first.
+    #[ORM\Column(length: 64, unique: true, nullable: true)]
+    #[Serializer\Exclude]
+    public ?string $osmId = null;
+
+    // Provenance marker for imported data (e.g. 'osm'); NULL for app-created entries.
+    #[ORM\Column(length: 32, nullable: true)]
+    #[Serializer\Exclude]
+    public ?string $source = null;
+
+    // True when the title was auto-generated on import (from address tags or a
+    // generic fallback) rather than a real OSM `name`. Drives the "help name this
+    // bookcase" crowdsourcing prompt; cleared once a user gives it a proper title.
+    #[ORM\Column(options: ['default' => false])]
+    #[Serializer\Exclude]
+    public bool $titleProvisional = false;
+
     #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: Rating::class, orphanRemoval: true)]
     #[Serializer\Groups(['bookcase_detail'])]
     public Collection $ratings;

@@ -133,6 +133,9 @@ bookcase:
   rate: Valorar
   your_rating: Tu valoración
   no_ratings: Aún no hay valoraciones
+  title_provisional_notice: 'Esta entrada aún no tiene un nombre propio — se generó automáticamente al importarla.'
+  title_provisional_notice_source: 'Esta entrada aún no tiene un nombre propio — se importó automáticamente de %source%.'
+  title_provisional_cta: Ayuda a nombrarla
   manage_photos: Gestionar fotos
   no_photos: Aún no hay fotos.
   photo_count: '%count% / 5 imágenes'
@@ -364,6 +367,7 @@ static:
     code_body: 'El %source_code% de OpenBookCase es de código abierto y se publica bajo la'
     data_title: Base de datos
     data_body: 'Los datos recopilados de casitas de libros y cajas de intercambio se publican como base de datos abierta bajo la'
+    data_attribution: 'Parte de los datos de ubicación se importa de %osm% y sigue siendo © colaboradores de OpenStreetMap, utilizados bajo la misma Open Database License (ODbL).'
 
 # ── Búsqueda en el mapa y ubicación ──
 search:

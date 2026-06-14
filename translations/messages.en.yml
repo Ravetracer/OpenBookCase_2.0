@@ -133,6 +133,9 @@ bookcase:
   rate: Rate
   your_rating: Your rating
   no_ratings: No ratings yet
+  title_provisional_notice: "This entry doesn't have a proper name yet — it was generated automatically on import."
+  title_provisional_notice_source: "This entry doesn't have a proper name yet — it was imported automatically from %source%."
+  title_provisional_cta: Help name it
   manage_photos: Manage Photos
   no_photos: No photos yet.
   photo_count: '%count% / 5 images'
@@ -364,6 +367,7 @@ static:
     code_body: 'The OpenBookCase %source_code% is open source, released under the'
     data_title: Database
     data_body: 'The collected bookcase and give-box data is published as an open database under the'
+    data_attribution: 'Some location data is imported from %osm% and remains © OpenStreetMap contributors, used under the same Open Database License (ODbL).'
 
 # ── Map search & geolocation ──
 search:

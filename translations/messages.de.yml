@@ -133,6 +133,9 @@ bookcase:
   rate: Bewerten
   your_rating: Deine Bewertung
   no_ratings: Noch keine Bewertungen
+  title_provisional_notice: 'Dieser Eintrag hat noch keinen richtigen Namen — er wurde beim Import automatisch erzeugt.'
+  title_provisional_notice_source: 'Dieser Eintrag hat noch keinen richtigen Namen — er wurde automatisch aus %source% importiert.'
+  title_provisional_cta: Namen vorschlagen
   manage_photos: Fotos verwalten
   no_photos: Noch keine Fotos.
   photo_count: '%count% / 5 Bilder'
@@ -364,6 +367,7 @@ static:
     code_body: 'Der %source_code% von OpenBookCase ist Open Source und steht unter der'
     data_title: Datenbank
     data_body: 'Die gesammelten Daten zu Bücherschränken und Giveboxen werden als offene Datenbank unter der'
+    data_attribution: 'Ein Teil der Standortdaten stammt aus %osm% und bleibt © OpenStreetMap-Mitwirkende, genutzt unter derselben Open Database License (ODbL).'
 
 # ── Kartensuche & Standort ──
 search:

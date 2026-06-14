@@ -133,6 +133,9 @@ bookcase:
   rate: Оценить
   your_rating: Ваша оценка
   no_ratings: Пока нет оценок
+  title_provisional_notice: 'У этой записи ещё нет настоящего названия — оно создано автоматически при импорте.'
+  title_provisional_notice_source: 'У этой записи ещё нет настоящего названия — она была автоматически импортирована из %source%.'
+  title_provisional_cta: Помогите назвать
   manage_photos: Управление фотографиями
   no_photos: Пока нет фотографий.
   photo_count: '%count% / 5 изображений'
@@ -364,6 +367,7 @@ static:
     code_body: '%source_code% OpenBookCase является открытым и распространяется под лицензией'
     data_title: База данных
     data_body: 'Собранные данные о книжных шкафах и боксах для обмена публикуются как открытая база данных под лицензией'
+    data_attribution: 'Часть данных о местоположении импортирована из %osm% и остаётся © участники OpenStreetMap, используется по той же Open Database License (ODbL).'
 
 # ── Поиск по карте и геолокация ──
 search:

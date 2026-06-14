@@ -133,6 +133,9 @@ bookcase:
   rate: Évaluer
   your_rating: Votre évaluation
   no_ratings: Pas encore d'évaluation
+  title_provisional_notice: "Cette entrée n'a pas encore de vrai nom — il a été généré automatiquement lors de l'import."
+  title_provisional_notice_source: "Cette entrée n'a pas encore de vrai nom — elle a été importée automatiquement depuis %source%."
+  title_provisional_cta: Aidez à la nommer
   manage_photos: Gérer les photos
   no_photos: Pas encore de photos.
   photo_count: '%count% / 5 images'
@@ -364,6 +367,7 @@ static:
     code_body: "Le %source_code% d'OpenBookCase est open source et publié sous la"
     data_title: Base de données
     data_body: 'Les données collectées sur les boîtes à livres et give-boxes sont publiées comme base de données ouverte sous la'
+    data_attribution: 'Une partie des données de localisation provient de %osm% et reste © les contributeurs d''OpenStreetMap, utilisée sous la même Open Database License (ODbL).'
 
 # ── Recherche sur la carte & géolocalisation ──
 search:

@@ -7,6 +7,23 @@
 
 <h3 class="mb-4 pr-8 text-lg font-bold">{{ bookcase.title }}</h3>
 
+{# Auto-generated (imported) title — invite the community to give it a real name.
+   Name the data source (e.g. OpenStreetMap) when we know it. #}
+{% if bookcase.titleProvisional %}
+  {% set source_label = { 'osm': 'OpenStreetMap' }[bookcase.source] ?? bookcase.source %}
+  <div class="alert alert-info mb-4 py-2 text-sm" role="note">
+    {{ ui.icon('info', 'size-4 shrink-0') }}
+    <span>{{ source_label
+      ? 'bookcase.title_provisional_notice_source'|trans({ '%source%': source_label })
+      : 'bookcase.title_provisional_notice'|trans }}</span>
+    {% if is_granted('ROLE_USER') %}
+      <button type="button" class="btn btn-xs btn-info" data-modal-action="edit" data-bc-id="{{ bookcase.id }}">
+        {{ 'bookcase.title_provisional_cta'|trans }}
+      </button>
+    {% endif %}
+  </div>
+{% endif %}
+
 {# Image carousel #}
 {% if bookcase.images|length > 0 %}
   <div class="carousel mb-4 w-full rounded-box bg-base-200">

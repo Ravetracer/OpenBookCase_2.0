@@ -18,6 +18,8 @@
     <h2>{{ 'static.licenses.data_title'|trans }}</h2>
     <p>{{ 'static.licenses.data_body'|trans }}
       <a class="link link-primary" href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener noreferrer">Open Database License (ODbL)</a>.</p>
+    {% set osm_link %}<a class="link link-primary" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>{% endset %}
+    <p>{{ 'static.licenses.data_attribution'|trans({'%osm%': osm_link})|raw }}</p>
   </article>
 </div>
 {% endblock %}

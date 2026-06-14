@@ -133,6 +133,9 @@ bookcase:
   rate: Beoordelen
   your_rating: Jouw beoordeling
   no_ratings: Nog geen beoordelingen
+  title_provisional_notice: 'Dit item heeft nog geen echte naam — die is automatisch gegenereerd bij het importeren.'
+  title_provisional_notice_source: 'Dit item heeft nog geen echte naam — het is automatisch geïmporteerd uit %source%.'
+  title_provisional_cta: Help met benoemen
   manage_photos: Foto’s beheren
   no_photos: Nog geen foto’s.
   photo_count: '%count% / 5 afbeeldingen'
@@ -364,6 +367,7 @@ static:
     code_body: 'De %source_code% van OpenBookCase is opensource en wordt uitgebracht onder de'
     data_title: Database
     data_body: 'De verzamelde gegevens over boekenkasten en give-boxen worden als open database gepubliceerd onder de'
+    data_attribution: 'Een deel van de locatiegegevens is geïmporteerd uit %osm% en blijft © OpenStreetMap-bijdragers, gebruikt onder dezelfde Open Database License (ODbL).'
 
 # ── Kaartzoeken & locatie ──
 search:

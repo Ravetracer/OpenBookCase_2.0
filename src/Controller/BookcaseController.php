@@ -506,6 +506,10 @@ class BookcaseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // The user has reviewed/confirmed the entry, so its title is no longer a
+            // provisional auto-generated one (clears the OSM "help name this" prompt).
+            $bookcase->titleProvisional = false;
+
             $this->entityManager->persist($bookcase);
             $this->entityManager->flush();
 
