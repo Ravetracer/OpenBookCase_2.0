@@ -348,6 +348,12 @@ class BookcaseController extends AbstractController
                 'longitude' => $bookcase->position?->longitude,
                 'entryType' => $bookcase->entryType->value,
                 'mapSymbol' => $bookcase->mapSymbol->value,
+                // Filter-relevant fields, so the live-added marker matches the
+                // bbox payload shape and isn't dropped by the active map filters.
+                'markerStatus' => $bookcase->active?->status->value,
+                'accessibility' => $bookcase->accessibility?->level?->markerColor(),
+                'isMobile' => $bookcase->isMobile,
+                'isBookcrossingZone' => $bookcase->isBookcrossingZone,
             ], Response::HTTP_CREATED);
         }
 

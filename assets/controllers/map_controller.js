@@ -377,15 +377,24 @@ export default class extends Controller {
         }
     }
 
-    addCreatedMarker({ id, latitude, longitude, title, entryType, mapSymbol } = {}) {
+    addCreatedMarker({ id, latitude, longitude, title, entryType, mapSymbol, markerStatus, accessibility, isMobile, isBookcrossingZone } = {}) {
         if (!id || this.loadedMarkers.has(id)) return;
         this.loadedMarkers.add(id);
+        // Mirror the bbox API marker shape so the active filters (status, type,
+        // accessibility, mobility, …) judge it the same way — otherwise a missing
+        // `status` fails passesFilters() and the new pin is silently dropped.
         this.buildAndAddMarker({
             id,
             title,
             entryType,
             mapSymbol,
+            status: markerStatus || 'active',
+            accessibility: accessibility || null,
+            isMobile: !!isMobile,
+            isBookcrossingZone: !!isBookcrossingZone,
             position: { latitude, longitude },
+            ratingCount: 0,
+            ratingAverage: null,
             openWishlistCount: 0,
         });
     }
