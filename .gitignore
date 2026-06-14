@@ -32,3 +32,6 @@ yarn-error.log
 # Legacy data importers — kept local, never published
 /src/Command/ImportPhpMyAdminJsonCommand.php
 ###< project local/dev artifacts ###
+
+# PHPUnit result cache
+/.phpunit.cache/
