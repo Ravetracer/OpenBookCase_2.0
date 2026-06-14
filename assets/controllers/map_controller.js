@@ -64,10 +64,15 @@ export default class extends Controller {
 
         this.map = L.map('map').setView(center, zoom);
         this.markerCluster = L.markerClusterGroup();
-        this.loadedMarkers = [];
+        // Set (not array) so the dedup check while paging markers in is O(1).
+        this.loadedMarkers = new Set();
         // id → { marker, item }, so dialog changes can refresh a marker's icon/popup live.
         this.markersById = {};
         this.spinner = document.getElementById('loaderSpinner');
+        this.loaderProgress = document.getElementById('loaderProgress');
+        // Bumped on every loadEntries() so an in-flight paged load can detect it
+        // was superseded by a newer pan/zoom and stop adding stale markers.
+        this.loadGeneration = 0;
 
         // Search state
         this.searchSeq = 0;
@@ -327,8 +332,8 @@ export default class extends Controller {
     }
 
     addCreatedMarker({ id, latitude, longitude, title, entryType, mapSymbol } = {}) {
-        if (!id || this.loadedMarkers.includes(id)) return;
-        this.loadedMarkers.push(id);
+        if (!id || this.loadedMarkers.has(id)) return;
+        this.loadedMarkers.add(id);
         this.buildAndAddMarker({
             id,
             title,
@@ -341,6 +346,8 @@ export default class extends Controller {
 
     showSpinner(visible) {
         if (this.spinner) this.spinner.hidden = !visible;
+        // The progress badge only makes sense while loading; clear it when done.
+        if (!visible && this.loaderProgress) this.loaderProgress.hidden = true;
     }
 
     // ── Geolocation ────────────────────────────────────────────────────────
@@ -639,26 +646,75 @@ export default class extends Controller {
 
     // ── Markers ──────────────────────────────────────────────────────────────
 
-    loadEntries() {
+    // Load the markers for the current view in batches, so they render
+    // progressively (with a count) instead of after one big response. Each page
+    // is bulk-added to the cluster (addLayers) and the await between pages yields
+    // to the UI, keeping the map responsive while a wide area streams in.
+    async loadEntries() {
         const bounds = this.getBoundingCoordinates(this.map.getBounds());
 
-        if (!this.loadRequired(bounds) && this.loadedMarkers.length > 0) {
+        if (!this.loadRequired(bounds) && this.loadedMarkers.size > 0) {
             return;
         }
 
+        // Claim this load; a later pan/zoom bumps the generation and supersedes us.
+        const generation = ++this.loadGeneration;
+        const pageSize = 1500;
+        const bbox = `latMin=${bounds.latMin}&latMax=${bounds.latMax}&lonMin=${bounds.lngMin}&lonMax=${bounds.lngMax}`;
+
+        let offset = 0;
+        let total = null;
+        let received = 0;
+
         this.showSpinner(true);
-        axios.get(`/api/bookcase?latMin=${bounds.latMin}&latMax=${bounds.latMax}&lonMin=${bounds.lngMin}&lonMax=${bounds.lngMax}`)
-            .then((response) => {
-                response.data.forEach((item) => {
-                    if (this.loadedMarkers.includes(item.id)) {
-                        return;
-                    }
-                    this.loadedMarkers.push(item.id);
-                    this.buildAndAddMarker(item);
+        try {
+            do {
+                // Trailing slash is intentional — `/api/bookcase` (no slash)
+                // 301-redirects here, and we don't want that extra round-trip on
+                // every page.
+                const { data } = await axios.get(`/api/bookcase/?${bbox}&offset=${offset}&limit=${pageSize}`);
+
+                // A newer load started while we were waiting — drop this page.
+                if (generation !== this.loadGeneration) return;
+
+                const markers = data.markers ?? [];
+                if (total === null) total = data.total ?? markers.length;
+
+                // Build this page's markers and bulk-add the visible ones at once.
+                const batch = [];
+                markers.forEach((item) => {
+                    if (this.loadedMarkers.has(item.id)) return;
+                    this.loadedMarkers.add(item.id);
+                    const marker = this.buildMarker(item);
+                    if (this.passesFilters(item, this.currentFilters)) batch.push(marker);
                 });
-                this.showSpinner(false);
-            })
-            .catch(() => this.showSpinner(false));
+                if (batch.length) this.markerCluster.addLayers(batch);
+
+                received += markers.length;
+                this.updateLoadProgress(received, total);
+
+                offset += pageSize;
+                // Stop on a short page (no more rows) regardless of the count.
+                if (markers.length < pageSize) break;
+            } while (offset < total);
+        } catch {
+            // Network/parse error — fall through to hide the spinner.
+        } finally {
+            if (generation === this.loadGeneration) this.showSpinner(false);
+        }
+    }
+
+    // Update the spinner's progress badge. Only shown for multi-page loads —
+    // a single-page (zoomed-in) load needs no count.
+    updateLoadProgress(received, total) {
+        if (!this.loaderProgress) return;
+        if (total > 1500 && received < total) {
+            this.loaderProgress.hidden = false;
+            this.loaderProgress.textContent =
+                `${received.toLocaleString()} / ${total.toLocaleString()}`;
+        } else {
+            this.loaderProgress.hidden = true;
+        }
     }
 
     // Pick the marker icon. An inactive (currently unavailable) entry always gets
@@ -711,8 +767,10 @@ export default class extends Controller {
         });
     }
 
-    // Build one marker (with its detail popup) and add it to the cluster.
-    buildAndAddMarker(item) {
+    // Build one marker (with its detail popup) and register it, WITHOUT adding it
+    // to the cluster — the caller decides when/how (single addLayer, or a batched
+    // addLayers during paged loading). Returns the marker.
+    buildMarker(item) {
         const newMarker = L.marker(
             [item.position.latitude, item.position.longitude],
             { icon: this.markerIcon(item), draggable: this.canaddValue }
@@ -734,10 +792,18 @@ export default class extends Controller {
         // enough for the next open; an open popup is refreshed explicitly below.
         this.markersById[item.id] = { marker: newMarker, item };
 
+        return newMarker;
+    }
+
+    // Build and immediately add a single marker (used for live-added pins, e.g.
+    // after a quick-add). Paged loading uses buildMarker + a batched addLayers.
+    buildAndAddMarker(item) {
+        const marker = this.buildMarker(item);
+
         // Only show it if it passes the active filters (kept off the cluster
         // otherwise; applyFilters() can add it back when filters change).
         if (this.passesFilters(item, this.currentFilters)) {
-            this.markerCluster.addLayer(newMarker);
+            this.markerCluster.addLayer(marker);
         }
     }
 

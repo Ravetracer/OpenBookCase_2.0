@@ -187,7 +187,11 @@
             </div>
         </div>
 
-        <span id="loaderSpinner" class="loading loading-spinner loading-lg absolute right-6 top-20 z-[1000] text-primary" role="status" aria-label="Loading" hidden></span>
+        <div id="loaderSpinner" class="absolute right-6 top-20 z-[1000] flex items-center gap-2" role="status" aria-label="Loading" hidden>
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+            {# Shown only for multi-page (batched) loads — counts markers as they stream in #}
+            <span id="loaderProgress" class="badge badge-neutral badge-sm tabular-nums shadow" hidden></span>
+        </div>
     </div>
 
     {# Permanent dialog — detail & edit fragments are injected into the body target #}

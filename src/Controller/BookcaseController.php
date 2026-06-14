@@ -40,6 +40,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/api/bookcase', name: 'api_bookcase_')]
 class BookcaseController extends AbstractController
 {
+    // Marker paging for the map's bounding-box endpoint: default page size and
+    // the hard cap a client may request.
+    private const MAP_PAGE_DEFAULT = 1500;
+    private const MAP_PAGE_MAX = 5000;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly BookcaseRepository $bookcaseRepository,
@@ -142,11 +147,26 @@ class BookcaseController extends AbstractController
             return new JsonResponse(['error' => 'Missing bounding box parameters.'], Response::HTTP_BAD_REQUEST);
         }
 
+        // Paged loading: the map fetches markers in batches so it can render
+        // progressively (and show progress) instead of waiting for one huge
+        // response. `limit` is capped; `offset` walks the result set.
+        $limit = max(1, min(self::MAP_PAGE_MAX, (int) $request->query->get('limit', self::MAP_PAGE_DEFAULT)));
+        $offset = max(0, (int) $request->query->get('offset', 0));
+
+        $total = $this->bookcaseRepository->countByBoundingBox(
+            (float) $latMin,
+            (float) $latMax,
+            (float) $lonMin,
+            (float) $lonMax,
+        );
+
         $rows = $this->bookcaseRepository->findByBoundingBoxLight(
             (float) $latMin,
             (float) $latMax,
             (float) $lonMin,
             (float) $lonMax,
+            $limit,
+            $offset,
         );
 
         // Build the marker payload directly (same shape the map consumes) instead of
@@ -184,7 +204,12 @@ class BookcaseController extends AbstractController
             ];
         }
 
-        return new JsonResponse($markers, Response::HTTP_OK);
+        return new JsonResponse([
+            'total' => $total,
+            'offset' => $offset,
+            'limit' => $limit,
+            'markers' => $markers,
+        ], Response::HTTP_OK);
     }
 
     /**

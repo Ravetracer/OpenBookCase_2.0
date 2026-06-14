@@ -59,8 +59,10 @@ class BookcaseRepository extends ServiceEntityRepository
         float $latMax,
         float $lonMin,
         float $lonMax,
+        ?int $limit = null,
+        int $offset = 0,
     ): array {
-        return $this->createQueryBuilder('bc')
+        $qb = $this->createQueryBuilder('bc')
             ->select(
                 'bc.id AS id',
                 'bc.title AS title',
@@ -101,9 +103,41 @@ class BookcaseRepository extends ServiceEntityRepository
             ->setParameter('latMin', $latMin)
             ->setParameter('latMax', $latMax)
             ->setParameter('lonMin', $lonMin)
+            ->setParameter('lonMax', $lonMax);
+
+        // Stable order so LIMIT/OFFSET paging never skips or repeats a row. The
+        // query is array-hydrated and grouped by bc.id (no fetched collections),
+        // so LIMIT applies to grouped rows directly — safe to paginate.
+        if ($limit !== null) {
+            $qb->orderBy('bc.id', 'ASC')
+                ->setFirstResult(max(0, $offset))
+                ->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+    /**
+     * Count of entries inside a bounding box. Lets the map show a determinate
+     * progress bar while it pages markers in. No joins — just the indexed
+     * lat/lon range — so it's cheap.
+     */
+    public function countByBoundingBox(
+        float $latMin,
+        float $latMax,
+        float $lonMin,
+        float $lonMax,
+    ): int {
+        return (int) $this->createQueryBuilder('bc')
+            ->select('COUNT(bc.id)')
+            ->where('bc.position.latitude BETWEEN :latMin AND :latMax')
+            ->andWhere('bc.position.longitude BETWEEN :lonMin AND :lonMax')
+            ->setParameter('latMin', $latMin)
+            ->setParameter('latMax', $latMax)
+            ->setParameter('lonMin', $lonMin)
             ->setParameter('lonMax', $lonMax)
             ->getQuery()
-            ->getArrayResult();
+            ->getSingleScalarResult();
     }
 
     /**
