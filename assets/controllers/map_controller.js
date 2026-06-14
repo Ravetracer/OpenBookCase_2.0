@@ -48,12 +48,16 @@ export default class extends Controller {
         const lon = parseFloat(this.initialLonValue);
         const hasInitial = this.initialIdValue !== '' && !isNaN(lat) && !isNaN(lon);
 
-        // Logging in reloads the page. If the user had moved/zoomed the map first,
-        // restore that exact view instead of teleporting them to their home
-        // location (or the default centre) — they logged in to act *here*. This is
-        // a one-shot, set only across the login round-trip (see saveMapView /
-        // the login-submit handler), so a normal fresh visit still honours home.
-        const restore = this.readRestoreView();
+        // Several in-page actions reload the map: logging in/out, deleting an
+        // entry, changing language, or a plain refresh. In all of those the user
+        // is already on the map and wants to stay put — not be teleported to their
+        // home location (or the default centre). So restore the previous view when
+        // this load is a reload/back-forward (delete, language, F5, …) OR a
+        // one-shot marker was set for an auth redirect (login/logout, which are
+        // "navigate" loads, see the connect() handlers). Arriving from another page
+        // is a plain "navigate" with no marker → it correctly falls through to
+        // home/default.
+        const restore = this.shouldRestoreView() ? this.readSavedView() : null;
 
         const homeLat = parseFloat(this.homeLatValue);
         const homeLon = parseFloat(this.homeLonValue);
@@ -123,18 +127,27 @@ export default class extends Controller {
         // user actually is, not where they first landed.
         this.map.on('moveend', this.saveMapView.bind(this));
 
-        // When the user submits the login form, flag that the post-login reload
-        // should restore the current map view (overriding any home location).
-        // Capture phase so it runs before the form navigates away.
+        // Logging in/out leaves the map page and redirects back to it (a "navigate"
+        // load, not a reload), so flag those so the post-redirect load restores the
+        // current view instead of teleporting to home/default. Capture phase so it
+        // runs before the page navigates away. (Reload-based actions — delete,
+        // language change, refresh — are detected via the navigation type instead.)
+        this.markRestore = () => {
+            this.saveMapView();
+            try { sessionStorage.setItem('obc:restoreView', '1'); } catch { /* ignore */ }
+        };
         this.onLoginSubmit = (e) => {
-            const form = e.target;
-            const action = (form && form.getAttribute && form.getAttribute('action')) || '';
-            if (/\/login\/?($|[?#])/.test(action)) {
-                this.saveMapView();
-                try { sessionStorage.setItem('obc:restoreView', '1'); } catch { /* ignore */ }
-            }
+            const action = (e.target && e.target.getAttribute && e.target.getAttribute('action')) || '';
+            if (/\/login\/?($|[?#])/.test(action)) this.markRestore();
         };
         document.addEventListener('submit', this.onLoginSubmit, true);
+
+        // Logout is a plain link, not a form.
+        this.onLogoutClick = (e) => {
+            const link = e.target.closest && e.target.closest('a[href]');
+            if (link && /\/logout\/?($|[?#])/.test(link.getAttribute('href') || '')) this.markRestore();
+        };
+        document.addEventListener('click', this.onLogoutClick, true);
 
         // Close the suggestion list when clicking anywhere outside the search box,
         // and the filter panel when clicking outside the filter control.
@@ -211,6 +224,7 @@ export default class extends Controller {
         document.removeEventListener('bc:updated', this.onUpdated);
         document.removeEventListener('home:changed', this.onHomeChanged);
         document.removeEventListener('submit', this.onLoginSubmit, true);
+        document.removeEventListener('click', this.onLogoutClick, true);
     }
 
     // ── Add a new entry from the map ─────────────────────────────────────────
@@ -395,12 +409,38 @@ export default class extends Controller {
         } catch { /* sessionStorage unavailable (private mode etc.) — ignore */ }
     }
 
-    // Read (and consume) the pre-login view, but only when the one-shot login
-    // marker is set — so it applies to the login reload and nothing else.
-    readRestoreView() {
+    // Decide whether this page load should keep the previous map view. True when
+    // the load is a reload / back-forward (delete, language change, F5, browser
+    // back), or when a one-shot "restore" marker was set for an auth redirect
+    // (login/logout). The marker is always consumed so it can't leak into a later
+    // unrelated navigation.
+    shouldRestoreView() {
+        let markerSet = false;
         try {
-            if (sessionStorage.getItem('obc:restoreView') !== '1') return null;
-            sessionStorage.removeItem('obc:restoreView'); // one-shot
+            markerSet = sessionStorage.getItem('obc:restoreView') === '1';
+            if (markerSet) sessionStorage.removeItem('obc:restoreView'); // one-shot
+        } catch { /* sessionStorage unavailable */ }
+
+        return markerSet || this.isReloadNavigation();
+    }
+
+    // Was this page entered via a reload or browser back/forward (as opposed to a
+    // fresh "navigate" from another page or a typed URL)?
+    isReloadNavigation() {
+        try {
+            const nav = performance.getEntriesByType('navigation')[0];
+            if (nav && nav.type) return nav.type === 'reload' || nav.type === 'back_forward';
+            // Legacy fallback: 1 = reload, 2 = back/forward.
+            const legacy = performance.navigation && performance.navigation.type;
+            return legacy === 1 || legacy === 2;
+        } catch {
+            return false;
+        }
+    }
+
+    // The last saved map view for this tab, or null if absent/invalid.
+    readSavedView() {
+        try {
             const view = JSON.parse(sessionStorage.getItem('obc:mapView') || 'null');
             if (!view || typeof view.lat !== 'number' || typeof view.lng !== 'number') return null;
             return view;
