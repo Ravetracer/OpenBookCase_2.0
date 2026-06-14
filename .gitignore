@@ -31,5 +31,4 @@ yarn-error.log
 *.js.map
 # Legacy data importers — kept local, never published
 /src/Command/ImportPhpMyAdminJsonCommand.php
-/src/Command/ImportLesestundenCommand.php
 ###< project local/dev artifacts ###
