@@ -42,10 +42,18 @@ export default class extends Controller {
     initialize() {
         super.initialize();
 
-        // Centre priority: deep-link entry → user's home location (if enabled) → default.
+        // Centre priority: deep-link entry → restored pre-login view → user's
+        // home location (if enabled) → default.
         const lat = parseFloat(this.initialLatValue);
         const lon = parseFloat(this.initialLonValue);
         const hasInitial = this.initialIdValue !== '' && !isNaN(lat) && !isNaN(lon);
+
+        // Logging in reloads the page. If the user had moved/zoomed the map first,
+        // restore that exact view instead of teleporting them to their home
+        // location (or the default centre) — they logged in to act *here*. This is
+        // a one-shot, set only across the login round-trip (see saveMapView /
+        // the login-submit handler), so a normal fresh visit still honours home.
+        const restore = this.readRestoreView();
 
         const homeLat = parseFloat(this.homeLatValue);
         const homeLon = parseFloat(this.homeLonValue);
@@ -57,6 +65,9 @@ export default class extends Controller {
         if (hasInitial) {
             center = [lat, lon];
             zoom = 17;
+        } else if (restore) {
+            center = [restore.lat, restore.lng];
+            zoom = Number.isFinite(restore.zoom) ? restore.zoom : 13;
         } else if (hasHome) {
             center = [homeLat, homeLon];
             zoom = isNaN(homeZoom) ? 13 : homeZoom;
@@ -99,11 +110,31 @@ export default class extends Controller {
         // Drop the home marker if the user has a home location set.
         this.showHomeMarker();
 
+        // Remember the current view so a subsequent login can restore it even if
+        // the user never pans/zooms (moveend keeps it updated thereafter).
+        this.saveMapView();
+
         this.loadEntries();
     }
 
     connect() {
         this.map.on('moveend', this.loadEntries.bind(this));
+        // Keep the saved view current so a login mid-session restores where the
+        // user actually is, not where they first landed.
+        this.map.on('moveend', this.saveMapView.bind(this));
+
+        // When the user submits the login form, flag that the post-login reload
+        // should restore the current map view (overriding any home location).
+        // Capture phase so it runs before the form navigates away.
+        this.onLoginSubmit = (e) => {
+            const form = e.target;
+            const action = (form && form.getAttribute && form.getAttribute('action')) || '';
+            if (/\/login\/?($|[?#])/.test(action)) {
+                this.saveMapView();
+                try { sessionStorage.setItem('obc:restoreView', '1'); } catch { /* ignore */ }
+            }
+        };
+        document.addEventListener('submit', this.onLoginSubmit, true);
 
         // Close the suggestion list when clicking anywhere outside the search box,
         // and the filter panel when clicking outside the filter control.
@@ -179,6 +210,7 @@ export default class extends Controller {
         document.removeEventListener('bc:rating', this.onRatingChanged);
         document.removeEventListener('bc:updated', this.onUpdated);
         document.removeEventListener('home:changed', this.onHomeChanged);
+        document.removeEventListener('submit', this.onLoginSubmit, true);
     }
 
     // ── Add a new entry from the map ─────────────────────────────────────────
@@ -348,6 +380,33 @@ export default class extends Controller {
         if (this.spinner) this.spinner.hidden = !visible;
         // The progress badge only makes sense while loading; clear it when done.
         if (!visible && this.loaderProgress) this.loaderProgress.hidden = true;
+    }
+
+    // Persist the current map view (centre + zoom) for the current tab, so a
+    // login round-trip can return the user exactly where they were.
+    saveMapView() {
+        try {
+            const c = this.map.getCenter();
+            sessionStorage.setItem('obc:mapView', JSON.stringify({
+                lat: c.lat,
+                lng: c.lng,
+                zoom: this.map.getZoom(),
+            }));
+        } catch { /* sessionStorage unavailable (private mode etc.) — ignore */ }
+    }
+
+    // Read (and consume) the pre-login view, but only when the one-shot login
+    // marker is set — so it applies to the login reload and nothing else.
+    readRestoreView() {
+        try {
+            if (sessionStorage.getItem('obc:restoreView') !== '1') return null;
+            sessionStorage.removeItem('obc:restoreView'); // one-shot
+            const view = JSON.parse(sessionStorage.getItem('obc:mapView') || 'null');
+            if (!view || typeof view.lat !== 'number' || typeof view.lng !== 'number') return null;
+            return view;
+        } catch {
+            return null;
+        }
     }
 
     // ── Geolocation ────────────────────────────────────────────────────────
