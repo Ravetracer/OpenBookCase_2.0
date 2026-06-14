@@ -72,6 +72,7 @@ auth:
   username_or_email: "Usuario o correo electrónico"
   email_placeholder: "tu@ejemplo.com"
   forgot_password: "¿Olvidaste tu contraseña?"
+  remember_me: "Mantener la sesión iniciada durante 30 días"
   login_title: Iniciar sesión
   please_sign_in: Inicia sesión
   sign_in: Iniciar sesión

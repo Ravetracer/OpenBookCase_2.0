@@ -72,6 +72,7 @@ auth:
   username_or_email: "Gebruikersnaam of e-mail"
   email_placeholder: "jij@voorbeeld.nl"
   forgot_password: "Wachtwoord vergeten?"
+  remember_me: "30 dagen ingelogd blijven"
   login_title: Inloggen
   please_sign_in: Log in
   sign_in: Inloggen

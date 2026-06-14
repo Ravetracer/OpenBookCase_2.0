@@ -17,6 +17,7 @@ use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -66,6 +67,9 @@ class AppAuthenticator extends AbstractLoginFormAuthenticator
             ),
             [
                 new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                // Enabled by the RememberMeListener when the login form's
+                // "_remember_me" checkbox is submitted (opt-in, 30-day cookie).
+                new RememberMeBadge(),
             ]
         );
     }

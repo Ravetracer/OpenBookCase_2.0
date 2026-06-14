@@ -104,6 +104,10 @@
                             <a href="{{ path('app_forgot_password') }}" class="link link-hover text-sm text-base-content/70">{{ 'auth.forgot_password'|trans }}</a>
                         </div>
                     </div>
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" name="_remember_me" value="1" class="checkbox checkbox-sm">
+                        <span class="label-text">{{ 'auth.remember_me'|trans }}</span>
+                    </label>
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                     <div class="modal-action">
                         <button type="button" class="btn btn-ghost" onclick="loginModal.close()">{{ 'cancel'|trans }}</button>

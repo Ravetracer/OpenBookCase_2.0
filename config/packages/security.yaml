@@ -19,6 +19,13 @@ security:
             provider: app_user_provider
             user_checker: App\Security\UserChecker
             custom_authenticator: App\Security\AppAuthenticator
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 days, in seconds
+                # opt-in: only set the cookie when the login form's
+                # "_remember_me" checkbox is checked (handled by the
+                # RememberMeBadge added in AppAuthenticator)
+                always_remember_me: false
             logout:
                 path: app_logout
                 # where to redirect after logout

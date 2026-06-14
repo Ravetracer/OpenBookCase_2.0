@@ -29,6 +29,11 @@
           <input type="password" name="password" id="inputPassword" class="input input-bordered w-full" autocomplete="current-password" required>
         </div>
 
+        <label class="label cursor-pointer justify-start gap-2">
+          <input type="checkbox" name="_remember_me" value="1" class="checkbox checkbox-sm">
+          <span class="label-text">{{ 'auth.remember_me'|trans }}</span>
+        </label>
+
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
         <button class="btn btn-primary w-full" type="submit">{{ 'auth.sign_in'|trans }}</button>

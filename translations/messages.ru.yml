@@ -72,6 +72,7 @@ auth:
   username_or_email: "Имя пользователя или эл. почта"
   email_placeholder: "you@example.com"
   forgot_password: "Забыли пароль?"
+  remember_me: "Оставаться в системе 30 дней"
   login_title: Вход
   please_sign_in: Пожалуйста, войдите
   sign_in: Войти
