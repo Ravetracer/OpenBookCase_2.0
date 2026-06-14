@@ -65,7 +65,7 @@ export default class extends Controller {
         const hasHome = this.homeEnabledValue && !isNaN(homeLat) && !isNaN(homeLon);
 
         // Default for anonymous visitors / no stored home: centre of Germany, zoomed out.
-        let center = [51.1657, 10.4515], zoom = 10;
+        let center = [51.1657, 10.4515], zoom = 8;
         if (hasInitial) {
             center = [lat, lon];
             zoom = 17;
