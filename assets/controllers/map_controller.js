@@ -17,6 +17,8 @@ export default class extends Controller {
         geodenied: String,
         geounsupported: String,
         geolocate: String,
+        followlocate: String,
+        followstop: String,
         canadd: Boolean,
         addhere: String,
         moveconfirm: String,
@@ -226,6 +228,8 @@ export default class extends Controller {
         document.removeEventListener('home:changed', this.onHomeChanged);
         document.removeEventListener('submit', this.onLoginSubmit, true);
         document.removeEventListener('click', this.onLogoutClick, true);
+        // Release the geolocation watch so it doesn't keep running after teardown.
+        this.stopFollow();
     }
 
     // ── Add a new entry from the map ─────────────────────────────────────────
@@ -483,11 +487,106 @@ export default class extends Controller {
                     L.DomEvent.stopPropagation(e);
                     controller.locateUser(link);
                 });
+
+                // Second button in the same bar: a "follow me" toggle that live-tracks
+                // the position and re-centres the map as the user moves (great on a phone).
+                const follow = L.DomUtil.create('a', '', container);
+                follow.href = '#';
+                follow.role = 'button';
+                follow.title = controller.followlocateValue;
+                follow.setAttribute('aria-label', controller.followlocateValue);
+                follow.setAttribute('aria-pressed', 'false');
+                follow.style.display = 'flex';
+                follow.style.alignItems = 'center';
+                follow.style.justifyContent = 'center';
+                // A navigation arrow — distinct from the locate crosshair.
+                follow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>';
+                controller.followLink = follow;
+                L.DomEvent.on(follow, 'click', (e) => {
+                    L.DomEvent.preventDefault(e);
+                    L.DomEvent.stopPropagation(e);
+                    controller.toggleFollow();
+                });
+
                 L.DomEvent.disableClickPropagation(container);
                 return container;
             },
         });
         this.map.addControl(new GeoControl());
+    }
+
+    // ── Follow mode (live tracking) ──────────────────────────────────────────
+
+    toggleFollow() {
+        if (this.followWatchId != null) {
+            this.stopFollow();
+        } else {
+            this.startFollow();
+        }
+    }
+
+    startFollow() {
+        if (!('geolocation' in navigator)) {
+            window.alert(this.geounsupportedValue);
+            return;
+        }
+
+        const link = this.followLink;
+        if (link) {
+            // Highlighted state — white arrow on the brand blue, matching the user dot.
+            link.style.background = '#2563eb';
+            link.style.color = '#ffffff';
+            link.title = this.followstopValue;
+            link.setAttribute('aria-label', this.followstopValue);
+            link.setAttribute('aria-pressed', 'true');
+        }
+
+        // A manual pan hands control back to the user (stop chasing them around).
+        // Programmatic setView/panTo don't fire `dragstart`, so this only catches
+        // genuine user drags.
+        this.followDragHandler = () => this.stopFollow();
+        this.map.on('dragstart', this.followDragHandler);
+
+        this.followFirstFix = true;
+        this.followWatchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                const latlng = [pos.coords.latitude, pos.coords.longitude];
+                const first = this.followFirstFix;
+                this.followFirstFix = false;
+                // Don't keep re-opening the popup on every update — only the first fix.
+                this.showUserLocation(latlng, pos.coords.accuracy, first);
+                if (first) {
+                    this.map.setView(latlng, Math.max(this.map.getZoom(), 16), { animate: true });
+                } else {
+                    this.map.panTo(latlng, { animate: true });
+                }
+            },
+            (err) => {
+                this.stopFollow();
+                const denied = err && err.code === 1;
+                window.alert(denied ? this.geodeniedValue : this.geoerrorValue);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 },
+        );
+    }
+
+    stopFollow() {
+        if (this.followWatchId != null) {
+            navigator.geolocation.clearWatch(this.followWatchId);
+            this.followWatchId = null;
+        }
+        if (this.followDragHandler) {
+            this.map.off('dragstart', this.followDragHandler);
+            this.followDragHandler = null;
+        }
+        const link = this.followLink;
+        if (link) {
+            link.style.background = '';
+            link.style.color = '';
+            link.title = this.followlocateValue;
+            link.setAttribute('aria-label', this.followlocateValue);
+            link.setAttribute('aria-pressed', 'false');
+        }
     }
 
     locateUser(link) {
@@ -542,7 +641,7 @@ export default class extends Controller {
     // A distinct blue dot (+ accuracy halo) for the user's own position, kept
     // off the marker cluster so it never merges with bookcase pins. Re-used on
     // repeated locates rather than stacking new layers.
-    showUserLocation(latlng, accuracy) {
+    showUserLocation(latlng, accuracy, openPopup = true) {
         // Remember the located position so bookcase popups can show the distance.
         this.userLat = latlng[0] ?? latlng.lat;
         this.userLng = latlng[1] ?? latlng.lng;
@@ -551,7 +650,7 @@ export default class extends Controller {
             this.userMarker.setLatLng(latlng);
             this.userAccuracy.setLatLng(latlng).setRadius(accuracy || 0);
             this.userMarker.setPopupContent(this.userLocationPopup(latlng));
-            this.userMarker.openPopup();
+            if (openPopup) this.userMarker.openPopup();
             return;
         }
 
@@ -572,7 +671,7 @@ export default class extends Controller {
             fillOpacity: 1,
         }).addTo(this.map);
         this.userMarker.bindPopup(this.userLocationPopup(latlng));
-        this.userMarker.openPopup();
+        if (openPopup) this.userMarker.openPopup();
     }
 
     // Popup for the user's location dot: the label, plus a subtle "Add bookcase

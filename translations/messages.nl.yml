@@ -388,6 +388,8 @@ search:
   geolocation_error: Je locatie kon niet worden bepaald.
   geolocation_unsupported: Je browser ondersteunt geen geolocatie.
   geolocation_denied: "Locatietoegang is geblokkeerd voor deze app. Schakel het in via Instellingen → Privacy en beveiliging → Locatievoorzieningen (op de iPhone heeft de geïnstalleerde app een eigen toestemming nodig, los van Safari)."
+  follow_location: Mijn locatie volgen
+  follow_location_stop: Stoppen met volgen
 
 # ── Add / create entry ──
 add:

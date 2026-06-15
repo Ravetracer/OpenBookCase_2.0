@@ -388,6 +388,8 @@ search:
   geolocation_error: Dein Standort konnte nicht ermittelt werden.
   geolocation_unsupported: Dein Browser unterstützt keine Standortbestimmung.
   geolocation_denied: "Der Standortzugriff ist für diese App blockiert. Aktiviere ihn unter Einstellungen → Datenschutz & Sicherheit → Ortungsdienste (auf dem iPhone benötigt die installierte App eine eigene Berechtigung, getrennt von Safari)."
+  follow_location: Meinem Standort folgen
+  follow_location_stop: Verfolgung beenden
 
 # ── Add / create entry ──
 add:
