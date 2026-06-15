@@ -33,6 +33,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -216,55 +217,103 @@ class BookcaseController extends AbstractController
      * Open-data dump of every entry as a downloadable JSON file. Location and contact
      * data only — images and per-user ratings are intentionally excluded. Declared
      * before `/{bookcase}` so the literal path wins over the placeholder route.
+     *
+     * The dataset is large (tens of thousands of rows), so this **streams** the JSON
+     * one entry at a time and clears the EM in batches instead of building the whole
+     * payload in memory — the old build-everything approach hit the PHP memory limit
+     * and returned HTTP 500. Pass `?gzip=1` for an on-the-fly gzip-compressed download
+     * (`.json.gz`), which is far smaller over the wire.
      */
     #[Route('/export', name: 'export', methods: ['GET'])]
-    public function export(): Response
+    public function export(Request $request): Response
     {
-        $bookcases = [];
-        foreach ($this->bookcaseRepository->findAllForExport() as $bc) {
-            $bookcases[] = [
-                'id' => (string) $bc->id,
-                'title' => $bc->title,
-                'type' => $bc->entryType->value,
-                'status' => $bc->active?->status->value,
-                'statusDescription' => $bc->active?->statusDescription,
-                'position' => [
-                    'latitude' => $bc->position?->latitude,
-                    'longitude' => $bc->position?->longitude,
-                ],
-                'address' => [
-                    'street' => $bc->address?->street,
-                    'houseNumber' => $bc->address?->houseNumber,
-                    'zipcode' => $bc->address?->zipcode,
-                    'city' => $bc->address?->city,
-                    'additionalData' => $bc->address?->additionalData,
-                ],
-                'webpage' => $bc->webpage,
-                'isMobile' => $bc->isMobile,
-                'installationType' => $bc->installationType,
-                'digitalMediaAllowed' => $bc->digitalMediaAllowed,
-                'accessibility' => [
-                    'level' => $bc->accessibility?->level?->value,
-                    'description' => $bc->accessibility?->description,
-                ],
-                'comment' => $bc->comment,
-                'openingTimes' => array_map(static fn (OpeningTime $ot) => [
-                    'openTime' => $ot->open_time,
-                    'twentyFourSeven' => $ot->twenty_for_seven,
-                ], $bc->openingTimes->toArray()),
-                'caretakers' => array_map(static fn (Caretaker $c) => [
-                    'name' => $c->name,
-                    'contact' => $c->contact,
-                ], $bc->caretakers->toArray()),
-            ];
-        }
+        $compress = $request->query->getBoolean('gzip');
 
-        $response = new JsonResponse([
-            'count' => count($bookcases),
-            'bookcases' => $bookcases,
-        ]);
-        $response->setEncodingOptions($response->getEncodingOptions() | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $response->headers->set('Content-Disposition', 'attachment; filename="openbookcase-export.json"');
+        // Children are resolved once in two small bulk queries, then looked up per
+        // row — lazy-loading them per entity would be 100k+ queries.
+        $caretakerMap = $this->bookcaseRepository->exportCaretakerMap();
+        $openingMap = $this->bookcaseRepository->exportOpeningTimeMap();
+        $count = $this->bookcaseRepository->count([]);
+
+        $repo = $this->bookcaseRepository;
+        $em = $this->entityManager;
+
+        $jsonFlags = JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+
+        $callback = function () use ($repo, $em, $caretakerMap, $openingMap, $count, $compress, $jsonFlags): void {
+            // Incremental gzip: compress chunk-by-chunk so neither the JSON nor its
+            // compressed form is ever fully held in memory.
+            $deflate = $compress ? deflate_init(ZLIB_ENCODING_GZIP, ['level' => 6]) : null;
+            $emit = static function (string $chunk) use ($deflate): void {
+                echo $deflate !== null ? deflate_add($deflate, $chunk, ZLIB_NO_FLUSH) : $chunk;
+            };
+
+            $emit('{' . "\n" . '  "count": ' . $count . ',' . "\n" . '  "bookcases": [');
+
+            $first = true;
+            $i = 0;
+            foreach ($repo->iterateForExport() as $bc) {
+                $key = (string) $bc->id;
+                $entry = [
+                    'id' => $key,
+                    'title' => $bc->title,
+                    'type' => $bc->entryType->value,
+                    'status' => $bc->active?->status->value,
+                    'statusDescription' => $bc->active?->statusDescription,
+                    'position' => [
+                        'latitude' => $bc->position?->latitude,
+                        'longitude' => $bc->position?->longitude,
+                    ],
+                    'address' => [
+                        'street' => $bc->address?->street,
+                        'houseNumber' => $bc->address?->houseNumber,
+                        'zipcode' => $bc->address?->zipcode,
+                        'city' => $bc->address?->city,
+                        'additionalData' => $bc->address?->additionalData,
+                    ],
+                    'webpage' => $bc->webpage,
+                    'isMobile' => $bc->isMobile,
+                    'installationType' => $bc->installationType,
+                    'digitalMediaAllowed' => $bc->digitalMediaAllowed,
+                    'accessibility' => [
+                        'level' => $bc->accessibility?->level?->value,
+                        'description' => $bc->accessibility?->description,
+                    ],
+                    'comment' => $bc->comment,
+                    'openingTimes' => $openingMap[$key] ?? [],
+                    'caretakers' => $caretakerMap[$key] ?? [],
+                ];
+
+                $emit(($first ? '' : ',') . "\n" . json_encode($entry, $jsonFlags));
+                $first = false;
+
+                // Free hydrated entities and push bytes to the client in batches so
+                // memory stays flat across the whole dump.
+                if ((++$i % 500) === 0) {
+                    $em->clear();
+                    if ($deflate !== null) {
+                        echo deflate_add($deflate, '', ZLIB_SYNC_FLUSH);
+                    }
+                    // flush() (SAPI-level) only — NOT ob_flush(), which would empty
+                    // any wrapping output buffer (e.g. the test harness capturing this).
+                    flush();
+                }
+            }
+
+            $emit("\n" . '  ]' . "\n" . '}' . "\n");
+
+            if ($deflate !== null) {
+                echo deflate_add($deflate, '', ZLIB_FINISH);
+            }
+            flush();
+        };
+
+        $response = new StreamedResponse($callback);
+        $filename = $compress ? 'openbookcase-export.json.gz' : 'openbookcase-export.json';
+        $response->headers->set('Content-Type', $compress ? 'application/gzip' : 'application/json; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        // Don't let a reverse proxy buffer the whole stream before flushing.
+        $response->headers->set('X-Accel-Buffering', 'no');
 
         return $response;
     }

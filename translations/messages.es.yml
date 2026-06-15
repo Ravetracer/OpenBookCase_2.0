@@ -162,6 +162,9 @@ list:
   heading: Todas las estanterías
   entries: '%count% entradas'
   export: Exportar JSON
+  export_compressed: JSON comprimido (.json.gz)
+  export_plain: JSON sin comprimir (.json)
+  export_recommended: recomendado
   none: Aún no se han encontrado estanterías.
   col_title: Título
   col_address: Dirección

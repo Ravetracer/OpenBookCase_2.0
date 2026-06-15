@@ -162,6 +162,9 @@ list:
   heading: Все шкафы
   entries: 'записей: %count%'
   export: Экспорт JSON
+  export_compressed: Сжатый JSON (.json.gz)
+  export_plain: Несжатый JSON (.json)
+  export_recommended: рекомендуется
   none: Шкафы пока не найдены.
   col_title: Название
   col_address: Адрес

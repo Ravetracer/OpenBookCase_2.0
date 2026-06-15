@@ -147,15 +147,82 @@ class BookcaseRepository extends ServiceEntityRepository
      *
      * @return Bookcase[]
      */
-    public function findAllForExport(): array
+    /**
+     * Stream every bookcase one entity at a time (no collection fetch-joins, so
+     * `toIterable()` is allowed). The full export is ~56k rows — hydrating them
+     * all at once exhausts memory (HTTP 500), so the controller iterates this and
+     * clears the EM periodically. Caretakers + opening times are resolved from the
+     * lookup maps below rather than lazy-loaded (which would be 100k+ queries).
+     *
+     * @return iterable<Bookcase>
+     */
+    public function iterateForExport(): iterable
     {
         return $this->createQueryBuilder('bc')
-            ->addSelect('caretaker', 'openingTime')
-            ->leftJoin('bc.caretakers', 'caretaker')
-            ->leftJoin('bc.openingTimes', 'openingTime')
             ->orderBy('bc.title', 'ASC')
             ->getQuery()
-            ->getResult();
+            ->toIterable();
+    }
+
+    /**
+     * Caretakers grouped by bookcase ULID (string form), in one bulk query.
+     *
+     * @return array<string, list<array{name: ?string, contact: ?string}>>
+     */
+    public function exportCaretakerMap(): array
+    {
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT bc.bookcase_id AS bid, c.name AS name, c.contact AS contact
+               FROM bookcase_caretaker bc
+               JOIN caretaker c ON c.id = bc.caretaker_id',
+        );
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[self::ulidKey($row['bid'])][] = [
+                'name' => $row['name'],
+                'contact' => $row['contact'],
+            ];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Opening times grouped by bookcase ULID (string form), in one bulk query.
+     *
+     * @return array<string, list<array{openTime: ?string, twentyFourSeven: ?bool}>>
+     */
+    public function exportOpeningTimeMap(): array
+    {
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT bookcase_id AS bid, open_time AS open_time, twenty_for_seven AS tfs
+               FROM opening_time
+              WHERE bookcase_id IS NOT NULL',
+        );
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[self::ulidKey($row['bid'])][] = [
+                'openTime' => $row['open_time'],
+                'twentyFourSeven' => $row['tfs'] === null ? null : (bool) $row['tfs'],
+            ];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Normalise a raw binary ULID column value (BLOB) to the same canonical
+     * string `(string) $bookcase->id` produces, so the maps key consistently.
+     */
+    private static function ulidKey(mixed $raw): string
+    {
+        if (is_resource($raw)) {
+            $raw = stream_get_contents($raw);
+        }
+
+        return (string) Ulid::fromBinary($raw);
     }
 
     /**

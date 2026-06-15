@@ -162,6 +162,9 @@ list:
   heading: All Bookcases
   entries: '%count% entries'
   export: Export JSON
+  export_compressed: Compressed JSON (.json.gz)
+  export_plain: Plain JSON (.json)
+  export_recommended: recommended
   none: No bookcases found yet.
   col_title: Title
   col_address: Address

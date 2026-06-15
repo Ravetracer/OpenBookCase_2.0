@@ -162,6 +162,9 @@ list:
   heading: Alle Bücherschränke
   entries: '%count% Einträge'
   export: JSON exportieren
+  export_compressed: Komprimiertes JSON (.json.gz)
+  export_plain: Unkomprimiertes JSON (.json)
+  export_recommended: empfohlen
   none: Noch keine Bücherschränke gefunden.
   col_title: Titel
   col_address: Adresse

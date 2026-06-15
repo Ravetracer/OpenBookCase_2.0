@@ -162,6 +162,9 @@ list:
   heading: Toutes les boîtes à livres
   entries: '%count% entrées'
   export: Exporter en JSON
+  export_compressed: JSON compressé (.json.gz)
+  export_plain: JSON non compressé (.json)
+  export_recommended: recommandé
   none: Aucune boîte à livres trouvée pour le moment.
   col_title: Titre
   col_address: Adresse

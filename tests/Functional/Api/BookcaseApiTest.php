@@ -8,6 +8,8 @@ use App\Entity\Rating;
 use App\Entity\WatchlistItem;
 use App\Enums\AccessibilityLevel;
 use App\Tests\Factory\BookcaseFactory;
+use App\Tests\Factory\CaretakerFactory;
+use App\Tests\Factory\OpeningTimeFactory;
 use App\Tests\Factory\RatingFactory;
 use App\Tests\Factory\WatchlistItemFactory;
 use App\Tests\Factory\WishlistItemFactory;
@@ -225,6 +227,69 @@ final class BookcaseApiTest extends FunctionalTestCase
         $this->client->submit($form);
         $this->assertResponseStatusCodeSame(400);
         $this->assertSame('error', $this->json()['status']);
+    }
+
+    // ---------------------------------------------------------------------
+    // GET /api/bookcase/export  (streamed open-data dump, plain + gzip)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Body of a streamed response. The test client already runs the stream during
+     * request() (so the StreamedResponse is marked sent); the captured bytes live on
+     * the BrowserKit internal response, not via a second sendContent().
+     */
+    private function captureStream(): string
+    {
+        return (string) $this->client->getInternalResponse()->getContent();
+    }
+
+    public function testExportStreamsJsonWithChildren(): void
+    {
+        $bc = BookcaseFactory::createOne(['title' => 'Export Me']);
+        OpeningTimeFactory::createOne([
+            'bookcase' => $bc,
+            'open_time' => '24/7',
+            'twenty_for_seven' => true,
+        ]);
+        $caretaker = CaretakerFactory::createOne(['name' => 'Jane Keeper', 'contact' => 'jane@example.test']);
+        $bc->addCaretaker($caretaker);
+        $this->em()->flush();
+
+        $this->client->request('GET', '/api/bookcase/export');
+        $this->assertResponseIsSuccessful();
+        $response = $this->client->getResponse();
+        $this->assertStringContainsString('application/json', (string) $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('openbookcase-export.json', (string) $response->headers->get('Content-Disposition'));
+
+        $data = json_decode($this->captureStream(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame(1, $data['count']);
+
+        $entry = $data['bookcases'][0];
+        $this->assertSame('Export Me', $entry['title']);
+        $this->assertSame((string) $bc->id, $entry['id']);
+        // Children are resolved from the bulk lookup maps, keyed by ULID.
+        $this->assertSame('Jane Keeper', $entry['caretakers'][0]['name']);
+        $this->assertSame('24/7', $entry['openingTimes'][0]['openTime']);
+        $this->assertTrue($entry['openingTimes'][0]['twentyFourSeven']);
+    }
+
+    public function testExportGzipReturnsGzippedJson(): void
+    {
+        BookcaseFactory::createMany(3);
+
+        $this->client->request('GET', '/api/bookcase/export?gzip=1');
+        $this->assertResponseIsSuccessful();
+        $response = $this->client->getResponse();
+        $this->assertSame('application/gzip', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('openbookcase-export.json.gz', (string) $response->headers->get('Content-Disposition'));
+
+        $gz = $this->captureStream();
+        $json = gzdecode($gz);
+        $this->assertNotFalse($json, 'response body should be valid gzip');
+
+        $data = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame(3, $data['count']);
+        $this->assertCount(3, $data['bookcases']);
     }
 
     // ---------------------------------------------------------------------

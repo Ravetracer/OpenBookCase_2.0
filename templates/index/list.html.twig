@@ -20,9 +20,20 @@
      }) }}>
   <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
     <h1 class="text-2xl font-bold">{{ 'list.heading'|trans }}</h1>
-    <a href="{{ path('api_bookcase_export') }}" class="btn btn-outline btn-sm gap-1" download>
-      {{ ui.icon('external', 'size-4') }} {{ 'list.export'|trans }}
-    </a>
+    <div class="dropdown dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-outline btn-sm gap-1">
+        {{ ui.icon('external', 'size-4') }} {{ 'list.export'|trans }}
+      </div>
+      <ul tabindex="0" class="menu dropdown-content z-40 mt-1 w-60 rounded-box bg-base-100 p-2 shadow-lg">
+        <li>
+          <a href="{{ path('api_bookcase_export', { gzip: 1 }) }}" download>
+            {{ 'list.export_compressed'|trans }}
+            <span class="badge badge-success badge-xs">{{ 'list.export_recommended'|trans }}</span>
+          </a>
+        </li>
+        <li><a href="{{ path('api_bookcase_export') }}" download>{{ 'list.export_plain'|trans }}</a></li>
+      </ul>
+    </div>
   </div>
 
   {# Toolbar: live search + sort-by-distance. #}

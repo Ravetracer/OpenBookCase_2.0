@@ -162,6 +162,9 @@ list:
   heading: Alle boekenkasten
   entries: '%count% items'
   export: JSON exporteren
+  export_compressed: Gecomprimeerde JSON (.json.gz)
+  export_plain: Onbewerkte JSON (.json)
+  export_recommended: aanbevolen
   none: Nog geen boekenkasten gevonden.
   col_title: Titel
   col_address: Adres
