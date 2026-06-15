@@ -23,6 +23,7 @@ export default class extends Controller {
         userlat: String,
         userlon: String,
         geoerror: String,
+        geodenied: String,
         geounsupported: String,
     };
 
@@ -97,23 +98,46 @@ export default class extends Controller {
             return;
         }
         this.distanceBtnTarget.classList.add('opacity-50');
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                this.distanceBtnTarget.classList.remove('opacity-50');
-                this.state.userLat = String(pos.coords.latitude);
-                this.state.userLon = String(pos.coords.longitude);
-                this.state.sort = 'distance';
-                this.state.dir = 'asc';
-                this.state.page = 1;
-                this.distanceBtnTarget.classList.replace('btn-outline', 'btn-primary');
-                this.refresh();
-            },
-            () => {
-                this.distanceBtnTarget.classList.remove('opacity-50');
-                window.alert(this.geoerrorValue);
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-        );
+
+        const onSuccess = (pos) => {
+            this.distanceBtnTarget.classList.remove('opacity-50');
+            this.state.userLat = String(pos.coords.latitude);
+            this.state.userLon = String(pos.coords.longitude);
+            this.state.sort = 'distance';
+            this.state.dir = 'asc';
+            this.state.page = 1;
+            this.distanceBtnTarget.classList.replace('btn-outline', 'btn-primary');
+            this.refresh();
+        };
+
+        const fail = (err) => {
+            this.distanceBtnTarget.classList.remove('opacity-50');
+            // code 1 = permission denied → tell the user to fix it in Settings
+            // (on iOS an installed PWA needs its own permission, separate from Safari).
+            const denied = err && err.code === 1;
+            window.alert(denied ? this.geodeniedValue : this.geoerrorValue);
+        };
+
+        // iOS home-screen PWAs often fail the high-accuracy (GPS) path even when the
+        // coarse network location works, so fall back to low accuracy before giving up.
+        // A permission denial (code 1) won't change on a retry, so don't bother.
+        const onError = (err) => {
+            if (err && err.code === 1) {
+                fail(err);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(onSuccess, fail, {
+                enableHighAccuracy: false,
+                timeout: 20000,
+                maximumAge: 300000,
+            });
+        };
+
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000,
+        });
     }
 
     params() {

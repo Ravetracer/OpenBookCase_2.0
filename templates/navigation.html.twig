@@ -25,6 +25,9 @@
                     <li><a href="{{ path('app_index') }}?add=1" data-bc-create data-editable="1">{{ ui.icon('plus', 'size-4') }} {{ 'nav.add'|trans }}</a></li>
                 {% endif %}
 
+                {# Install-as-app — hidden until `beforeinstallprompt` fires (see base.html.twig). #}
+                <li data-install-button hidden><a href="#" data-install-button-trigger>{{ ui.icon('download', 'size-4') }} {{ 'nav.install'|trans }}</a></li>
+
                 <li>
                     <details>
                         <summary>{{ ui.icon('info', 'size-4') }} {{ 'nav.info'|trans }}</summary>
@@ -112,6 +115,14 @@
 
     {# Desktop action cluster — hidden below lg (those items live in the burger menu instead). #}
     <div class="navbar-end hidden gap-1 lg:flex">
+        {# Install-as-app button — hidden until the browser fires `beforeinstallprompt`
+           (Chrome/Edge desktop + Android). iOS has no such event; users install via
+           Safari's Share menu. Toggled by the PWA install script in base.html.twig. #}
+        <button type="button" data-install-button hidden
+                class="btn btn-ghost btn-sm gap-1" title="{{ 'nav.install'|trans }}">
+            {{ ui.icon('download', 'size-4') }} <span>{{ 'nav.install'|trans }}</span>
+        </button>
+
         {% if app.user %}
             {# Add a new entry. On the map page the modal controller intercepts this
                click (no reload); on other pages it navigates to the map (?add=1). #}

@@ -14,6 +14,7 @@ export default class extends Controller {
         searchnoresults: String,
         searchcoordinate: String,
         geoerror: String,
+        geodenied: String,
         geounsupported: String,
         geolocate: String,
         canadd: Boolean,
@@ -496,19 +497,46 @@ export default class extends Controller {
         }
 
         if (link) link.classList.add('opacity-50');
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                if (link) link.classList.remove('opacity-50');
-                const latlng = [pos.coords.latitude, pos.coords.longitude];
-                this.showUserLocation(latlng, pos.coords.accuracy);
-                this.map.setView(latlng, 16);
-            },
-            () => {
-                if (link) link.classList.remove('opacity-50');
-                window.alert(this.geoerrorValue);
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-        );
+
+        const onSuccess = (pos) => {
+            if (link) link.classList.remove('opacity-50');
+            const latlng = [pos.coords.latitude, pos.coords.longitude];
+            this.showUserLocation(latlng, pos.coords.accuracy);
+            this.map.setView(latlng, 16);
+        };
+
+        const fail = (err) => {
+            if (link) link.classList.remove('opacity-50');
+            // code 1 = permission denied, 2 = position unavailable, 3 = timeout.
+            // A denial needs the user to fix it in Settings (especially on iOS, where
+            // an installed PWA needs its own permission, separate from Safari), so give
+            // the actionable message rather than the generic "couldn't determine".
+            const denied = err && err.code === 1;
+            window.alert(denied ? this.geodeniedValue : this.geoerrorValue);
+        };
+
+        // iOS home-screen PWAs frequently return POSITION_UNAVAILABLE / TIMEOUT for
+        // the high-accuracy (GPS) path even when the coarse network location works
+        // fine in Safari. So try high accuracy first, then fall back to a low-accuracy
+        // request with a longer timeout before giving up. Don't retry on an explicit
+        // permission denial (code 1) — that won't change on a second call.
+        const onError = (err) => {
+            if (err && err.code === 1) {
+                fail(err);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(onSuccess, fail, {
+                enableHighAccuracy: false,
+                timeout: 20000,
+                maximumAge: 300000,
+            });
+        };
+
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000,
+        });
     }
 
     // A distinct blue dot (+ accuracy halo) for the user's own position, kept

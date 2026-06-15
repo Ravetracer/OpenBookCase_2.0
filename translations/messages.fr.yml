@@ -66,6 +66,14 @@ nav:
   toggle_theme: Basculer le mode sombre
   menu: Menu
   add: 'Ajouter une boîte'
+  install: 'Installer l''appli'
+
+# ── Install as app (iOS "Add to Home Screen" help) ──
+install:
+  ios_title: 'Installer OpenBookCase'
+  ios_intro: 'Ajoutez OpenBookCase à votre écran d’accueil pour une expérience comme une appli :'
+  ios_step1: 'Touchez le bouton Partager dans Safari'
+  ios_step2: 'Choisissez « Sur l’écran d’accueil »'
 
 # ── Authentification ──
 auth:
@@ -379,6 +387,7 @@ search:
   use_my_location: Afficher ma position
   geolocation_error: Impossible de déterminer votre position.
   geolocation_unsupported: Votre navigateur ne prend pas en charge la géolocalisation.
+  geolocation_denied: "L'accès à la position est bloqué pour cette app. Activez-le dans Réglages → Confidentialité et sécurité → Service de localisation (sur iPhone, l'app installée a besoin de sa propre autorisation, distincte de Safari)."
 
 # ── Add / create entry ──
 add:

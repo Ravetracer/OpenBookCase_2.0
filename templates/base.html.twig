@@ -7,7 +7,91 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="OpenBookCase - Where's the nearest public book case">
         <meta name="author" content="Christian Nielebock">
-        <link rel="icon" href="{{ asset('build/images/favicon.png') }}">
+        {# Favicons + PWA icons (generated from assets/images/obc2_icon.svg). Paths
+           are absolute so they resolve on nested routes like /bookcase/{id}. #}
+        <link rel="icon" href="/favicon.ico" sizes="any">
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
+        {# Installable web-app (PWA) #}
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#633d0f">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="OpenBookCase">
+
+        {# Register the (network-only) service worker that makes the app installable.
+           When a new worker activates, reload open tabs once so deployed changes are
+           picked up. The reload listener is only attached when a worker already
+           controls the page, so the very first visit is never reloaded. #}
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () {
+                    if (navigator.serviceWorker.controller) {
+                        var reloaded = false;
+                        navigator.serviceWorker.addEventListener('controllerchange', function () {
+                            if (reloaded) return;
+                            reloaded = true;
+                            window.location.reload();
+                        });
+                    }
+                    navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' });
+                });
+            }
+        </script>
+
+        {# "Install app" button wiring. The button(s) marked [data-install-button] stay
+           hidden until the browser fires `beforeinstallprompt` (Chrome/Edge desktop +
+           Android). We stash that event and replay it on click. iOS/Safari has no such
+           event — there users install via the Share menu, so the button simply stays
+           hidden. Already-installed (standalone) launches never show it. #}
+        <script>
+            (function () {
+                var deferredPrompt = null;
+                var setVisible = function (visible) {
+                    document.querySelectorAll('[data-install-button]').forEach(function (el) {
+                        el.hidden = !visible;
+                    });
+                };
+                var standalone = window.matchMedia('(display-mode: standalone)').matches
+                    || window.navigator.standalone === true;
+                var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+                    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS
+
+                // iOS has no beforeinstallprompt — show the button straight away and
+                // open the "Add to Home Screen" instructions on click instead.
+                if (isIOS && !standalone) {
+                    window.addEventListener('DOMContentLoaded', function () { setVisible(true); });
+                }
+
+                window.addEventListener('beforeinstallprompt', function (e) {
+                    e.preventDefault(); // suppress Chrome's default mini-infobar
+                    deferredPrompt = e;
+                    if (!standalone) setVisible(true);
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!e.target.closest('[data-install-button], [data-install-button-trigger]')) return;
+                    e.preventDefault();
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.finally(function () {
+                            deferredPrompt = null; // the prompt event is single-use
+                            setVisible(false);
+                        });
+                    } else if (isIOS) {
+                        document.getElementById('installHelpModal').showModal();
+                    }
+                });
+
+                window.addEventListener('appinstalled', function () {
+                    deferredPrompt = null;
+                    setVisible(false);
+                });
+            })();
+        </script>
 
         {# Apply the stored theme before paint to avoid a flash of the wrong theme #}
         <script>
@@ -50,7 +134,7 @@
           _paq.push(['trackPageView']);
           _paq.push(['enableLinkTracking']);
           (function() {
-            var u="https://matomo.openbookcase.de";
+            var u="https://matomo.openbookcase.de/";
             _paq.push(['setTrackerUrl', u+'matomo.php']);
             _paq.push(['setSiteId', '1']);
             var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
@@ -228,6 +312,29 @@
                     <button type="button" class="btn btn-primary" id="cookieAccept">{{ 'cookies.accept'|trans }}</button>
                 </div>
             </div>
+        </dialog>
+
+        {# ───────────────── iOS "Add to Home Screen" instructions ─────────────────
+           iOS fires no `beforeinstallprompt`, so on iPhone/iPad the install button
+           opens this dialog instead of a native prompt. #}
+        <dialog id="installHelpModal" class="modal">
+            <div class="modal-box max-w-sm">
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+                </form>
+                <h3 class="mb-2 flex items-center gap-2 text-lg font-bold">
+                    {{ ui.icon('download', 'size-5') }} {{ 'install.ios_title'|trans }}
+                </h3>
+                <p class="mb-4 text-sm text-base-content/80">{{ 'install.ios_intro'|trans }}</p>
+                <ol class="list-decimal space-y-2 pl-5 text-sm">
+                    <li>{{ 'install.ios_step1'|trans }}</li>
+                    <li>{{ 'install.ios_step2'|trans }}</li>
+                </ol>
+                <div class="modal-action">
+                    <button type="button" class="btn btn-primary" onclick="installHelpModal.close()">{{ 'cookies.accept'|trans }}</button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
         </dialog>
 
         {% block javascripts %}

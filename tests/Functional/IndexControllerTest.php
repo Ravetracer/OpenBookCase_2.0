@@ -13,6 +13,22 @@ final class IndexControllerTest extends FunctionalTestCase
         $this->assertResponseIsSuccessful();
     }
 
+    public function testHomepageExposesPwaTags(): void
+    {
+        $html = $this->client->request('GET', '/')->html();
+        $this->assertResponseIsSuccessful();
+
+        // Installable PWA wiring lives in base.html.twig, so it ships on every page.
+        $this->assertStringContainsString('rel="manifest" href="/manifest.webmanifest"', $html);
+        $this->assertStringContainsString('name="theme-color"', $html);
+        $this->assertStringContainsString('/icons/apple-touch-icon.png', $html);
+        $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js'", $html);
+
+        // The "Install app" button ships hidden; JS reveals it on `beforeinstallprompt`.
+        $this->assertStringContainsString('data-install-button', $html);
+        $this->assertStringContainsString('beforeinstallprompt', $html);
+    }
+
     public function testListReturns200(): void
     {
         $this->client->request('GET', '/list');

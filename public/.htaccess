@@ -1,3 +1,14 @@
+<IfModule mod_headers.c>
+    # The PWA service worker and manifest must never be served from a stale HTTP
+    # cache, otherwise app/page updates would not be picked up. Force a
+    # revalidation on every request so new versions are recognised immediately.
+    <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
 # Use the front controller as index file. It serves as a fallback solution when
 # every other rewrite/redirect fails (e.g. in an aliased environment without
 # mod_rewrite). Additionally, this reduces the matching process for the

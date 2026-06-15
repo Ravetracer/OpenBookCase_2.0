@@ -66,6 +66,14 @@ nav:
   toggle_theme: Dunkelmodus umschalten
   menu: Menü
   add: 'Schrank hinzufügen'
+  install: 'App installieren'
+
+# ── Install as app (iOS "Add to Home Screen" help) ──
+install:
+  ios_title: 'OpenBookCase installieren'
+  ios_intro: 'Füge OpenBookCase zum Startbildschirm hinzu – für ein App-Erlebnis:'
+  ios_step1: 'Tippe in Safari auf „Teilen“'
+  ios_step2: 'Wähle „Zum Home-Bildschirm“'
 
 # ── Authentifizierung ──
 auth:
@@ -379,6 +387,7 @@ search:
   use_my_location: Meinen Standort anzeigen
   geolocation_error: Dein Standort konnte nicht ermittelt werden.
   geolocation_unsupported: Dein Browser unterstützt keine Standortbestimmung.
+  geolocation_denied: "Der Standortzugriff ist für diese App blockiert. Aktiviere ihn unter Einstellungen → Datenschutz & Sicherheit → Ortungsdienste (auf dem iPhone benötigt die installierte App eine eigene Berechtigung, getrennt von Safari)."
 
 # ── Add / create entry ──
 add:

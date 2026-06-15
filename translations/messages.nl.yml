@@ -66,6 +66,14 @@ nav:
   toggle_theme: Donkere modus wisselen
   menu: Menu
   add: 'Kast toevoegen'
+  install: 'App installeren'
+
+# ── Install as app (iOS "Add to Home Screen" help) ──
+install:
+  ios_title: 'OpenBookCase installeren'
+  ios_intro: 'Voeg OpenBookCase toe aan je beginscherm voor een app-ervaring:'
+  ios_step1: 'Tik op de Deel-knop in Safari'
+  ios_step2: 'Kies “Zet op beginscherm”'
 
 # ── Authenticatie ──
 auth:
@@ -379,6 +387,7 @@ search:
   use_my_location: Mijn locatie tonen
   geolocation_error: Je locatie kon niet worden bepaald.
   geolocation_unsupported: Je browser ondersteunt geen geolocatie.
+  geolocation_denied: "Locatietoegang is geblokkeerd voor deze app. Schakel het in via Instellingen → Privacy en beveiliging → Locatievoorzieningen (op de iPhone heeft de geïnstalleerde app een eigen toestemming nodig, los van Safari)."
 
 # ── Add / create entry ──
 add:

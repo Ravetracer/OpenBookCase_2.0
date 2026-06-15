@@ -66,6 +66,14 @@ nav:
   toggle_theme: Toggle dark mode
   menu: Menu
   add: 'Add bookcase'
+  install: 'Install app'
+
+# ── Install as app (iOS "Add to Home Screen" help) ──
+install:
+  ios_title: 'Install OpenBookCase'
+  ios_intro: 'Add OpenBookCase to your home screen for an app-like experience:'
+  ios_step1: 'Tap the Share button in Safari'
+  ios_step2: 'Choose “Add to Home Screen”'
 
 # ── Authentication (login / register) ──
 auth:
@@ -379,6 +387,7 @@ search:
   use_my_location: Show my location
   geolocation_error: Could not determine your location.
   geolocation_unsupported: Your browser does not support geolocation.
+  geolocation_denied: "Location access is blocked for this app. Enable it under Settings → Privacy & Security → Location Services (on iPhone the installed app needs its own permission, separate from Safari)."
 
 # ── Add / create entry ──
 add:
