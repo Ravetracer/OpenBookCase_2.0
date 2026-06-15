@@ -1,0 +1,43 @@
+{# Changelog — English. Keep newest release at the TOP.
+   Badge convention: badge-success = New, badge-info = Improved, badge-warning = Fixed.
+   When you add a release here, mirror it in de.html.twig. #}
+<h1 class="text-3xl font-bold">{{ 'static.changelog.title'|trans }}</h1>
+<p class="mt-2 text-base-content/70">{{ 'static.changelog.lead'|trans }}</p>
+
+<div class="mt-8 space-y-10">
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">15 June 2026</h2>
+      <span class="badge badge-info badge-soft">Update</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">New</span>
+        <span>Install OpenBookCase as an app on your phone or computer (“Add to Home Screen”) — it opens in its own window and always shows live data.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">New</span>
+        <span>“Follow me” on the map: a new button live-tracks your location and keeps the map centred as you move. Tap again, or pan the map, to stop.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-warning badge-sm shrink-0">Fixed</span>
+        <span>Location now works inside the installed app on iPhone, with a clear hint pointing you to Settings if location access is blocked.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">14 June 2026</h2>
+      <span class="badge badge-primary badge-soft">Initial release</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">New</span>
+        <span>First public release of OpenBookCase 2.0: search the map for public bookcases and give-boxes, view details and photos, manage your wishlist, rate locations, and add or reposition entries — with a multi-language interface and a light/dark theme.</span>
+      </li>
+    </ul>
+  </section>
+
+</div>

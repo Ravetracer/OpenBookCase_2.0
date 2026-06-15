@@ -22,6 +22,7 @@ final class StaticPageControllerTest extends FunctionalTestCase
             'imprint' => ['/imprint'],
             'legal' => ['/legal'],
             'licenses' => ['/licenses'],
+            'changelog' => ['/changelog'],
         ];
     }
 

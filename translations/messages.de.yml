@@ -48,6 +48,7 @@ Details: Details
 # ── Navigation ──
 nav:
   help: "Anleitung"
+  changelog: "Neuigkeiten"
   cookies: Cookies
   bookcase_count: Bücherschränke
   map: Karte
@@ -332,6 +333,9 @@ form:
 static:
   help:
     title: "Anleitung"
+  changelog:
+    title: "Neuigkeiten"
+    lead: Aktuelle Updates und Verbesserungen von OpenBookCase.
   about:
     title: Über OpenBookCase
     lead: Was ist dieses Projekt?

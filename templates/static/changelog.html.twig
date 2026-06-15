@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'static.changelog.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-3xl p-4 sm:p-8">
+  {# German + English are written; other locales fall back to English.
+     To add a release, edit BOTH static/changelog/{de,en}.html.twig — see CLAUDE.md. #}
+  {% set localized = app.request.locale in ['de', 'en'] ? app.request.locale : 'en' %}
+  {{ include('static/changelog/' ~ localized ~ '.html.twig') }}
+</div>
+{% endblock %}

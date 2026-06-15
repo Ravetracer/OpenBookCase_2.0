@@ -48,6 +48,7 @@ Details: Détails
 # ── Navigation ──
 nav:
   help: "Guide"
+  changelog: "Nouveautés"
   cookies: Cookies
   bookcase_count: boîtes à livres
   map: Carte
@@ -332,6 +333,9 @@ form:
 static:
   help:
     title: "Guide d'utilisation"
+  changelog:
+    title: "Nouveautés"
+    lead: Dernières mises à jour et améliorations d'OpenBookCase.
   about:
     title: À propos d'OpenBookCase
     lead: Qu'est-ce que ce projet ?

@@ -37,4 +37,10 @@ class StaticPageController extends AbstractController
     {
         return $this->render('static/help.html.twig');
     }
+
+    #[Route('/changelog', name: 'app_changelog')]
+    public function changelog(): Response
+    {
+        return $this->render('static/changelog.html.twig');
+    }
 }

@@ -48,6 +48,7 @@ Details: Details
 # ── Navigatie ──
 nav:
   help: "Handleiding"
+  changelog: "Nieuws"
   cookies: Cookies
   bookcase_count: boekenkasten
   map: Kaart
@@ -332,6 +333,9 @@ form:
 static:
   help:
     title: "Handleiding"
+  changelog:
+    title: "Nieuws"
+    lead: Recente updates en verbeteringen van OpenBookCase.
   about:
     title: Over OpenBookCase
     lead: Wat is dit project?

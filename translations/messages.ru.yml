@@ -48,6 +48,7 @@ Details: Подробнее
 # ── Навигация ──
 nav:
   help: "Руководство"
+  changelog: "Что нового"
   cookies: Cookie
   bookcase_count: книжных шкафов
   map: Карта
@@ -332,6 +333,9 @@ form:
 static:
   help:
     title: "Руководство пользователя"
+  changelog:
+    title: "Что нового"
+    lead: Последние обновления и улучшения OpenBookCase.
   about:
     title: О проекте OpenBookCase
     lead: Что это за проект?
