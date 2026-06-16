@@ -35,6 +35,22 @@ final class IndexControllerTest extends FunctionalTestCase
         $this->assertResponseIsSuccessful();
     }
 
+    public function testListShowsExportTermsDialogWithMandatoryLinks(): void
+    {
+        $this->client->request('GET', '/list');
+        $this->assertResponseIsSuccessful();
+        $html = $this->client->getResponse()->getContent();
+
+        // Export links are gated behind the usage-terms confirmation dialog.
+        $this->assertStringContainsString('data-export-download', $html);
+        $this->assertStringContainsString('id="exportTermsModal"', $html);
+        $this->assertStringContainsString('export-terms', $html);
+
+        // The ODbL licence link and the mandatory OpenStreetMap copyright link must be present.
+        $this->assertStringContainsString('https://opendatacommons.org/licenses/odbl/', $html);
+        $this->assertStringContainsString('https://www.openstreetmap.org/copyright', $html);
+    }
+
     public function testListFragmentReturns200(): void
     {
         $this->client->request('GET', '/list/fragment');

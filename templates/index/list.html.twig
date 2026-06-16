@@ -26,12 +26,12 @@
       </div>
       <ul tabindex="0" class="menu dropdown-content z-40 mt-1 w-60 rounded-box bg-base-100 p-2 shadow-lg">
         <li>
-          <a href="{{ path('api_bookcase_export', { gzip: 1 }) }}" download>
+          <a href="{{ path('api_bookcase_export', { gzip: 1 }) }}" download data-export-download>
             {{ 'list.export_compressed'|trans }}
             <span class="badge badge-success badge-xs">{{ 'list.export_recommended'|trans }}</span>
           </a>
         </li>
-        <li><a href="{{ path('api_bookcase_export') }}" download>{{ 'list.export_plain'|trans }}</a></li>
+        <li><a href="{{ path('api_bookcase_export') }}" download data-export-download>{{ 'list.export_plain'|trans }}</a></li>
       </ul>
     </div>
   </div>
@@ -70,6 +70,44 @@
         data-trans-rating-failed="{{ 'js.could_not_save_rating'|trans }}"
         data-trans-close="{{ 'close'|trans }}">
   <div class="modal-box max-w-2xl" data-bookcase-modal-target="body"></div>
+  <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+</dialog>
+
+{# Permanent dialog — ODbL / OpenStreetMap usage terms shown before a JSON export download starts. #}
+<dialog id="exportTermsModal" class="modal" {{ stimulus_controller('export-terms') }}>
+  <div class="modal-box max-w-xl">
+    <h3 class="text-lg font-bold">{{ 'list.export_terms_title'|trans }}</h3>
+    <p class="mt-2 text-sm text-base-content/70">{{ 'list.export_terms_intro'|trans }}</p>
+
+    {% set odbl_link %}<a class="link link-primary" href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener noreferrer">Open Database License (ODbL)</a>{% endset %}
+    {% set osm_link %}<a class="link link-primary" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{{ 'list.export_terms_osm_label'|trans }}</a>{% endset %}
+
+    <ul class="mt-4 space-y-3 text-sm">
+      <li class="flex gap-2">
+        <span class="text-primary">{{ ui.icon('book', 'mt-0.5 size-5 shrink-0') }}</span>
+        <span>{{ 'list.export_terms_odbl'|trans({'%odbl%': odbl_link})|raw }}</span>
+      </li>
+      <li class="flex gap-2">
+        <span class="text-primary">{{ ui.icon('book', 'mt-0.5 size-5 shrink-0') }}</span>
+        <span>{{ 'list.export_terms_sharealike'|trans }}</span>
+      </li>
+      <li class="flex gap-2">
+        <span class="text-primary">{{ ui.icon('map', 'mt-0.5 size-5 shrink-0') }}</span>
+        <span>{{ 'list.export_terms_attribution'|trans({'%osm%': osm_link})|raw }}</span>
+      </li>
+      <li class="flex gap-2">
+        <span class="text-warning">{{ ui.icon('warning', 'mt-0.5 size-5 shrink-0') }}</span>
+        <span>{{ 'list.export_terms_no_reimport'|trans }}</span>
+      </li>
+    </ul>
+
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" data-action="export-terms#cancel">{{ 'cancel'|trans }}</button>
+      <button type="button" class="btn btn-primary gap-1" data-action="export-terms#confirm">
+        {{ ui.icon('download', 'size-4') }} {{ 'list.export_terms_agree'|trans }}
+      </button>
+    </div>
+  </div>
   <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
 </dialog>
 {% endblock %}

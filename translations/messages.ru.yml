@@ -165,6 +165,14 @@ list:
   export_compressed: Сжатый JSON (.json.gz)
   export_plain: Несжатый JSON (.json)
   export_recommended: рекомендуется
+  export_terms_title: Как можно использовать эти данные
+  export_terms_intro: 'Прежде чем скачать, обратите внимание, как можно использовать эти данные:'
+  export_terms_odbl: 'Все данные на этом сайте опубликованы под лицензией %odbl%.'
+  export_terms_sharealike: 'Если вы используете эти данные в другом проекте, этот проект также должен быть опубликован под лицензией ODbL и содержать ссылку на текст лицензии.'
+  export_terms_attribution: 'OpenBookCase содержит данные, импортированные из OpenStreetMap, поэтому любой проект, использующий эти данные, обязан указывать OpenStreetMap и его участников — ссылка на %osm% обязательна.'
+  export_terms_no_reimport: 'Эти данные нельзя импортировать обратно в OpenStreetMap. Записи иногда добавляются по памяти, а не по точным проверенным координатам, что делает их непригодными для OpenStreetMap.'
+  export_terms_osm_label: страницу авторских прав OpenStreetMap
+  export_terms_agree: Я согласен — начать скачивание
   none: Шкафы пока не найдены.
   col_title: Название
   col_address: Адрес

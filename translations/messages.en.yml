@@ -165,6 +165,14 @@ list:
   export_compressed: Compressed JSON (.json.gz)
   export_plain: Plain JSON (.json)
   export_recommended: recommended
+  export_terms_title: How you may use this data
+  export_terms_intro: 'Before you download, please understand how this data may be used:'
+  export_terms_odbl: 'All data on this site is published under the %odbl%.'
+  export_terms_sharealike: 'If you use this data in another project, that project must also be made available under the ODbL and must include a link to the license text.'
+  export_terms_attribution: 'OpenBookCase contains data imported from OpenStreetMap, so any project using this data must attribute OpenStreetMap and its contributors — a link to the %osm% is mandatory.'
+  export_terms_no_reimport: 'This data must not be imported back into OpenStreetMap. Entries are sometimes added from memory rather than at exact, verified coordinates, which makes them unusable for OpenStreetMap.'
+  export_terms_osm_label: OpenStreetMap copyright page
+  export_terms_agree: I agree — start download
   none: No bookcases found yet.
   col_title: Title
   col_address: Address

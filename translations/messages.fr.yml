@@ -165,6 +165,14 @@ list:
   export_compressed: JSON compressé (.json.gz)
   export_plain: JSON non compressé (.json)
   export_recommended: recommandé
+  export_terms_title: Comment utiliser ces données
+  export_terms_intro: 'Avant de télécharger, veuillez prendre connaissance des conditions d’utilisation de ces données :'
+  export_terms_odbl: 'Toutes les données de ce site sont publiées sous la %odbl%.'
+  export_terms_sharealike: 'Si vous utilisez ces données dans un autre projet, ce projet doit également être publié sous l’ODbL et inclure un lien vers le texte de la licence.'
+  export_terms_attribution: 'OpenBookCase contient des données importées d’OpenStreetMap ; tout projet utilisant ces données doit donc créditer OpenStreetMap et ses contributeurs — un lien vers la %osm% est obligatoire.'
+  export_terms_no_reimport: 'Ces données ne doivent pas être réimportées dans OpenStreetMap. Les entrées sont parfois ajoutées de mémoire plutôt qu’à des coordonnées exactes et vérifiées, ce qui les rend inutilisables pour OpenStreetMap.'
+  export_terms_osm_label: page des droits d’auteur d’OpenStreetMap
+  export_terms_agree: J’accepte — démarrer le téléchargement
   none: Aucune boîte à livres trouvée pour le moment.
   col_title: Titre
   col_address: Adresse
