@@ -20,6 +20,8 @@
       <a class="link link-primary" href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener noreferrer">Open Database License (ODbL)</a>.</p>
     {% set osm_link %}<a class="link link-primary" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>{% endset %}
     <p>{{ 'static.licenses.data_attribution'|trans({'%osm%': osm_link})|raw }}</p>
+    {% set taginfo_link %}<a class="link link-primary" href="/taginfo.json" target="_blank" rel="noopener noreferrer">{{ 'static.licenses.taginfo_term'|trans }}</a>{% endset %}
+    <p>{{ 'static.licenses.taginfo'|trans({'%taginfo%': taginfo_link})|raw }}</p>
   </article>
 </div>
 {% endblock %}

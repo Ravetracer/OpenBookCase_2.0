@@ -1,0 +1,96 @@
+{
+    "data_format": 1,
+    "data_url": "https://openbookcase.de/taginfo.json",
+    "data_updated": "20260616T000000Z",
+    "project": {
+        "name": "OpenBookCase",
+        "description": "Crowdsourced web map for finding public bookcases and give-boxes worldwide, partly seeded from OpenStreetMap.",
+        "project_url": "https://openbookcase.de",
+        "doc_url": "https://github.com/Ravetracer/OpenBookCase_2.0",
+        "icon_url": "https://openbookcase.de/icons/favicon-32x32.png",
+        "contact_name": "Christian Nielebock",
+        "contact_email": "info@openbookcase.de"
+    },
+    "tags": [
+        {
+            "key": "amenity",
+            "value": "public_bookcase",
+            "object_types": ["node", "way", "relation"],
+            "description": "Imported as a bookcase entry — the core feature OpenBookCase maps."
+        },
+        {
+            "key": "amenity",
+            "value": "give_box",
+            "object_types": ["node", "way", "relation"],
+            "description": "Imported as a give-box entry, shown with the give-box map symbol."
+        },
+        {
+            "key": "name",
+            "description": "Used as the entry's title when present (a URL-bearing name is rejected as spam and a title is generated instead)."
+        },
+        {
+            "key": "addr:street",
+            "description": "Stored as part of the entry's address, and used to build a fallback title when no name is tagged."
+        },
+        {
+            "key": "addr:housenumber",
+            "description": "Stored as part of the entry's address."
+        },
+        {
+            "key": "addr:postcode",
+            "description": "Stored as the entry's postcode."
+        },
+        {
+            "key": "addr:city",
+            "description": "Stored as the entry's city."
+        },
+        {
+            "key": "opening_hours",
+            "description": "Stored as the entry's opening time; a value of 24/7 is auto-detected and flagged as always open."
+        },
+        {
+            "key": "wheelchair",
+            "description": "Mapped to the entry's accessibility level: no = none, limited = partial, yes/designated = full."
+        },
+        {
+            "key": "operator",
+            "description": "Used as the name of the entry's caretaker."
+        },
+        {
+            "key": "contact:phone",
+            "description": "Used as the caretaker's contact detail (preferred over the plain phone tag)."
+        },
+        {
+            "key": "phone",
+            "description": "Used as the caretaker's contact detail when contact:phone is absent."
+        },
+        {
+            "key": "contact:email",
+            "description": "Used as the caretaker's contact detail when no phone is tagged."
+        },
+        {
+            "key": "email",
+            "description": "Used as the caretaker's contact detail when contact:email is absent."
+        },
+        {
+            "key": "website",
+            "description": "Used as the entry's web page, and as a caretaker contact fallback."
+        },
+        {
+            "key": "contact:website",
+            "description": "Used as the entry's web page when website is absent, and as a caretaker contact fallback."
+        },
+        {
+            "key": "url",
+            "description": "Used as the entry's web page when neither website nor contact:website is tagged."
+        },
+        {
+            "key": "description",
+            "description": "Stored as the entry's free-text comment shown to users."
+        },
+        {
+            "key": "note",
+            "description": "Stored as the entry's free-text comment when no description is tagged."
+        }
+    ]
+}

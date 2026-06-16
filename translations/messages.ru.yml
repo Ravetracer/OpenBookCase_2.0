@@ -383,6 +383,8 @@ static:
     data_title: База данных
     data_body: 'Собранные данные о книжных шкафах и боксах для обмена публикуются как открытая база данных под лицензией'
     data_attribution: 'Часть данных о местоположении импортирована из %osm% и остаётся © участники OpenStreetMap, используется по той же Open Database License (ODbL).'
+    taginfo: 'OpenBookCase также публикует %taginfo% с описанием используемых тегов OpenStreetMap.'
+    taginfo_term: 'файл проекта Taginfo'
 
 # ── Поиск по карте и геолокация ──
 search:

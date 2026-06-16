@@ -383,6 +383,8 @@ static:
     data_title: Datenbank
     data_body: 'Die gesammelten Daten zu Bücherschränken und Giveboxen werden als offene Datenbank unter der'
     data_attribution: 'Ein Teil der Standortdaten stammt aus %osm% und bleibt © OpenStreetMap-Mitwirkende, genutzt unter derselben Open Database License (ODbL).'
+    taginfo: 'OpenBookCase stellt außerdem eine %taginfo% bereit, die beschreibt, welche OpenStreetMap-Tags verwendet werden.'
+    taginfo_term: 'Taginfo-Projektdatei'
 
 # ── Kartensuche & Standort ──
 search:

@@ -383,6 +383,8 @@ static:
     data_title: Database
     data_body: 'The collected bookcase and give-box data is published as an open database under the'
     data_attribution: 'Some location data is imported from %osm% and remains © OpenStreetMap contributors, used under the same Open Database License (ODbL).'
+    taginfo: 'OpenBookCase also publishes a %taginfo% describing which OpenStreetMap tags it uses.'
+    taginfo_term: 'Taginfo project file'
 
 # ── Map search & geolocation ──
 search:

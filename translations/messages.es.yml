@@ -383,6 +383,8 @@ static:
     data_title: Base de datos
     data_body: 'Los datos recopilados de casitas de libros y cajas de intercambio se publican como base de datos abierta bajo la'
     data_attribution: 'Parte de los datos de ubicación se importa de %osm% y sigue siendo © colaboradores de OpenStreetMap, utilizados bajo la misma Open Database License (ODbL).'
+    taginfo: 'OpenBookCase también publica un %taginfo% que describe qué etiquetas de OpenStreetMap utiliza.'
+    taginfo_term: 'archivo de proyecto Taginfo'
 
 # ── Búsqueda en el mapa y ubicación ──
 search:

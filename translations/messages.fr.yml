@@ -383,6 +383,8 @@ static:
     data_title: Base de données
     data_body: 'Les données collectées sur les boîtes à livres et give-boxes sont publiées comme base de données ouverte sous la'
     data_attribution: 'Une partie des données de localisation provient de %osm% et reste © les contributeurs d''OpenStreetMap, utilisée sous la même Open Database License (ODbL).'
+    taginfo: 'OpenBookCase publie également un %taginfo% décrivant les attributs OpenStreetMap utilisés.'
+    taginfo_term: 'fichier de projet Taginfo'
 
 # ── Recherche sur la carte & géolocalisation ──
 search:

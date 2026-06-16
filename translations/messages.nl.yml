@@ -383,6 +383,8 @@ static:
     data_title: Database
     data_body: 'De verzamelde gegevens over boekenkasten en give-boxen worden als open database gepubliceerd onder de'
     data_attribution: 'Een deel van de locatiegegevens is geïmporteerd uit %osm% en blijft © OpenStreetMap-bijdragers, gebruikt onder dezelfde Open Database License (ODbL).'
+    taginfo: 'OpenBookCase publiceert ook een %taginfo% met de OpenStreetMap-tags die worden gebruikt.'
+    taginfo_term: 'Taginfo-projectbestand'
 
 # ── Kaartzoeken & locatie ──
 search:
