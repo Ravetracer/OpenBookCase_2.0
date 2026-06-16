@@ -99,7 +99,7 @@ final class MessageServiceTest extends KernelTestCase
 
     public function testNotifyManyDeliversToEachRecipient(): void
     {
-        $mailer = $this->createMock(MailerInterface::class);
+        $mailer = $this->createStub(MailerInterface::class);
         $users = UserFactory::createMany(3, ['notificationChannel' => NotificationChannel::Internal]);
         $bookcase = BookcaseFactory::createOne();
 

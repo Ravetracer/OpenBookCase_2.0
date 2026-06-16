@@ -16,10 +16,10 @@ final class LocaleSubscriberTest extends TestCase
 {
     private function dispatch(?User $user, ?string $cookie, ?string $acceptLanguage, int $requestType = HttpKernelInterface::MAIN_REQUEST): Request
     {
-        $security = $this->createMock(Security::class);
+        $security = $this->createStub(Security::class);
         $security->method('getUser')->willReturn($user);
 
-        $translator = $this->createMock(LocaleAwareInterface::class);
+        $translator = $this->createStub(LocaleAwareInterface::class);
 
         $subscriber = new LocaleSubscriber($security, $translator);
 
@@ -31,7 +31,7 @@ final class LocaleSubscriberTest extends TestCase
             $request->headers->set('Accept-Language', $acceptLanguage);
         }
 
-        $event = new RequestEvent($this->createMock(HttpKernelInterface::class), $request, $requestType);
+        $event = new RequestEvent($this->createStub(HttpKernelInterface::class), $request, $requestType);
         $subscriber->onKernelRequest($event);
 
         return $request;

@@ -15,7 +15,7 @@ A crowdsourced web app for searching and finding public bookcases and give-boxes
 - Inline SVG icons (Heroicons) via `templates/components/icon.html.twig` — no icon fonts
 - JMS Serializer groups for API JSON shaping (not Symfony Serializer)
 
-> The `@symfony/ux-vue` bundle is still installed but **unused** — `assets/vue/controllers/` is empty. The active frontend is Stimulus + Twig fragments injected into DaisyUI `<dialog>` modals.
+> The active frontend is Stimulus + Twig fragments injected into DaisyUI `<dialog>` modals. (The previously-installed-but-unused `@symfony/ux-vue` bundle and the `vue`/`vue-loader`/`vue-template-compiler` npm packages were removed in 2026 — there was never any Vue code.)
 
 ## Common Commands
 
@@ -84,7 +84,7 @@ Three suites, each its own directory:
 | Database | SQLite (dev) / configurable via DATABASE_URL |
 | ORM | Doctrine ORM 3.x with ULID PKs |
 | Templates | Twig 3 |
-| Frontend JS | Stimulus 3 (ux-vue installed but unused) |
+| Frontend JS | Stimulus 3 |
 | Styling | Tailwind CSS v4 + DaisyUI 5 + @tailwindcss/typography (via Webpack Encore PostCSS) |
 | Asset Build | Webpack Encore 5 (+ `@tailwindcss/postcss` postcss-loader) |
 | File Uploads | VichUploaderBundle 2.x |

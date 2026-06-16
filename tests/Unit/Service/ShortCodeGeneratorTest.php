@@ -11,7 +11,7 @@ final class ShortCodeGeneratorTest extends TestCase
 {
     public function testRandomHasRequestedLengthAndAlphabet(): void
     {
-        $repo = $this->createMock(BookcaseRepository::class);
+        $repo = $this->createStub(BookcaseRepository::class);
         $generator = new ShortCodeGenerator($repo);
 
         $code = $generator->random();
@@ -23,7 +23,7 @@ final class ShortCodeGeneratorTest extends TestCase
 
     public function testRandomIsReasonablyUnique(): void
     {
-        $repo = $this->createMock(BookcaseRepository::class);
+        $repo = $this->createStub(BookcaseRepository::class);
         $generator = new ShortCodeGenerator($repo);
 
         $codes = [];
@@ -51,7 +51,7 @@ final class ShortCodeGeneratorTest extends TestCase
 
     public function testRandomUniqueInAvoidsTakenSet(): void
     {
-        $repo = $this->createMock(BookcaseRepository::class);
+        $repo = $this->createStub(BookcaseRepository::class);
         $generator = new ShortCodeGenerator($repo);
 
         $taken = [];

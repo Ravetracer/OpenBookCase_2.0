@@ -107,7 +107,7 @@ final class RepositoryFindersTest extends KernelTestCase
         $watchedIds = $repo->findWatchedBookcaseIds($user);
         $this->assertCount(2, $watchedIds);
         $this->assertContains((string) $bookcaseA->id, $watchedIds);
-        $this->assertContainsOnly('string', $watchedIds);
+        $this->assertContainsOnlyString($watchedIds);
 
         $watchers = $repo->findWatcherUsersOf($bookcaseA);
         $this->assertCount(1, $watchers);
