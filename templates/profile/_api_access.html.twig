@@ -1,0 +1,167 @@
+{# API access section of the profile modal. Three states driven by the user's
+   latest application (apiApplication): none/denied/revoked → apply form;
+   pending → status + admin conversation + reply; approved → confirmation.
+   The modal body is server-rendered (not AJAX-injected), so data-action/targets
+   bind directly to the `profile` controller. #}
+{% import 'components/icon.html.twig' as ui %}
+{% set a = apiApplication %}
+
+<div class="mb-6">
+  <span class="label-text flex items-center gap-1 font-medium">{{ ui.icon('key', 'size-4') }} {{ 'profile.api_title'|trans }}</span>
+  <p class="mb-2 text-sm text-base-content/60">{{ 'profile.api_help'|trans }}</p>
+
+  {% if a is null or a.status.value in ['denied', 'revoked'] %}
+    {% if a and a.decisionReason %}
+      <div class="alert {{ a.status.value == 'denied' ? 'alert-error' : 'alert-warning' }} mb-3 text-sm">
+        {{ ui.icon('info', 'size-4 shrink-0') }}
+        <span><strong>{{ ('profile.api_status_' ~ a.status.value)|trans }}.</strong> {{ a.decisionReason }}</span>
+      </div>
+    {% endif %}
+
+    <button type="button" class="btn btn-outline btn-sm gap-1"
+            data-action="profile#showApiApply" data-profile-target="apiApplyButton">
+      {{ ui.icon('key', 'size-4') }} {{ a ? 'profile.api_apply_again'|trans : 'profile.api_apply'|trans }}
+    </button>
+
+    <div class="mt-3 hidden" data-profile-target="apiApplyForm">
+      <form action="{{ path('app_api_application_apply') }}" data-action="submit->profile#applyApi" class="space-y-3">
+        <input type="hidden" name="_token" value="{{ csrf_token('api_apply') }}">
+
+        <div>
+          <label class="label" for="api-app-name"><span class="label-text text-xs">{{ 'profile.api_app_name'|trans }}</span></label>
+          <input id="api-app-name" type="text" name="appName" maxlength="100" required class="input input-bordered input-sm w-full">
+        </div>
+
+        <div>
+          <label class="label" for="api-use-case"><span class="label-text text-xs">{{ 'profile.api_use_case'|trans }}</span></label>
+          <textarea id="api-use-case" name="useCase" rows="4" minlength="20" maxlength="4000" required
+                    class="textarea textarea-bordered textarea-sm w-full"
+                    placeholder="{{ 'profile.api_use_case_placeholder'|trans }}"></textarea>
+        </div>
+
+        <div>
+          <span class="label-text text-xs">{{ 'profile.api_client_type'|trans }}</span>
+          <div class="join mt-1 w-full">
+            <label class="btn btn-sm join-item flex-1">
+              <input type="radio" name="clientType" value="public" class="hidden" checked>
+              {{ 'profile.api_client_public'|trans }}
+            </label>
+            <label class="btn btn-sm join-item flex-1">
+              <input type="radio" name="clientType" value="confidential" class="hidden">
+              {{ 'profile.api_client_confidential'|trans }}
+            </label>
+          </div>
+          <p class="mt-1 text-xs text-base-content/60">{{ 'profile.api_client_help'|trans }}</p>
+        </div>
+
+        <div>
+          <span class="label-text text-xs">{{ 'profile.api_scopes'|trans }}</span>
+          <div class="mt-1 grid grid-cols-2 gap-1">
+            {% for scope in apiScopes %}
+              <label class="label cursor-pointer justify-start gap-2 py-0">
+                <input type="checkbox" name="scopes[]" value="{{ scope }}" class="checkbox checkbox-sm" checked>
+                <span class="label-text font-mono text-xs">{{ scope }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div>
+          <label class="label" for="api-redirect"><span class="label-text text-xs">{{ 'profile.api_redirect_uris'|trans }}</span></label>
+          <textarea id="api-redirect" name="redirectUris" rows="2" class="textarea textarea-bordered textarea-sm w-full"
+                    placeholder="https://example.com/callback"></textarea>
+          <p class="mt-1 text-xs text-base-content/60">{{ 'profile.api_redirect_help'|trans }}</p>
+        </div>
+
+        {# Data-usage terms — identical to the JSON-download dialog; must be acknowledged. #}
+        <div class="rounded-box border border-base-300 p-3">
+          <p class="mb-2 text-xs font-semibold">{{ 'list.export_terms_title'|trans }}</p>
+          {{ include('static/_data_terms.html.twig') }}
+          <label class="label mt-2 cursor-pointer justify-start gap-2">
+            <input type="checkbox" name="agree" value="1" required class="checkbox checkbox-sm checkbox-primary">
+            <span class="label-text text-sm">{{ 'profile.api_agree'|trans }}</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm gap-1">{{ ui.icon('key', 'size-4') }} {{ 'profile.api_submit'|trans }}</button>
+        <p data-profile-target="apiStatus" class="mt-1 text-sm" aria-live="polite"></p>
+      </form>
+    </div>
+
+  {% elseif a.status.value == 'pending' %}
+    <div class="mb-2 flex flex-wrap items-center gap-2">
+      <span class="badge {{ a.status.badgeClass }}">{{ ('profile.api_status_' ~ a.status.value)|trans }}</span>
+      <span class="text-sm text-base-content/70">{{ a.appName }}</span>
+    </div>
+    <p class="mb-3 text-sm text-base-content/60">{{ 'profile.api_pending_help'|trans }}</p>
+
+    {% if apiThread is not empty %}
+      <div class="mb-3 max-h-60 space-y-1 overflow-y-auto rounded-box border border-base-200 p-2">
+        {% for m in apiThread %}
+          {% set mine = m.sender and m.sender.id == user.id %}
+          <div class="chat {{ mine ? 'chat-end' : 'chat-start' }}">
+            <div class="chat-header text-xs opacity-60">
+              {{ m.sender ? m.sender.userIdentifier : 'messages.system'|trans }}
+              <time datetime="{{ m.createdAt|date('c') }}">{{ m.createdAt|date('d M Y, H:i') }}</time>
+            </div>
+            <div class="chat-bubble {{ mine ? 'chat-bubble-primary' : '' }} whitespace-pre-line text-sm">{{ m.body }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form action="{{ path('app_api_application_reply', {application: a.id}) }}" data-action="submit->profile#replyApi" class="space-y-2">
+      <input type="hidden" name="_token" value="{{ csrf_token('api_reply') }}">
+      <textarea name="body" rows="2" required class="textarea textarea-bordered textarea-sm w-full"
+                placeholder="{{ 'profile.api_reply_placeholder'|trans }}"></textarea>
+      <button type="submit" class="btn btn-primary btn-sm">{{ 'profile.api_reply_send'|trans }}</button>
+      <p data-profile-target="apiStatus" class="text-sm" aria-live="polite"></p>
+    </form>
+
+  {% elseif a.status.value == 'approved' %}
+    <div class="mb-2 flex flex-wrap items-center gap-2">
+      <span class="badge {{ a.status.badgeClass }}">{{ ('profile.api_status_' ~ a.status.value)|trans }}</span>
+      <span class="text-sm text-base-content/70">{{ a.appName }}</span>
+    </div>
+    <p class="mb-3 text-sm text-base-content/60">{{ 'profile.api_approved_help'|trans }}</p>
+
+    {# Show-once client secret (confidential clients), until the applicant confirms they saved it. #}
+    {% if a.oauthPlainSecret %}
+      <div class="alert alert-warning mb-3 flex-col items-start gap-2 text-sm">
+        <p class="font-semibold">{{ ui.icon('warning', 'size-4') }} {{ 'profile.api_secret_warning'|trans }}</p>
+        <code class="block w-full break-all rounded bg-base-100 p-2 font-mono text-xs">{{ a.oauthPlainSecret }}</code>
+        <form action="{{ path('app_api_application_ack_secret', {application: a.id}) }}" data-action="submit->profile#replyApi">
+          <input type="hidden" name="_token" value="{{ csrf_token('api_secret_ack') }}">
+          <button type="submit" class="btn btn-primary btn-xs">{{ 'profile.api_secret_saved'|trans }}</button>
+        </form>
+      </div>
+    {% endif %}
+
+    <dl class="space-y-2 text-sm">
+      <div>
+        <dt class="text-xs font-semibold text-base-content/60">{{ 'profile.api_client_id'|trans }}</dt>
+        <dd><code class="break-all font-mono text-xs">{{ a.oauthClientId }}</code></dd>
+      </div>
+      <div>
+        <dt class="text-xs font-semibold text-base-content/60">{{ 'profile.api_client_type'|trans }}</dt>
+        <dd>
+          {{ (a.clientType.value == 'public' ? 'profile.api_client_public' : 'profile.api_client_confidential')|trans }}
+          {% if a.clientType.value == 'public' %}<span class="text-base-content/60">— {{ 'profile.api_no_secret_pkce'|trans }}</span>{% endif %}
+        </dd>
+      </div>
+      {% if a.requestedScopes %}
+        <div>
+          <dt class="text-xs font-semibold text-base-content/60">{{ 'profile.api_scopes'|trans }}</dt>
+          <dd class="flex flex-wrap gap-1">{% for s in a.requestedScopes %}<span class="badge badge-ghost font-mono text-xs">{{ s }}</span>{% endfor %}</dd>
+        </div>
+      {% endif %}
+      <div>
+        <dt class="text-xs font-semibold text-base-content/60">{{ 'profile.api_endpoints'|trans }}</dt>
+        <dd class="space-y-0.5">
+          <div><span class="text-base-content/60">{{ 'profile.api_authorize_url'|trans }}:</span> <code class="break-all font-mono text-xs">{{ url('oauth2_authorize') }}</code></div>
+          <div><span class="text-base-content/60">{{ 'profile.api_token_url'|trans }}:</span> <code class="break-all font-mono text-xs">{{ url('oauth2_token') }}</code></div>
+        </dd>
+      </div>
+    </dl>
+  {% endif %}
+</div>

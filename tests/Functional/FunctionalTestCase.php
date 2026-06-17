@@ -19,6 +19,14 @@ abstract class FunctionalTestCase extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+
+        // The API rate limiter persists its state in a filesystem cache pool (so it
+        // survives the kernel reboot the client does between requests). Clear it per
+        // test so limiter counts never leak across tests or earlier suite runs.
+        $pool = static::getContainer()->get('rate_limiter.cache');
+        if ($pool instanceof \Psr\Cache\CacheItemPoolInterface) {
+            $pool->clear();
+        }
     }
 
     /** Create a verified user and authenticate the client as them. */

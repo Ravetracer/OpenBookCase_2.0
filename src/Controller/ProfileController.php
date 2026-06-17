@@ -11,6 +11,8 @@ use App\Config\Locales;
 use App\Entity\WishlistItem;
 use App\Enums\NotificationChannel;
 use App\EventSubscriber\LocaleSubscriber;
+use App\Repository\ApiApplicationRepository;
+use App\Repository\MessageRepository;
 use App\Repository\WishlistItemRepository;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +38,8 @@ class ProfileController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly WishlistItemRepository $wishlistItemRepository,
         private readonly TranslatorInterface $translator,
+        private readonly ApiApplicationRepository $apiApplications,
+        private readonly MessageRepository $messages,
     ) {
     }
 
@@ -48,9 +52,14 @@ class ProfileController extends AbstractController
         /** @var User|null $user */
         $user = $this->getUser();
 
+        $apiApplication = $user instanceof User ? $this->apiApplications->findLatestForUser($user) : null;
+
         return $this->render('profile/_modal.html.twig', [
             'user' => $user,
             'wishlistItems' => $user instanceof User ? $this->wishlistItemRepository->findForUser($user) : [],
+            'apiApplication' => $apiApplication,
+            'apiThread' => $apiApplication !== null ? $this->messages->findThreadForApplication($apiApplication) : [],
+            'apiScopes' => \App\Entity\ApiApplication::AVAILABLE_SCOPES,
         ]);
     }
 

@@ -118,6 +118,34 @@ final class BookcaseRepositoryTest extends KernelTestCase
         $this->assertSame(['Near', 'Mid', 'Far'], $titles);
     }
 
+    public function testNewestSortOrdersByCreationAndExcludesOsmImports(): void
+    {
+        // Created in order → time-ordered ULIDs, so "newest" desc must reverse them.
+        $first  = BookcaseFactory::createOne(['title' => 'First']);
+        $second = BookcaseFactory::createOne(['title' => 'Second']);
+        $osm    = BookcaseFactory::new()->osm('n123')->create(['title' => 'OSM Import']);
+
+        // Community-only count excludes the OSM-sourced row.
+        $this->assertSame(3, $this->repo()->countFiltered(null));
+        $this->assertSame(2, $this->repo()->countFiltered(null, true));
+
+        $newest = $this->repo()->findFilteredPaginated(null, 'newest', 'desc', null, null, null, 10, 0, true);
+        $titles = array_map(fn (Bookcase $b) => $b->title, $newest);
+
+        $this->assertNotContains('OSM Import', $titles, 'OSM imports are not community additions');
+        $this->assertSame(['Second', 'First'], $titles);
+    }
+
+    public function testGetCreatedAtDerivesFromUlid(): void
+    {
+        $bookcase = BookcaseFactory::createOne();
+        $this->assertNotNull($bookcase->getCreatedAt());
+        $this->assertSame(
+            $bookcase->id->getDateTime()->getTimestamp(),
+            $bookcase->getCreatedAt()->getTimestamp(),
+        );
+    }
+
     public function testFindOneWithRelationsResolvesValidUlidAndRejectsGarbage(): void
     {
         $bookcase = BookcaseFactory::createOne();

@@ -161,6 +161,15 @@ class Bookcase
         $this->watchlistItems = new ArrayCollection();
     }
 
+    /**
+     * Creation timestamp, derived from the time-ordered ULID primary key — so we
+     * get a "when was this added" date for the list view without a dedicated column.
+     */
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->id?->getDateTime();
+    }
+
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('entryType')]
     #[Serializer\Groups(['bookcase_detail'])]

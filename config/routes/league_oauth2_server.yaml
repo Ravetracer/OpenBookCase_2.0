@@ -1,0 +1,5 @@
+league_oauth2_server:
+    resource: '@LeagueOAuth2ServerBundle/config/routes.php'
+    type: php
+    # Namespace the endpoints: /oauth/authorize + /oauth/token.
+    prefix: /oauth

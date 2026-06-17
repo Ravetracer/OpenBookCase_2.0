@@ -1,0 +1,8 @@
+{# Flash messages for the admin pages. Values are translation keys set by AdminController. #}
+{% for type, msgs in app.flashes %}
+  {% for m in msgs %}
+    <div class="alert {{ type == 'success' ? 'alert-success' : (type == 'error' ? 'alert-error' : 'alert-info') }} mb-3">
+      <span>{{ m|trans }}</span>
+    </div>
+  {% endfor %}
+{% endfor %}

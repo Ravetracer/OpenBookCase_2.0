@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Config\Locales;
+use App\Entity\ApiApplication;
 use App\Entity\Bookcase;
 use App\Entity\Message;
 use App\Entity\User;
@@ -39,6 +40,8 @@ class MessageService
         MessageType $type = MessageType::Update,
         ?string $subject = null,
         ?Bookcase $relatedBookcase = null,
+        ?User $sender = null,
+        ?ApiApplication $apiApplication = null,
     ): ?Message {
         $channel = $recipient->notificationChannel;
         $emailUsable = $recipient->isVerified && !empty($recipient->email);
@@ -49,8 +52,9 @@ class MessageService
 
         // Store internally when the user wants it, or as a fallback when an
         // e-mail-only delivery can't reach a usable address (never lose a notice).
-        if ($channel->deliversInternal() || !$emailUsable) {
-            return $this->store($recipient, $body, $type, $subject, $relatedBookcase);
+        // Conversation messages are ALWAYS stored so the thread persists for both sides.
+        if ($apiApplication !== null || $channel->deliversInternal() || !$emailUsable) {
+            return $this->store($recipient, $body, $type, $subject, $relatedBookcase, $sender, $apiApplication);
         }
 
         return null;
@@ -67,9 +71,11 @@ class MessageService
         MessageType $type = MessageType::Update,
         ?string $subject = null,
         ?Bookcase $relatedBookcase = null,
+        ?User $sender = null,
+        ?ApiApplication $apiApplication = null,
     ): void {
         foreach ($recipients as $recipient) {
-            $this->notify($recipient, $body, $type, $subject, $relatedBookcase);
+            $this->notify($recipient, $body, $type, $subject, $relatedBookcase, $sender, $apiApplication);
         }
     }
 
@@ -79,6 +85,8 @@ class MessageService
         MessageType $type,
         ?string $subject,
         ?Bookcase $relatedBookcase,
+        ?User $sender = null,
+        ?ApiApplication $apiApplication = null,
     ): Message {
         $message = new Message();
         $message->recipient = $recipient;
@@ -86,6 +94,8 @@ class MessageService
         $message->subject = $subject;
         $message->body = $body;
         $message->relatedBookcase = $relatedBookcase;
+        $message->sender = $sender;
+        $message->apiApplication = $apiApplication;
 
         $this->entityManager->persist($message);
         $this->entityManager->flush();

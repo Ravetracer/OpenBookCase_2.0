@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+{% set a = application %}
+
+{% block title %}{{ a.appName }} – {{ 'admin.api.title'|trans }}{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-3xl p-4 sm:p-6">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <a href="{{ path('app_admin_api_applications') }}" class="btn btn-ghost btn-sm gap-1">{{ ui.icon('chevron-left', 'size-4') }} {{ 'admin.back'|trans }}</a>
+    <h1 class="text-2xl font-bold">{{ a.appName }}</h1>
+    <span class="badge {{ a.status.badgeClass }}">{{ ('admin.api.status_' ~ a.status.value)|trans }}</span>
+    <a href="{{ path('app_admin_api_usage', {application: a.id}) }}" class="btn btn-ghost btn-sm gap-1">{{ ui.icon('chart-bar', 'size-4') }} {{ 'admin.usage.view_for_app'|trans }}</a>
+  </div>
+  {{ include('admin/_flashes.html.twig') }}
+
+  <div class="mb-4 space-y-3 rounded-box border border-base-300 p-4">
+    <div><span class="text-sm font-semibold">{{ 'admin.api.col_applicant'|trans }}:</span>
+      {{ a.applicant ? a.applicant.userIdentifier : '–' }}
+      {% if a.applicant %}<span class="text-base-content/60">({{ a.applicant.email }})</span>{% endif %}
+    </div>
+    <div><span class="text-sm font-semibold">{{ 'admin.api.col_date'|trans }}:</span> {{ a.createdAt|date('Y-m-d H:i') }}</div>
+    <div><span class="text-sm font-semibold">{{ 'profile.api_client_type'|trans }}:</span>
+      {{ (a.clientType.value == 'public' ? 'profile.api_client_public' : 'profile.api_client_confidential')|trans }}
+    </div>
+    <div>
+      <span class="text-sm font-semibold">{{ 'profile.api_use_case'|trans }}:</span>
+      <p class="mt-1 whitespace-pre-line text-sm">{{ a.useCase }}</p>
+    </div>
+    {% if a.requestedScopes %}
+      <div>
+        <span class="text-sm font-semibold">{{ 'profile.api_scopes'|trans }}:</span>
+        <div class="mt-1 flex flex-wrap gap-1">{% for s in a.requestedScopes %}<span class="badge badge-ghost font-mono text-xs">{{ s }}</span>{% endfor %}</div>
+      </div>
+    {% endif %}
+    {% if a.redirectUris %}
+      <div>
+        <span class="text-sm font-semibold">{{ 'profile.api_redirect_uris'|trans }}:</span>
+        <ul class="mt-1 text-sm">{% for u in a.redirectUris %}<li class="break-all font-mono">{{ u }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    {% if a.decisionReason %}
+      <div><span class="text-sm font-semibold">{{ 'admin.api.decision_reason'|trans }}:</span> <span class="text-sm">{{ a.decisionReason }}</span></div>
+    {% endif %}
+  </div>
+
+  {# Decision actions #}
+  {% if a.status.value in ['pending', 'approved'] %}
+    <div class="mb-6 flex flex-wrap items-end gap-3">
+      {% if a.status.value == 'pending' %}
+        <form method="post" action="{{ path('app_admin_api_approve', {application: a.id}) }}">
+          <input type="hidden" name="_token" value="{{ csrf_token('admin_api_decision_' ~ a.id) }}">
+          <button class="btn btn-success btn-sm gap-1">{{ ui.icon('check-circle', 'size-4') }} {{ 'admin.api.approve'|trans }}</button>
+        </form>
+        <form method="post" action="{{ path('app_admin_api_deny', {application: a.id}) }}" class="flex items-end gap-2">
+          <input type="hidden" name="_token" value="{{ csrf_token('admin_api_decision_' ~ a.id) }}">
+          <input type="text" name="reason" required placeholder="{{ 'admin.api.reason_placeholder'|trans }}" class="input input-bordered input-sm">
+          <button class="btn btn-error btn-sm gap-1">{{ ui.icon('x-circle', 'size-4') }} {{ 'admin.api.deny'|trans }}</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ path('app_admin_api_revoke', {application: a.id}) }}" class="flex items-end gap-2">
+          <input type="hidden" name="_token" value="{{ csrf_token('admin_api_decision_' ~ a.id) }}">
+          <input type="text" name="reason" required placeholder="{{ 'admin.api.reason_placeholder'|trans }}" class="input input-bordered input-sm">
+          <button class="btn btn-warning btn-sm gap-1">{{ ui.icon('x-circle', 'size-4') }} {{ 'admin.api.revoke'|trans }}</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {# "Check back" — admin↔applicant conversation #}
+  <h2 class="mb-2 text-lg font-semibold">{{ 'admin.api.conversation'|trans }}</h2>
+  {% if thread is empty %}
+    <p class="mb-3 text-sm text-base-content/60">{{ 'admin.api.no_messages'|trans }}</p>
+  {% else %}
+    <div class="mb-3 space-y-1 rounded-box border border-base-200 p-2">
+      {% for m in thread %}
+        {% set fromAdmin = m.sender and a.applicant and m.sender.id != a.applicant.id %}
+        <div class="chat {{ fromAdmin ? 'chat-end' : 'chat-start' }}">
+          <div class="chat-header text-xs opacity-60">
+            {{ m.sender ? m.sender.userIdentifier : 'messages.system'|trans }}
+            <time datetime="{{ m.createdAt|date('c') }}">{{ m.createdAt|date('d M Y, H:i') }}</time>
+          </div>
+          <div class="chat-bubble {{ fromAdmin ? 'chat-bubble-primary' : '' }} whitespace-pre-line text-sm">{{ m.body }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" action="{{ path('app_admin_api_message', {application: a.id}) }}" class="space-y-2">
+    <input type="hidden" name="_token" value="{{ csrf_token('admin_api_message_' ~ a.id) }}">
+    <textarea name="body" rows="3" required class="textarea textarea-bordered w-full" placeholder="{{ 'admin.api.message_placeholder'|trans }}"></textarea>
+    <button class="btn btn-primary btn-sm gap-1">{{ ui.icon('bell', 'size-4') }} {{ 'admin.api.send_message'|trans }}</button>
+  </form>
+</div>
+{% endblock %}

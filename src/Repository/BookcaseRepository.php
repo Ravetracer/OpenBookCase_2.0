@@ -256,6 +256,8 @@ class BookcaseRepository extends ServiceEntityRepository
         'status' => 'bc.active.status',
         'latitude' => 'bc.position.latitude',
         'longitude' => 'bc.position.longitude',
+        // ULIDs are time-ordered, so id order == creation order ("Added" column).
+        'newest' => 'bc.id',
     ];
 
     /**
@@ -279,11 +281,25 @@ class BookcaseRepository extends ServiceEntityRepository
         )->setParameter('q', '%' . mb_strtolower($q) . '%');
     }
 
+    /**
+     * Restrict to community-contributed entries (legacy + user-added), excluding
+     * bulk-imported OpenStreetMap rows — used by the "newest additions" view so a
+     * recent OSM import batch can't drown out genuine community additions.
+     */
+    private function applyCommunityFilter(\Doctrine\ORM\QueryBuilder $qb): void
+    {
+        $qb->andWhere('bc.source IS NULL OR bc.source != :osmSource')
+            ->setParameter('osmSource', 'osm');
+    }
+
     /** Count entries matching the list-view search filter (for pagination). */
-    public function countFiltered(?string $q): int
+    public function countFiltered(?string $q, bool $communityOnly = false): int
     {
         $qb = $this->createQueryBuilder('bc')->select('COUNT(bc.id)');
         $this->applyListFilter($qb, $q);
+        if ($communityOnly) {
+            $this->applyCommunityFilter($qb);
+        }
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
@@ -305,11 +321,15 @@ class BookcaseRepository extends ServiceEntityRepository
         ?float $cosLat,
         int $limit,
         int $offset,
+        bool $communityOnly = false,
     ): array {
         $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
 
         $qb = $this->createQueryBuilder('bc');
         $this->applyListFilter($qb, $q);
+        if ($communityOnly) {
+            $this->applyCommunityFilter($qb);
+        }
 
         if ($sortKey === 'distance' && $uLat !== null && $uLon !== null && $cosLat !== null) {
             $qb->addSelect(

@@ -173,6 +173,9 @@
   </div>
 </div>
 
+{# API access — apply for / manage 3rd-party API access (OAuth, admin-vetted) #}
+{{ include('profile/_api_access.html.twig') }}
+
 {# Danger zone — explicit, two-step account deletion #}
 <div class="rounded-box border border-error/40 p-4">
   <h4 class="flex items-center gap-1 font-semibold text-error">{{ ui.icon('warning', 'size-4') }} {{ 'profile.danger_title'|trans }}</h4>

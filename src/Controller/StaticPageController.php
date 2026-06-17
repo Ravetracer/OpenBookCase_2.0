@@ -43,4 +43,10 @@ class StaticPageController extends AbstractController
     {
         return $this->render('static/changelog.html.twig');
     }
+
+    #[Route('/developers', name: 'app_developers')]
+    public function developers(): Response
+    {
+        return $this->render('static/developers.html.twig');
+    }
 }

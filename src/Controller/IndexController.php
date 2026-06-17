@@ -78,7 +78,7 @@ class IndexController extends AbstractController
     }
 
     private const PER_PAGE_OPTIONS = [10, 25, 50, 100];
-    private const SORT_KEYS = ['title', 'address', 'type', 'status', 'latitude', 'longitude', 'distance'];
+    private const SORT_KEYS = ['title', 'address', 'type', 'status', 'latitude', 'longitude', 'distance', 'newest'];
 
     #[Route('/list', name: 'app_list')]
     public function list(Request $request, BookcaseRepository $bookcaseRepository): Response
@@ -127,7 +127,11 @@ class IndexController extends AbstractController
         }
         $cosLat = $hasLocation ? cos(deg2rad($userLat)) : null;
 
-        $total = $bookcaseRepository->countFiltered($q);
+        // "Newest additions" is scoped to community-contributed entries so a recent
+        // bulk OpenStreetMap import can't dominate the list (the user's intent).
+        $communityOnly = $sort === 'newest';
+
+        $total = $bookcaseRepository->countFiltered($q, $communityOnly);
         $totalPages = max(1, (int) ceil($total / $perPage));
         $page = max(1, min((int) $request->query->get('page', 1), $totalPages));
 
@@ -140,6 +144,7 @@ class IndexController extends AbstractController
             $cosLat,
             $perPage,
             ($page - 1) * $perPage,
+            $communityOnly,
         );
 
         // Per-row distance (km) for the visible page only — accurate Haversine.
@@ -167,6 +172,7 @@ class IndexController extends AbstractController
             'q' => $q,
             'sort' => $sort,
             'dir' => $dir,
+            'communityOnly' => $communityOnly,
             'hasLocation' => $hasLocation,
             'userLat' => $userLat,
             'userLon' => $userLon,

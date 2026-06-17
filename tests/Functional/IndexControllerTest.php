@@ -98,6 +98,20 @@ final class IndexControllerTest extends FunctionalTestCase
         );
     }
 
+    public function testListFragmentNewestSortExcludesOsmImports(): void
+    {
+        BookcaseFactory::createOne(['title' => 'Community Added Spot']);
+        BookcaseFactory::new()->osm('n999')->create(['title' => 'Osm Imported Spot']);
+
+        $html = $this->client
+            ->request('GET', '/list/fragment', ['sort' => 'newest', 'dir' => 'desc'])
+            ->html();
+        $this->assertResponseIsSuccessful();
+
+        $this->assertStringContainsString('Community Added Spot', $html);
+        $this->assertStringNotContainsString('Osm Imported Spot', $html);
+    }
+
     public function testListFragmentPaginationLimitsRows(): void
     {
         BookcaseFactory::createMany(15, ['title' => 'Pageable Bookcase']);

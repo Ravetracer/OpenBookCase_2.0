@@ -86,7 +86,8 @@ export default class extends Controller {
             this.state.dir = this.state.dir === 'asc' ? 'desc' : 'asc';
         } else {
             this.state.sort = key;
-            this.state.dir = 'asc';
+            // "Added" (newest) is most useful newest-first; everything else asc.
+            this.state.dir = key === 'newest' ? 'desc' : 'asc';
         }
         this.state.page = 1;
         this.refresh();

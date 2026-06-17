@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+
+{% block title %}{{ 'admin.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-4xl p-4 sm:p-6">
+  <h1 class="mb-4 flex items-center gap-2 text-2xl font-bold">{{ ui.icon('shield-check') }} {{ 'admin.title'|trans }}</h1>
+  {{ include('admin/_flashes.html.twig') }}
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <a href="{{ path('app_admin_api_applications') }}"
+       class="card border border-base-300 bg-base-100 shadow-sm transition hover:shadow-md">
+      <div class="card-body">
+        <h2 class="card-title">{{ ui.icon('key', 'size-5') }} {{ 'admin.api.title'|trans }}</h2>
+        <p class="text-sm text-base-content/70">{{ 'admin.api.dashboard_help'|trans }}</p>
+        {% if pendingCount > 0 %}
+          <span class="badge badge-warning">{{ 'admin.api.pending_count'|trans({'%count%': pendingCount}) }}</span>
+        {% endif %}
+      </div>
+    </a>
+    <a href="{{ path('app_admin_api_usage') }}"
+       class="card border border-base-300 bg-base-100 shadow-sm transition hover:shadow-md">
+      <div class="card-body">
+        <h2 class="card-title">{{ ui.icon('chart-bar', 'size-5') }} {{ 'admin.usage.title'|trans }}</h2>
+        <p class="text-sm text-base-content/70">{{ 'admin.usage.dashboard_help'|trans }}</p>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

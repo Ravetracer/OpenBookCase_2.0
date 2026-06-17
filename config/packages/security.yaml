@@ -14,6 +14,19 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        # OAuth2 token endpoint — the bundle authenticates the client itself; no firewall identity.
+        oauth2_token:
+            pattern: ^/oauth/token$
+            security: false
+        # Public API (Phase 3 endpoints). Bearer-token authenticated; lazy + stateless so
+        # requests without a token pass through anonymously (public-data reads stay open),
+        # while writes are gated per-route by an OAuth scope (ROLE_OAUTH2_*).
+        api:
+            pattern: ^/api/v1
+            lazy: true
+            stateless: true
+            security: true
+            oauth2: true
         main:
             lazy: true
             provider: app_user_provider
@@ -40,7 +53,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        # The consent screen needs a logged-in user; anonymous → redirected to login first.
+        - { path: ^/oauth/authorize, roles: ROLE_USER }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

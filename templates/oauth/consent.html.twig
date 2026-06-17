@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+
+{% block title %}{{ 'oauth.consent_title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto flex max-w-lg flex-col gap-4 p-4 sm:p-6">
+  <div class="card border border-base-300 bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title flex items-center gap-2">{{ ui.icon('key') }} {{ 'oauth.consent_title'|trans }}</h1>
+
+      <p class="text-base-content/80">
+        {{ 'oauth.consent_intro'|trans({'%app%': client.name, '%user%': app.user.userIdentifier})|raw }}
+      </p>
+
+      <div class="mt-2">
+        <p class="mb-1 text-sm font-semibold">{{ 'oauth.consent_scopes'|trans }}</p>
+        {% if scopes is empty %}
+          <p class="text-sm text-base-content/60">{{ 'oauth.consent_no_scopes'|trans }}</p>
+        {% else %}
+          <ul class="space-y-1">
+            {% for scope in scopes %}
+              <li class="flex items-start gap-2 text-sm">
+                <span class="text-primary">{{ ui.icon('check-circle', 'mt-0.5 size-4 shrink-0') }}</span>
+                <span>{{ ('oauth.scope_' ~ (scope|replace({'.': '_'})))|trans }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <p class="mt-2 text-xs text-base-content/60">{{ 'oauth.consent_note'|trans }}</p>
+
+      {# Posts back to the same URL so the OAuth query params are preserved. #}
+      <form method="post" class="mt-4 flex flex-wrap gap-2">
+        <input type="hidden" name="_token" value="{{ consentToken }}">
+        <button type="submit" name="consent_action" value="approve" class="btn btn-primary gap-1">
+          {{ ui.icon('check-circle', 'size-4') }} {{ 'oauth.consent_approve'|trans }}
+        </button>
+        <button type="submit" name="consent_action" value="deny" class="btn btn-ghost gap-1">
+          {{ ui.icon('x-circle', 'size-4') }} {{ 'oauth.consent_deny'|trans }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

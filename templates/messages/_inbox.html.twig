@@ -12,6 +12,13 @@
         <p>{{ 'messages.none'|trans }}</p>
     </div>
 {% else %}
+    {# At most one open application thread per user (only one live application allowed),
+       so a single reply box at the end covers the conversation. #}
+    {% set threadApp = null %}
+    {% for message in messages %}
+        {% if message.apiApplication and message.apiApplication.status.value == 'pending' %}{% set threadApp = message.apiApplication %}{% endif %}
+    {% endfor %}
+
     <div class="max-h-[60vh] space-y-1 overflow-y-auto pr-1">
         {% for message in messages %}
             <div class="chat chat-start">
@@ -21,7 +28,7 @@
                     </div>
                 </div>
                 <div class="chat-header">
-                    {{ 'messages.system'|trans }}
+                    {{ message.sender ? message.sender.userIdentifier : 'messages.system'|trans }}
                     <time class="text-xs opacity-50" datetime="{{ message.createdAt|date('c') }}">{{ message.createdAt|date('d M Y, H:i') }}</time>
                 </div>
                 <div class="chat-bubble {{ message.readAt is null ? 'chat-bubble-primary' : '' }}">
@@ -40,4 +47,16 @@
             </div>
         {% endfor %}
     </div>
+
+    {# Reply box — the one place the inbox is two-way: an applicant answering the
+       admin inside their pending API-access application thread. Injected fragment,
+       so it carries plain data-* and is handled by message_modal_controller (delegation). #}
+    {% if threadApp %}
+        <form data-msg-reply action="{{ path('app_api_application_reply', {application: threadApp.id}) }}" class="mt-3 space-y-2 border-t border-base-200 pt-3">
+            <input type="hidden" name="_token" value="{{ csrf_token('api_reply') }}">
+            <label class="label-text text-sm font-medium">{{ 'messages.reply_label'|trans({'%app%': threadApp.appName}) }}</label>
+            <textarea name="body" rows="2" required class="textarea textarea-bordered textarea-sm w-full" placeholder="{{ 'messages.reply_placeholder'|trans }}"></textarea>
+            <button type="submit" class="btn btn-primary btn-sm">{{ 'messages.reply_send'|trans }}</button>
+        </form>
+    {% endif %}
 {% endif %}

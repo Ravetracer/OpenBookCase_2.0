@@ -1,0 +1,21 @@
+framework:
+    rate_limiter:
+        # Loose limiter for open public-data reads (GET /api/v1/*), keyed by client IP.
+        api_read:
+            policy: sliding_window
+            limit: 600
+            interval: '1 minute'
+            cache_pool: 'rate_limiter.cache'
+        # Tighter limiter for writes (POST/PATCH/DELETE), keyed by the OAuth access token.
+        api_write:
+            policy: sliding_window
+            limit: 60
+            interval: '10 minutes'
+            cache_pool: 'rate_limiter.cache'
+    cache:
+        pools:
+            # Dedicated, persistent store for limiter state (survives between requests).
+            # In tests this is cleared per-test in FunctionalTestCase::setUp (a
+            # resettable in-memory adapter would be wiped between sub-requests).
+            rate_limiter.cache:
+                adapter: cache.adapter.filesystem

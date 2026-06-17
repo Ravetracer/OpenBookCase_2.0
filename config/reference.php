@@ -629,7 +629,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         }>,
  *     },
  *     rate_limiter?: bool|array{ // Rate limiter configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         limiters?: array<string, array{ // Default: []
  *             lock_factory?: scalar|Param|null, // The service ID of the lock factory used by this limiter (or null to disable locking). // Default: "auto"
  *             cache_pool?: scalar|Param|null, // The cache pool to use for storing the current limiter state. // Default: "cache.rate_limiter"
@@ -1114,6 +1114,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             provider?: scalar|Param|null,
  *             user?: scalar|Param|null, // Default: "REMOTE_USER"
  *         },
+ *         oauth2?: array<mixed>,
  *         login_link?: array{
  *             check_route?: scalar|Param|null, // Route that will validate the login link - e.g. "app_login_link_verify".
  *             check_post_only?: scalar|Param|null, // If true, only HTTP POST requests to "check_route" will be handled by the authenticator. // Default: false
@@ -1777,6 +1778,52 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     enable_static_query_cache?: bool|Param, // Default: true
  *     connection_keys?: list<mixed>,
  * }
+ * @psalm-type LeagueOauth2ServerConfig = array{
+ *     authorization_server?: array{
+ *         private_key?: scalar|Param|null, // Full path to the private key file. How to generate a private key: https://oauth2.thephpleague.com/installation/#generating-public-and-private-keys
+ *         private_key_passphrase?: scalar|Param|null, // Passphrase of the private key, if any // Default: null
+ *         encryption_key?: scalar|Param|null, // The plain string or the ascii safe string used to create a Defuse\Crypto\Key to be used as an encryption key. How to generate an encryption key: https://oauth2.thephpleague.com/installation/#string-password
+ *         encryption_key_type?: scalar|Param|null, // The type of value of 'encryption_key' Should be either 'plain' or 'defuse' // Default: "plain"
+ *         access_token_ttl?: scalar|Param|null, // How long the issued access token should be valid for. The value should be a valid interval: http://php.net/manual/en/dateinterval.construct.php#refsect1-dateinterval.construct-parameters // Default: "PT1H"
+ *         refresh_token_ttl?: scalar|Param|null, // How long the issued refresh token should be valid for. The value should be a valid interval: http://php.net/manual/en/dateinterval.construct.php#refsect1-dateinterval.construct-parameters // Default: "P1M"
+ *         auth_code_ttl?: scalar|Param|null, // How long the issued auth code should be valid for. The value should be a valid interval: http://php.net/manual/en/dateinterval.construct.php#refsect1-dateinterval.construct-parameters // Default: "PT10M"
+ *         enable_client_credentials_grant?: bool|Param, // Whether to enable the client credentials grant // Default: true
+ *         enable_password_grant?: bool|Param, // Whether to enable the password grant // Default: true
+ *         enable_refresh_token_grant?: bool|Param, // Whether to enable the refresh token grant // Default: true
+ *         enable_auth_code_grant?: bool|Param, // Whether to enable the authorization code grant // Default: true
+ *         require_code_challenge_for_public_clients?: bool|Param, // Whether to require code challenge for public clients for the auth code grant // Default: true
+ *         enable_implicit_grant?: bool|Param, // Whether to enable the implicit grant // Default: true
+ *         persist_access_token?: bool|Param, // Whether to enable access token saving to persistence layer // Default: true
+ *         response_type_class?: scalar|Param|null, // Define a custom ResponseType // Default: null
+ *         revoke_refresh_tokens?: bool|Param, // Whether to revoke refresh tokens after they were used for all grant types // Default: true
+ *     },
+ *     resource_server?: array{
+ *         public_key?: scalar|Param|null, // Full path to the public key file How to generate a public key: https://oauth2.thephpleague.com/installation/#generating-public-and-private-keys
+ *         jwt_leeway?: scalar|Param|null, // The leeway in seconds to allow for clock skew in JWT verification. Default PT0S (no leeway). // Default: null
+ *     },
+ *     scopes?: array{
+ *         available?: list<scalar|Param|null>,
+ *         default?: list<scalar|Param|null>,
+ *     },
+ *     persistence?: array{ // Configures different persistence methods that can be used by the bundle for saving client and token data. Only one persistence method can be configured at a time.
+ *         doctrine?: array{
+ *             entity_manager?: scalar|Param|null, // Name of the entity manager that you wish to use for managing clients and tokens. // Default: "default"
+ *             table_prefix?: scalar|Param|null, // Table name prefix. // Default: "oauth2_"
+ *         },
+ *         in_memory?: scalar|Param|null,
+ *         custom?: array{
+ *             access_token_manager?: scalar|Param|null, // Service id of the custom access token manager
+ *             authorization_code_manager?: scalar|Param|null, // Service id of the custom authorization code manager
+ *             client_manager?: scalar|Param|null, // Service id of the custom client manager
+ *             refresh_token_manager?: scalar|Param|null, // Service id of the custom refresh token manager
+ *             credentials_revoker?: scalar|Param|null, // Service id of the custom credentials revoker
+ *         },
+ *     },
+ *     client?: array{
+ *         classname?: scalar|Param|null, // Set a custom client class. Must be a League\Bundle\OAuth2ServerBundle\Model\AbstractClient // Default: "League\\Bundle\\OAuth2ServerBundle\\Model\\Client"
+ *     },
+ *     role_prefix?: scalar|Param|null, // Set a custom prefix that replaces the default 'ROLE_OAUTH2_' role prefix // Default: "ROLE_OAUTH2_"
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1794,6 +1841,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     jms_serializer?: JmsSerializerConfig,
  *     stimulus?: StimulusConfig,
  *     ux_translator?: UxTranslatorConfig,
+ *     league_oauth2_server?: LeagueOauth2ServerConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1815,6 +1863,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         stimulus?: StimulusConfig,
  *         ux_translator?: UxTranslatorConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
+ *         league_oauth2_server?: LeagueOauth2ServerConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1833,6 +1882,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         jms_serializer?: JmsSerializerConfig,
  *         stimulus?: StimulusConfig,
  *         ux_translator?: UxTranslatorConfig,
+ *         league_oauth2_server?: LeagueOauth2ServerConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1854,6 +1904,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ux_translator?: UxTranslatorConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
  *         dama_doctrine_test?: DamaDoctrineTestConfig,
+ *         league_oauth2_server?: LeagueOauth2ServerConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

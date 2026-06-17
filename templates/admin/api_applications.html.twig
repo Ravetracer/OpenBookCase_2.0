@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+
+{% block title %}{{ 'admin.api.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-5xl p-4 sm:p-6">
+  <div class="mb-4 flex items-center gap-2">
+    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-ghost btn-sm gap-1">{{ ui.icon('chevron-left', 'size-4') }} {{ 'admin.back'|trans }}</a>
+    <h1 class="text-2xl font-bold">{{ 'admin.api.title'|trans }}</h1>
+  </div>
+  {{ include('admin/_flashes.html.twig') }}
+
+  {% if applications is empty %}
+    <div class="alert">{{ 'admin.api.none'|trans }}</div>
+  {% else %}
+    <div class="overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>{{ 'admin.api.col_app'|trans }}</th>
+            <th>{{ 'admin.api.col_applicant'|trans }}</th>
+            <th>{{ 'admin.api.col_date'|trans }}</th>
+            <th>{{ 'admin.api.col_status'|trans }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in applications %}
+            <tr>
+              <td class="font-medium">{{ a.appName }}</td>
+              <td>{{ a.applicant ? a.applicant.userIdentifier : '–' }}</td>
+              <td class="whitespace-nowrap tabular-nums">{{ a.createdAt|date('Y-m-d H:i') }}</td>
+              <td><span class="badge {{ a.status.badgeClass }}">{{ ('admin.api.status_' ~ a.status.value)|trans }}</span></td>
+              <td class="text-right">
+                <a href="{{ path('app_admin_api_application', {application: a.id}) }}" class="btn btn-sm gap-1">
+                  {{ ui.icon('info', 'size-4') }} {{ 'admin.api.details'|trans }}
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

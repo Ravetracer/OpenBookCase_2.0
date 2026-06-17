@@ -12,11 +12,14 @@ use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Component\Uid\Ulid;
 
 /**
- * A one-way system message delivered to a single user's inbox.
+ * A message delivered to a single user's inbox.
  *
- * There is intentionally no sender: messages are always from "the system"
- * (release notes, watchlist/wishlist notifications). Peer-to-peer messaging is
- * out of scope, so no moderation surface is created.
+ * By default messages are one-way from "the system" (release notes,
+ * watchlist/wishlist notifications) — `sender` is null and no reply is possible.
+ * The one exception is an **API-application conversation**: when `apiApplication`
+ * is set, the message belongs to a scoped admin↔applicant thread, `sender` names
+ * who wrote it, and replies are allowed (only between that applicant and admins).
+ * No general peer-to-peer messaging surface is created.
  */
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 #[ORM\Index(name: 'recipient_read', columns: ['recipient_id', 'read_at'])]
@@ -31,6 +34,16 @@ class Message
     #[ORM\ManyToOne(inversedBy: 'messages')]
     #[ORM\JoinColumn(nullable: false)]
     public ?User $recipient = null;
+
+    /** Who wrote it; null = the system. Set only inside API-application threads. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    public ?User $sender = null;
+
+    /** When set, this message is part of that application's reply-enabled thread. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    public ?ApiApplication $apiApplication = null;
 
     #[ORM\Column(length: 32, enumType: MessageType::class)]
     public MessageType $type = MessageType::Update;
@@ -61,5 +74,11 @@ class Message
     public function isRead(): bool
     {
         return $this->readAt !== null;
+    }
+
+    /** True when this message belongs to a reply-enabled API-application thread. */
+    public function isThread(): bool
+    {
+        return $this->apiApplication !== null;
     }
 }

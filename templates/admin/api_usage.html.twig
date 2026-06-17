@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+
+{% block title %}{{ 'admin.usage.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-6xl p-4 sm:p-6">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-ghost btn-sm gap-1">{{ ui.icon('chevron-left', 'size-4') }} {{ 'admin.back'|trans }}</a>
+    <h1 class="text-2xl font-bold">{{ 'admin.usage.title'|trans }}</h1>
+    <span class="badge badge-ghost">{{ 'admin.usage.total'|trans({'%count%': total}) }}</span>
+  </div>
+  {{ include('admin/_flashes.html.twig') }}
+
+  {# Filters #}
+  <form method="get" action="{{ path('app_admin_api_usage') }}" class="mb-4 flex flex-wrap items-end gap-2">
+    <label class="form-control">
+      <span class="label-text mb-1 text-xs">{{ 'admin.usage.filter_app'|trans }}</span>
+      <select name="application" class="select select-bordered select-sm">
+        <option value="">{{ 'admin.usage.filter_app_all'|trans }}</option>
+        {% for a in applications %}
+          <option value="{{ a.id }}" {{ application and application.id == a.id ? 'selected' }}>{{ a.appName }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="form-control">
+      <span class="label-text mb-1 text-xs">{{ 'admin.usage.filter_method'|trans }}</span>
+      <select name="method" class="select select-bordered select-sm">
+        <option value="">{{ 'admin.usage.filter_method_all'|trans }}</option>
+        {% for m in ['GET', 'POST', 'PATCH', 'DELETE'] %}
+          <option value="{{ m }}" {{ method == m ? 'selected' }}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="form-control flex-1">
+      <span class="label-text mb-1 text-xs">{{ 'admin.usage.filter_q'|trans }}</span>
+      <input type="search" name="q" value="{{ q }}" placeholder="{{ 'admin.usage.filter_q_placeholder'|trans }}" class="input input-bordered input-sm">
+    </label>
+    <button class="btn btn-primary btn-sm gap-1">{{ ui.icon('search', 'size-4') }} {{ 'admin.usage.filter_apply'|trans }}</button>
+  </form>
+
+  {% if logs is empty %}
+    <div class="alert">{{ 'admin.usage.none'|trans }}</div>
+  {% else %}
+    <div class="overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-zebra table-sm">
+        <thead>
+          <tr>
+            <th>{{ 'admin.usage.col_time'|trans }}</th>
+            <th>{{ 'admin.usage.col_app'|trans }}</th>
+            <th>{{ 'admin.usage.col_user'|trans }}</th>
+            <th>{{ 'admin.usage.col_method'|trans }}</th>
+            <th>{{ 'admin.usage.col_route'|trans }}</th>
+            <th>{{ 'admin.usage.col_status'|trans }}</th>
+            <th>{{ 'admin.usage.col_payload'|trans }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr>
+              <td class="whitespace-nowrap tabular-nums">{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+              <td>{{ log.apiApplication ? log.apiApplication.appName : (log.oauthClientId ?? '–') }}</td>
+              <td>{{ log.actingUser ? log.actingUser.userIdentifier : '–' }}</td>
+              <td><span class="badge badge-ghost font-mono text-xs">{{ log.method }}</span></td>
+              <td class="font-mono text-xs">{{ log.routeName ?? log.path }}</td>
+              <td>
+                <span class="badge badge-sm {{ log.statusCode < 300 ? 'badge-success' : (log.statusCode < 500 ? 'badge-warning' : 'badge-error') }}">{{ log.statusCode }}</span>
+              </td>
+              <td>
+                {% if log.requestPayload %}
+                  <details>
+                    <summary class="cursor-pointer text-xs text-base-content/60">{{ 'admin.usage.show_payload'|trans }}</summary>
+                    <pre class="mt-1 max-w-md overflow-x-auto rounded bg-base-200 p-2 text-xs">{{ log.requestPayload|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
+                  </details>
+                {% else %}
+                  <span class="text-base-content/30">–</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pages > 1 %}
+      {% set qs = {application: application ? application.id : '', method: method, q: q} %}
+      <div class="mt-4 flex justify-center">
+        <div class="join">
+          {% if page > 1 %}
+            <a href="{{ path('app_admin_api_usage', qs|merge({page: page - 1})) }}" class="btn btn-sm join-item">«</a>
+          {% endif %}
+          <span class="btn btn-sm join-item btn-disabled">{{ 'admin.usage.page'|trans({'%page%': page, '%pages%': pages}) }}</span>
+          {% if page < pages %}
+            <a href="{{ path('app_admin_api_usage', qs|merge({page: page + 1})) }}" class="btn btn-sm join-item">»</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

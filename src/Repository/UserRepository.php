@@ -47,6 +47,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $rows[0] ?? null;
     }
 
+    /**
+     * Users carrying the given role in their stored `roles` column.
+     *
+     * NB: matches the JSON-encoded array text (e.g. `["ROLE_ADMIN"]`), so it only
+     * finds *explicitly* stored roles — the implicit ROLE_USER (added in
+     * User::getRoles) is never stored and won't match here. Used to notify admins.
+     *
+     * @return User[]
+     */
+    public function findByRole(string $role): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.roles LIKE :role')
+            ->setParameter('role', '%"' . $role . '"%')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function add(User $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);

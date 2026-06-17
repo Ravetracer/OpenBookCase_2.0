@@ -12,6 +12,7 @@ export default class extends Controller {
         'languageToken',
         'homeStatus', 'homeRemove',
         'watchlist', 'watchlistEmpty', 'watchRowTemplate', 'wishlist',
+        'apiApplyButton', 'apiApplyForm', 'apiStatus',
         'confirm', 'deleteButton', 'confirmCheck', 'confirmButton', 'deleteStatus', 'deleteToken',
     ];
 
@@ -290,6 +291,46 @@ export default class extends Controller {
         const hasRows = this.watchlistTarget.children.length > 0;
         this.watchlistTarget.classList.toggle('hidden', !hasRows);
         this.watchlistEmptyTarget.classList.toggle('hidden', hasRows);
+    }
+
+    // Reveal the (initially hidden) API-access application form.
+    showApiApply() {
+        if (this.hasApiApplyFormTarget) this.apiApplyFormTarget.classList.remove('hidden');
+        if (this.hasApiApplyButtonTarget) this.apiApplyButtonTarget.classList.add('hidden');
+    }
+
+    // Submit a new API-access application; reload so the section reflects "pending".
+    async applyApi(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        await this.postApiForm(form);
+    }
+
+    // Post a reply inside a pending application's conversation thread.
+    async replyApi(event) {
+        event.preventDefault();
+        await this.postApiForm(event.currentTarget);
+    }
+
+    async postApiForm(form) {
+        const status = this.hasApiStatusTarget ? this.apiStatusTarget : null;
+        if (status) { status.textContent = ''; status.className = 'mt-1 text-sm'; }
+        try {
+            const response = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+            const json = await response.json().catch(() => ({}));
+            if (response.ok) {
+                window.location.reload();
+            } else if (status) {
+                status.textContent = json.error || this.t('transCouldNotSave', 'Could not save.');
+                status.classList.add('text-error');
+            }
+        } catch {
+            if (status) {
+                status.textContent = this.t('transCouldNotSave', 'Could not save.');
+                status.classList.add('text-error');
+            }
+        }
     }
 
     showConfirm() {

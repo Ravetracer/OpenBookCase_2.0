@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\ApiApplication;
 use App\Entity\Message;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -59,6 +60,21 @@ class MessageRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('m')
             ->andWhere('m.recipient = :user')
             ->setParameter('user', $user->id, 'ulid')
+            ->orderBy('m.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * The full admin↔applicant conversation for one application, oldest first.
+     *
+     * @return Message[]
+     */
+    public function findThreadForApplication(ApiApplication $application): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.apiApplication = :app')
+            ->setParameter('app', $application->id, 'ulid')
             ->orderBy('m.createdAt', 'ASC')
             ->getQuery()
             ->getResult();

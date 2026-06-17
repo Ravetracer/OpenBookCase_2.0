@@ -1,0 +1,47 @@
+league_oauth2_server:
+    authorization_server:
+        private_key: '%env(resolve:OAUTH_PRIVATE_KEY)%'
+        private_key_passphrase: '%env(resolve:OAUTH_PASSPHRASE)%'
+        encryption_key: '%env(resolve:OAUTH_ENCRYPTION_KEY)%'
+
+        # Short-lived access tokens, refreshed silently. Refresh tokens are long-lived
+        # (rotated on each use) and stay valid until the admin revokes the client.
+        access_token_ttl: PT1H
+        refresh_token_ttl: P1Y
+        auth_code_ttl: PT10M
+
+        # Only the Authorization Code grant (with refresh) — user-delegated access.
+        # No client-credentials (public-data reads stay open), no password/implicit grants.
+        enable_auth_code_grant: true
+        enable_refresh_token_grant: true
+        enable_client_credentials_grant: false
+        enable_password_grant: false
+        enable_implicit_grant: false
+
+        # PKCE is mandatory for public (mobile/SPA) clients.
+        require_code_challenge_for_public_clients: true
+
+        # Rotate refresh tokens: each refresh invalidates the previous one.
+        revoke_refresh_tokens: true
+    resource_server:
+        public_key: '%env(resolve:OAUTH_PUBLIC_KEY)%'
+    scopes:
+        # Write / per-user scopes only — public-data reads need no token. There is
+        # deliberately no scope for account management (email/password/etc.).
+        # Keep in sync with App\Entity\ApiApplication::AVAILABLE_SCOPES.
+        available:
+            # 'read' is a harmless baseline (public-data reads are open anyway); it
+            # exists so 'default' is non-empty (the bundle requires ≥1 default scope).
+            - 'read'
+            - 'bookcases.write'
+            - 'bookcases.delete'
+            - 'images.write'
+            - 'wishlist.write'
+            - 'watchlist.write'
+            - 'home.write'
+        default: ['read']
+    persistence:
+        # Doctrine in every env (incl. test): the bundle only ships a Doctrine
+        # credentials-revoker, and DB-backed clients/tokens persist across the
+        # request boundaries an OAuth flow crosses. DAMA rolls back per test.
+        doctrine: ~

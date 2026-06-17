@@ -34,6 +34,7 @@
                         <ul>
                             <li><a href="{{ path('app_help') }}">{{ 'nav.help'|trans }}</a></li>
                             <li><a href="{{ path('app_changelog') }}">{{ 'nav.changelog'|trans }}</a></li>
+                            <li><a href="{{ path('app_developers') }}">{{ 'nav.developers'|trans }}</a></li>
                             <li><a href="{{ path('app_about') }}">{{ 'nav.about'|trans }}</a></li>
                             <li><a href="{{ path('app_imprint') }}">{{ 'nav.imprint'|trans }}</a></li>
                             <li><a href="{{ path('app_legal') }}">{{ 'nav.legal'|trans }}</a></li>
@@ -42,6 +43,10 @@
                         </ul>
                     </details>
                 </li>
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li><a href="{{ path('app_admin_dashboard') }}" class="{{ path starts with '/admin' ? 'active' : '' }}">{{ ui.icon('shield-check', 'size-4') }} {{ 'nav.admin'|trans }}</a></li>
+                {% endif %}
 
                 <li>
                     <details>
@@ -104,6 +109,7 @@
                     <ul class="z-40 rounded-box bg-base-100 p-2 shadow-lg">
                         <li><a href="{{ path('app_help') }}">{{ 'nav.help'|trans }}</a></li>
                         <li><a href="{{ path('app_changelog') }}">{{ 'nav.changelog'|trans }}</a></li>
+                            <li><a href="{{ path('app_developers') }}">{{ 'nav.developers'|trans }}</a></li>
                         <li><a href="{{ path('app_about') }}">{{ 'nav.about'|trans }}</a></li>
                         <li><a href="{{ path('app_imprint') }}">{{ 'nav.imprint'|trans }}</a></li>
                         <li><a href="{{ path('app_legal') }}">{{ 'nav.legal'|trans }}</a></li>
@@ -112,6 +118,9 @@
                     </ul>
                 </details>
             </li>
+            {% if is_granted('ROLE_ADMIN') %}
+                <li><a href="{{ path('app_admin_dashboard') }}" class="{{ path starts with '/admin' ? 'active' : '' }}">{{ ui.icon('shield-check', 'size-4') }} {{ 'nav.admin'|trans }}</a></li>
+            {% endif %}
         </ul>
     </div>
 

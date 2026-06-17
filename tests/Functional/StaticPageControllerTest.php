@@ -23,7 +23,17 @@ final class StaticPageControllerTest extends FunctionalTestCase
             'legal' => ['/legal'],
             'licenses' => ['/licenses'],
             'changelog' => ['/changelog'],
+            'developers' => ['/developers'],
         ];
+    }
+
+    public function testDevelopersPageShowsApiDocs(): void
+    {
+        $html = $this->client->request('GET', '/developers')->html();
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('/api/v1/bookcases', $html);
+        $this->assertStringContainsString('/oauth/token', $html);
+        $this->assertStringContainsString('code_challenge', $html); // PKCE example present
     }
 
     public function testImprintRespectsGermanLocaleCookie(): void

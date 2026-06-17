@@ -8,7 +8,9 @@
 }|filter(v => v is not null and v != '') %}
 
 {% macro sortHeader(key, label, sort, dir, baseParams, extra = '') %}
-  {% set nextDir = (sort == key and dir == 'asc') ? 'desc' : 'asc' %}
+  {# "Added" (newest) is most useful newest-first, so default its first click to desc. #}
+  {% set firstDir = key == 'newest' ? 'desc' : 'asc' %}
+  {% set nextDir = (sort == key) ? (dir == 'asc' ? 'desc' : 'asc') : firstDir %}
   <th class="{{ extra }}">
     <a href="{{ path('app_list', baseParams|merge({sort: key, dir: nextDir, page: 1})) }}"
        data-sort="{{ key }}"
@@ -20,6 +22,13 @@
 {% import _self as h %}
 
 <p class="mb-3 text-sm text-base-content/60">{{ 'list.entries'|trans({ '%count%': total }) }}</p>
+
+{% if communityOnly is defined and communityOnly %}
+  <div class="alert alert-info mb-3 text-sm">
+    {{ ui.icon('info', 'size-4 shrink-0') }}
+    <span>{{ 'list.newest_note'|trans }}</span>
+  </div>
+{% endif %}
 
 {% if bookcases is empty %}
   <div class="alert">{{ q is defined and q ? 'list.no_results'|trans : 'list.none'|trans }}</div>
@@ -37,6 +46,7 @@
           {% if hasLocation %}
             {{ h.sortHeader('distance', 'list.col_distance'|trans, sort, dir, baseParams, 'text-right') }}
           {% endif %}
+          {{ h.sortHeader('newest', 'list.col_added'|trans, sort, dir, baseParams, 'text-right') }}
           <th></th>
         </tr>
       </thead>
@@ -72,6 +82,7 @@
                 {% else %}{{ 'list.distance'|trans({ '%km%': km|round(1) }) }}{% endif %}
               </td>
             {% endif %}
+            <td class="text-right tabular-nums whitespace-nowrap">{{ bookcase.createdAt ? bookcase.createdAt|date('Y-m-d') : '–' }}</td>
             <td class="text-right">
               <div class="join">
                 <button type="button" class="btn btn-sm join-item gap-1" data-bc-open="{{ bookcase.id }}">
