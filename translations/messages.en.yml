@@ -153,6 +153,7 @@ bookcase:
   required: Required
   upload: Upload
   add_caretaker: Add caretaker
+  add_opening_time: Add opening time
   alt_text: 'Image description (for screen readers)'
   alt_placeholder: 'e.g. A wooden bookcase next to a park bench'
 

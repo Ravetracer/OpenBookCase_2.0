@@ -92,6 +92,8 @@ export default class extends Controller {
                 case 'copy-link':        event.preventDefault(); this.copyLink(trigger); break;
                 case 'add-caretaker':    event.preventDefault(); this.addCaretaker(); break;
                 case 'remove-caretaker': event.preventDefault(); trigger.closest('[data-caretaker-entry]')?.remove(); break;
+                case 'add-opening-time':    event.preventDefault(); this.addOpeningTime(); break;
+                case 'remove-opening-time': event.preventDefault(); trigger.closest('[data-opening-time-entry]')?.remove(); break;
                 case 'close':  event.preventDefault(); this.element.close(); break;
             }
         };
@@ -462,6 +464,15 @@ export default class extends Controller {
     // Clone the caretaker prototype, giving it the next collection index.
     addCaretaker() {
         const container = this.bodyTarget.querySelector('[data-caretaker-collection]');
+        if (!container) return;
+        const index = parseInt(container.dataset.index || '0', 10);
+        container.insertAdjacentHTML('beforeend', container.dataset.prototype.replaceAll('__name__', index));
+        container.dataset.index = index + 1;
+    }
+
+    // Clone the opening-time prototype, giving it the next collection index.
+    addOpeningTime() {
+        const container = this.bodyTarget.querySelector('[data-opening-time-collection]');
         if (!container) return;
         const index = parseInt(container.dataset.index || '0', 10);
         container.insertAdjacentHTML('beforeend', container.dataset.prototype.replaceAll('__name__', index));

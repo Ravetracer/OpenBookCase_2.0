@@ -153,6 +153,7 @@ bookcase:
   required: Verplicht
   upload: Uploaden
   add_caretaker: Beheerder toevoegen
+  add_opening_time: Openingstijd toevoegen
   alt_text: 'Afbeeldingsbeschrijving (voor schermlezers)'
   alt_placeholder: 'bijv. Een houten boekenkast naast een parkbank'
 

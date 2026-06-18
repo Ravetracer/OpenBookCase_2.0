@@ -20,6 +20,21 @@
   </div>
 {% endmacro %}
 
+{# Renders one opening-time entry. Shared by the existing-entries loop and the
+   add-prototype, so a newly added entry looks identical to existing ones. #}
+{% macro openingTimeEntry(entry) %}
+  {% import 'components/icon.html.twig' as ui %}
+  <div class="mb-4 rounded-box border border-base-200 p-3" data-opening-time-entry>
+    <div class="mb-2 flex justify-end">
+      <button type="button" class="btn btn-ghost btn-xs gap-1 text-error" data-modal-action="remove-opening-time">
+        {{ ui.icon('trash', 'size-4') }} {{ 'delete'|trans }}
+      </button>
+    </div>
+    {{ form_row(entry.twenty_for_seven) }}
+    {{ form_row(entry.open_time) }}
+  </div>
+{% endmacro %}
+
 <form method="dialog">
   <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
 </form>
@@ -88,12 +103,16 @@
     <input type="checkbox" />
     <div class="collapse-title font-medium">{{ 'openingTimes' | trans }}</div>
     <div class="collapse-content">
-      {% for openTimeEntry in form.openingTimes %}
-        <div class="mb-4 border-b border-base-200 pb-4 last:border-0">
-          {{ form_row(openTimeEntry.twenty_for_seven) }}
-          {{ form_row(openTimeEntry.open_time) }}
-        </div>
-      {% endfor %}
+      <div data-opening-time-collection
+           data-index="{{ form.openingTimes|length }}"
+           data-prototype="{{ _self.openingTimeEntry(form.openingTimes.vars.prototype)|e('html_attr') }}">
+        {% for openTimeEntry in form.openingTimes %}
+          {{ _self.openingTimeEntry(openTimeEntry) }}
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline btn-primary gap-1" data-modal-action="add-opening-time">
+        {{ ui.icon('clock', 'size-4') }} {{ 'bookcase.add_opening_time'|trans }}
+      </button>
     </div>
   </div>
 

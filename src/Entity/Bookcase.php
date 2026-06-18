@@ -101,7 +101,7 @@ class Bookcase
     #[Serializer\Groups(['bookcase_detail'])]
     public ?Address $address = null;
 
-    #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: OpeningTime::class)]
+    #[ORM\OneToMany(mappedBy: 'bookcase', targetEntity: OpeningTime::class, cascade: ['persist'], orphanRemoval: true)]
     #[Serializer\Groups(['bookcase_detail'])]
     public Collection $openingTimes;
 
