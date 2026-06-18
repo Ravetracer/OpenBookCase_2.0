@@ -2,11 +2,53 @@
 {% import 'components/icon.html.twig' as ui %}
 <html lang="{{ app.request.locale }}">
     <head>
-        <title>{% block title %}OpenBookCase 2.0{% endblock %}</title>
+        <title>{% block title %}{{ 'seo.default_title'|trans }}{% endblock %}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="OpenBookCase - Where's the nearest public book case">
+        <meta name="description" content="{% block meta_description %}{{ 'seo.default_description'|trans }}{% endblock %}">
+        <meta name="keywords" content="{% block meta_keywords %}{{ 'seo.keywords'|trans }}{% endblock %}">
         <meta name="author" content="Christian Nielebock">
+
+        {# Canonical URL — pages that exist under more than one path (e.g. `/` and the
+           legacy `/map` backlink target) override this block to point at the single
+           preferred URL, consolidating SEO signals without a redirect. #}
+        <link rel="canonical" href="{% block canonical %}{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}{% endblock %}">
+
+        {# Open Graph / Twitter card — richer link previews + extra ranking signals. #}
+        {% set og_title = block('og_title') is defined ? block('og_title') : 'seo.default_title'|trans %}
+        {% set og_desc = block('meta_description') %}
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="OpenBookCase">
+        <meta property="og:title" content="{{ og_title }}">
+        <meta property="og:description" content="{{ og_desc }}">
+        <meta property="og:url" content="{{ app.request.uri }}">
+        <meta property="og:locale" content="{{ app.request.locale }}">
+        <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}/icons/icon-512.png">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="{{ og_title }}">
+        <meta name="twitter:description" content="{{ og_desc }}">
+        <meta name="twitter:image" content="{{ app.request.schemeAndHttpHost }}/icons/icon-512.png">
+
+        {# Structured data: tells search engines this is a searchable site, wiring the
+           sitelinks search box to the public list search (/list?q=…). #}
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "OpenBookCase",
+            "url": "{{ app.request.schemeAndHttpHost }}/",
+            "description": {{ 'seo.default_description'|trans|json_encode|raw }},
+            "inLanguage": "{{ app.request.locale }}",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": "{{ app.request.schemeAndHttpHost }}/list?q={search_term_string}"
+                },
+                "query-input": "required name=search_term_string"
+            }
+        }
+        </script>
         {# Favicons + PWA icons (generated from assets/images/obc2_icon.svg). Paths
            are absolute so they resolve on nested routes like /bookcase/{id}. #}
         <link rel="icon" href="/favicon.ico" sizes="any">

@@ -630,3 +630,12 @@ filter:
 'admin.usage.page': "Página %page% de %pages%"
 'nav.developers': "Desarrolladores"
 'static.developers.title': "API para desarrolladores"
+
+# ── SEO (títulos de página, meta descripciones, palabras clave) ──
+'seo.default_title': "OpenBookCase – Encuentra bibliotecas públicas de calle y cajas de intercambio"
+'seo.default_description': "Encuentra bibliotecas públicas de calle, estanterías de libros gratis y cajas de intercambio cerca de ti, con ubicaciones, horarios y fotos en un mapa interactivo."
+'seo.keywords': "biblioteca pública de calle, intercambio de libros, libros gratis, caja de intercambio, estantería de libros, compartir libros, biblioteca libre, libros cerca de mí"
+'seo.index_title': "Bibliotecas públicas de calle y cajas de intercambio cerca de ti | OpenBookCase"
+'seo.index_description': "Descubre bibliotecas públicas de calle y cajas de intercambio cerca de ti en un mapa interactivo. Ubicaciones, horarios y fotos, mantenido por la comunidad."
+'seo.index_h1': "Encuentra bibliotecas públicas de calle y cajas de intercambio cerca de ti"
+'seo.index_intro': "OpenBookCase muestra bibliotecas públicas de calle, estanterías de libros gratis y cajas de intercambio cerca de ti en un mapa interactivo. Consulta ubicaciones, horarios y fotos, o añade tú mismo una nueva y compártela con la comunidad."

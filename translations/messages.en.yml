@@ -630,3 +630,12 @@ filter:
 'admin.usage.page': "Page %page% of %pages%"
 'nav.developers': "Developers"
 'static.developers.title': "Developer API"
+
+# ── SEO (page titles, meta descriptions, keywords) ──
+'seo.default_title': "OpenBookCase – Find public bookcases & give-boxes near you"
+'seo.default_description': "Find public bookcases, open book-sharing shelves and give-boxes near you – with locations, opening times and photos on an interactive map."
+'seo.keywords': "public bookcases, public bookcase, little free library, free little library, book exchange, book sharing, give-box, givebox, bookcase near me, public bookshelf, swap books, free books"
+'seo.index_title': "Find public bookcases & give-boxes near you | OpenBookCase"
+'seo.index_description': "Discover public bookcases and give-boxes near you on an interactive map. Locations, opening times and photos – community-maintained. Add a public bookcase yourself."
+'seo.index_h1': "Find public bookcases and give-boxes near you"
+'seo.index_intro': "OpenBookCase shows public bookcases, open book-sharing shelves and give-boxes near you on an interactive map. Browse locations, opening times and photos of public bookcases – or add a new one and share it with the community."

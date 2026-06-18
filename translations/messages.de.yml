@@ -630,3 +630,12 @@ filter:
 'admin.usage.page': "Seite %page% von %pages%"
 'nav.developers': "Entwickler"
 'static.developers.title': "Entwickler-API"
+
+# ── SEO (Seitentitel, Meta-Beschreibungen, Schlüsselwörter) ──
+'seo.default_title': "OpenBookCase – Öffentliche Bücherschränke & Giveboxen finden"
+'seo.default_description': "Finde öffentliche Bücherschränke, offene Bücherregale und Giveboxen in deiner Nähe – mit Standorten, Öffnungszeiten und Fotos auf einer interaktiven Karte."
+'seo.keywords': "öffentliche Bücherschränke, öffentlicher Bücherschrank, Bücherschrank, Bücherschränke, Bücherzelle, offener Bücherschrank, Givebox, Giveboxen, Bücher tauschen, Bücherschrank in der Nähe, Bücherschrank Karte, Bücher verschenken"
+'seo.index_title': "Öffentliche Bücherschränke & Giveboxen in deiner Nähe finden | OpenBookCase"
+'seo.index_description': "Entdecke öffentliche Bücherschränke und Giveboxen in deiner Nähe auf einer interaktiven Karte. Standorte, Öffnungszeiten und Fotos – gemeinschaftlich gepflegt. Trage selbst einen öffentlichen Bücherschrank bei."
+'seo.index_h1': "Öffentliche Bücherschränke und Giveboxen finden"
+'seo.index_intro': "OpenBookCase zeigt dir öffentliche Bücherschränke, offene Bücherregale und Giveboxen in deiner Nähe auf einer interaktiven Karte. Entdecke Standorte, Öffnungszeiten und Fotos öffentlicher Bücherschränke – oder trage selbst einen neuen Bücherschrank bei und teile ihn mit der Community."
