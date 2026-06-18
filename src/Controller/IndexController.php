@@ -26,6 +26,7 @@ class IndexController extends AbstractController
     // content), while the inbound links still count.
     #[Route('/', name: 'app_index')]
     #[Route('/map', name: 'app_index_map')]
+    #[Route('/index', name: 'app_index_legacy')]
     public function index(): Response
     {
         $form = $this->createForm(BookcaseType::class);
