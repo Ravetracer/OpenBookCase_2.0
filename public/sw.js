@@ -14,7 +14,7 @@
  * registration script reloads open tabs once the new worker takes control — so
  * a deployed change is recognised the next time someone opens the app or page.
  */
-const SW_VERSION = '2026-06-17.5';
+const SW_VERSION = '2026-06-18.2';
 
 self.addEventListener('install', () => {
     // Don't wait for old tabs to close — take over as soon as we're installed.

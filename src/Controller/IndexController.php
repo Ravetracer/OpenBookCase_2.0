@@ -19,7 +19,13 @@ class IndexController extends AbstractController
     ) {
     }
 
+    // `/map` is served directly (HTTP 200, no redirect) so the many legacy
+    // backlinks to https://openbookcase.de/map keep resolving and pass their
+    // link equity. base.html.twig emits a rel=canonical pointing at `/` so
+    // Google consolidates both URLs into one ranking signal (no duplicate
+    // content), while the inbound links still count.
     #[Route('/', name: 'app_index')]
+    #[Route('/map', name: 'app_index_map')]
     public function index(): Response
     {
         $form = $this->createForm(BookcaseType::class);

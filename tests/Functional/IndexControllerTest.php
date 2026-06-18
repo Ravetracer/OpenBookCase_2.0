@@ -13,6 +13,44 @@ final class IndexControllerTest extends FunctionalTestCase
         $this->assertResponseIsSuccessful();
     }
 
+    public function testLegacyMapPathServesTheMapWithoutRedirect(): void
+    {
+        // Legacy backlinks point at /map; it must serve the homepage directly
+        // (HTTP 200, no redirect) so the inbound links keep their value.
+        $crawler = $this->client->request('GET', '/map');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertGreaterThan(0, $crawler->filter('#map')->count());
+    }
+
+    public function testLegacyMapPathCanonicalisesToHomepage(): void
+    {
+        // Both / and /map render the same page, so /map must declare the homepage
+        // as its canonical URL to consolidate SEO signals (no duplicate content).
+        $html = $this->client->request('GET', '/map')->html();
+
+        $this->assertMatchesRegularExpression('#<link rel="canonical" href="https?://[^/]+/">#', $html);
+    }
+
+    public function testHomepageExposesSeoTags(): void
+    {
+        $crawler = $this->client->request('GET', '/');
+        $this->assertResponseIsSuccessful();
+        $html = $this->client->getResponse()->getContent();
+
+        // Canonical, keyword meta, Open Graph and structured data for search engines.
+        $this->assertStringContainsString('<link rel="canonical"', $html);
+        $this->assertStringContainsString('name="keywords"', $html);
+        $this->assertStringContainsString('property="og:title"', $html);
+        $this->assertStringContainsString('application/ld+json', $html);
+        $this->assertStringContainsString('"@type": "WebSite"', $html);
+
+        // A real (screen-reader) H1 gives crawlers keyword-bearing text the map can't.
+        $this->assertSame(1, $crawler->filter('h1')->count());
+        $this->assertNotSame('', trim($crawler->filter('h1')->text()));
+    }
+
     public function testHomepageExposesPwaTags(): void
     {
         $html = $this->client->request('GET', '/')->html();

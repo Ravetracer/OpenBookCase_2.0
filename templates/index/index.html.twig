@@ -1,6 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}OpenBookCase 2.0{% endblock %}
+{% block title %}{{ 'seo.index_title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'seo.index_description'|trans }}{% endblock %}
+{% block og_title %}{{ 'seo.index_title'|trans }}{% endblock %}
+
+{# `/` and the legacy `/map` backlink target both render this page — canonicalise
+   both to the homepage so their ranking signals are consolidated. #}
+{% block canonical %}{{ url('app_index') }}{% endblock %}
 
 {# Map page fills the viewport and must not scroll #}
 {% block body_class %}h-screen overflow-hidden{% endblock %}
@@ -8,6 +14,13 @@
 
 {% block body %}
     {% import 'components/icon.html.twig' as ui %}
+
+    {# Crawlable text content. The Leaflet map is invisible to search engines, so a
+       real heading + intro give them keyword-bearing copy (and the page a proper H1
+       for screen readers). Visually hidden, not display:none, so it stays accessible. #}
+    <h1 class="sr-only">{{ 'seo.index_h1'|trans }}</h1>
+    <p class="sr-only">{{ 'seo.index_intro'|trans }}</p>
+
     {% set initial = initialBookcase|default(null) %}
     <div class="relative h-full" {{ stimulus_controller('map', {
         'detailstrans': 'Details'|trans,

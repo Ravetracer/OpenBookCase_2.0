@@ -629,3 +629,12 @@ filter:
 'admin.usage.page': "Page %page% sur %pages%"
 'nav.developers': "Développeurs"
 'static.developers.title': "API pour développeurs"
+
+# ── SEO (titres de page, méta-descriptions, mots-clés) ──
+'seo.default_title': "OpenBookCase – Trouver des boîtes à livres et give-boxes près de chez vous"
+'seo.default_description': "Trouvez des boîtes à livres publiques, des bibliothèques de rue et des give-boxes près de chez vous, avec adresses, horaires et photos sur une carte interactive."
+'seo.keywords': "boîte à livres, boîtes à livres, bibliothèque de rue, échange de livres, livres gratuits, give-box, partage de livres, boîte à livres près de moi"
+'seo.index_title': "Boîtes à livres et give-boxes près de chez vous | OpenBookCase"
+'seo.index_description': "Découvrez des boîtes à livres publiques et des give-boxes près de chez vous sur une carte interactive. Adresses, horaires et photos, gérés par la communauté."
+'seo.index_h1': "Trouver des boîtes à livres et des give-boxes près de chez vous"
+'seo.index_intro': "OpenBookCase affiche des boîtes à livres publiques, des bibliothèques de rue et des give-boxes près de chez vous sur une carte interactive. Consultez les adresses, horaires et photos, ou ajoutez vous-même une nouvelle boîte à livres et partagez-la avec la communauté."
