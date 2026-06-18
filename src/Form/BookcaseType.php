@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Bookcase;
+use App\Entity\OpeningTime;
 use App\Enums\EntryType;
 use App\Form\subForms\AccessibilityType;
 use App\Form\subForms\ActiveType;
@@ -59,6 +60,16 @@ class BookcaseType extends AbstractType
                     'entry_type' => OpeningTimeType::class,
                     'allow_add' => true,
                     'allow_delete' => true,
+                    'by_reference' => false,
+                    // OpeningTimeType has a checkbox (twenty_for_seven); Symfony's request
+                    // handler materialises that unchecked box for every existing child, so a
+                    // row the user removed in the UI still arrives as `[twenty_for_seven => null]`
+                    // and allow_delete's "missing key" removal never fires. delete_empty drops
+                    // such rows — but the default isEmpty treats a `false` checkbox as NOT empty,
+                    // so we define emptiness explicitly: no time text and not 24/7. This also
+                    // matches the semantics here (such an opening time is meaningless).
+                    'delete_empty' => static fn (?OpeningTime $ot): bool => null === $ot
+                        || ('' === trim((string) $ot->open_time) && !$ot->twenty_for_seven),
                 ]
             )
             ->add('comment', null, ['label' => 'form.comment'])

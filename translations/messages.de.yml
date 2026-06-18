@@ -153,6 +153,7 @@ bookcase:
   required: Erforderlich
   upload: Hochladen
   add_caretaker: Betreuungsperson hinzufügen
+  add_opening_time: Öffnungszeit hinzufügen
   alt_text: 'Bildbeschreibung (für Screenreader)'
   alt_placeholder: 'z. B. Ein hölzerner Bücherschrank neben einer Parkbank'
 

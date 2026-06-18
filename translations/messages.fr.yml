@@ -153,6 +153,7 @@ bookcase:
   required: Obligatoire
   upload: Téléverser
   add_caretaker: Ajouter un responsable
+  add_opening_time: Ajouter un horaire d'ouverture
   alt_text: 'Description de l’image (pour lecteurs d’écran)'
   alt_placeholder: 'p. ex. Une boîte à livres en bois près d’un banc'
 

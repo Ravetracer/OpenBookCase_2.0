@@ -389,6 +389,77 @@ final class BookcaseApiTest extends FunctionalTestCase
         $this->assertSame('After Save', $reloaded->title);
     }
 
+    public function testEditFormRendersOpeningTimeAddControl(): void
+    {
+        $this->loginAsUser();
+        $bc = BookcaseFactory::createOne(['title' => 'Opening Controls']);
+
+        $crawler = $this->client->request('GET', '/api/bookcase/' . $bc->id . '/edit');
+        $this->assertResponseIsSuccessful();
+
+        // The add button + the prototype-bearing collection container must be present,
+        // otherwise a user can never add an opening time to an entry that has none.
+        $this->assertGreaterThan(0, $crawler->filter('[data-modal-action="add-opening-time"]')->count());
+        $this->assertGreaterThan(0, $crawler->filter('[data-opening-time-collection][data-prototype]')->count());
+    }
+
+    public function testSaveAddsOpeningTime(): void
+    {
+        $this->loginAsUser();
+        $bc = BookcaseFactory::new()->at(50.0, 10.0)->create(['title' => 'No Hours Yet']);
+        $id = (string) $bc->id;
+        $this->assertCount(0, $bc->openingTimes);
+
+        $crawler = $this->client->request('GET', '/api/bookcase/' . $id . '/edit');
+        $form = $crawler->filter('#edit-form')->form();
+
+        // The opening-time row is added client-side from the prototype, so inject the
+        // field values the JS would have produced and POST the full form payload.
+        $values = $form->getPhpValues();
+        $values['bookcase']['openingTimes'][0] = [
+            'open_time' => '',
+            'twenty_for_seven' => '1',
+        ];
+
+        $this->client->request('POST', $form->getUri(), $values);
+        $this->assertResponseIsSuccessful();
+        $this->assertSame('success', $this->json()['status']);
+
+        // Persisted with the bookcase FK set (by_reference=false + cascade persist).
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(Bookcase::class)->find($id);
+        $this->assertCount(1, $reloaded->openingTimes);
+        $this->assertTrue($reloaded->openingTimes->first()->twenty_for_seven);
+        $this->assertSame($id, (string) $reloaded->openingTimes->first()->bookcase->id);
+    }
+
+    public function testSaveRemovesOpeningTime(): void
+    {
+        $this->loginAsUser();
+        $bc = BookcaseFactory::new()->at(50.0, 10.0)->create(['title' => 'Has Hours']);
+        OpeningTimeFactory::createOne(['bookcase' => $bc, 'twenty_for_seven' => true]);
+        $id = (string) $bc->id;
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(Bookcase::class)->find($id);
+        $this->assertCount(1, $reloaded->openingTimes);
+
+        $crawler = $this->client->request('GET', '/api/bookcase/' . $id . '/edit');
+        $form = $crawler->filter('#edit-form')->form();
+
+        // Submit with the openingTimes collection emptied (what the UI sends after the
+        // user removes the row) — delete_empty + orphanRemoval should delete it.
+        $values = $form->getPhpValues();
+        $values['bookcase']['openingTimes'] = [];
+
+        $this->client->request('POST', $form->getUri(), $values);
+        $this->assertResponseIsSuccessful();
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(Bookcase::class)->find($id);
+        $this->assertCount(0, $reloaded->openingTimes);
+    }
+
     // ---------------------------------------------------------------------
     // DELETE /api/bookcase/{id}  (soft delete, ROLE_USER, JSON reason)
     // ---------------------------------------------------------------------
