@@ -1,1 +1,3 @@
 bookcase.title_no_url: "Links zijn niet toegestaan in de titel — zet weblinks in het veld Website of Opmerking."
+position.latitude_out_of_range: "De breedtegraad moet tussen -90 en 90 liggen."
+position.longitude_out_of_range: "De lengtegraad moet tussen -180 en 180 liggen."

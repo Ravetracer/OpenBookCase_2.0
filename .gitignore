@@ -29,8 +29,6 @@ yarn-error.log
 /.idea/
 /public/images/
 *.js.map
-# Legacy data importers — kept local, never published
-/src/Command/ImportPhpMyAdminJsonCommand.php
 # Personal deployment notes — kept local, never published
 /docs/
 ###< project local/dev artifacts ###

@@ -1,6 +1,7 @@
 {% import 'components/icon.html.twig' as ui %}
 {% set path = app.request.pathInfo %}
 {% set currentLocale = app.request.locale %}
+{% set bc_count = bookcase_count() %}
 <header class="navbar sticky top-0 z-[1100] border-b border-base-300 bg-base-100/95 px-2 shadow-sm backdrop-blur sm:px-4">
     <div class="navbar-start">
         {# Mobile / tablet menu — below lg the whole navbar collapses in here so nothing
@@ -14,7 +15,7 @@
                 <li class="menu-title">
                     <span class="flex items-center gap-1 text-base-content/70">
                         {{ ui.icon('book', 'size-4') }}
-                        <span class="font-semibold tabular-nums text-base-content">{{ bookcase_count()|number_format }}</span>
+                        <span class="font-semibold tabular-nums text-base-content" data-bookcase-count data-count="{{ bc_count }}">{{ bc_count|number_format }}</span>
                         {{ 'nav.bookcase_count'|trans }}
                     </span>
                 </li>
@@ -93,7 +94,7 @@
         <div class="ml-1 hidden items-center gap-1 rounded-full bg-base-200 px-3 py-1 text-sm lg:flex"
              title="{{ 'nav.bookcase_count'|trans }}">
             {{ ui.icon('book', 'size-4 opacity-70') }}
-            <span class="font-semibold tabular-nums">{{ bookcase_count()|number_format }}</span>
+            <span class="font-semibold tabular-nums" data-bookcase-count data-count="{{ bc_count }}">{{ bc_count|number_format }}</span>
             <span class="text-base-content/60">{{ 'nav.bookcase_count'|trans }}</span>
         </div>
     </div>
@@ -183,3 +184,18 @@
         {% endif %}
     </div>
 </header>
+
+{# Live-update the navbar bookcase count when an entry is added without a full
+   page reload (the quick-add flow dispatches `bc:created`). Deletes reload the
+   page, so they refresh the count on their own. #}
+<script>
+    (function () {
+        document.addEventListener('bc:created', function () {
+            document.querySelectorAll('[data-bookcase-count]').forEach(function (el) {
+                var next = (parseInt(el.dataset.count, 10) || 0) + 1;
+                el.dataset.count = String(next);
+                el.textContent = next.toLocaleString('{{ currentLocale }}');
+            });
+        });
+    })();
+</script>

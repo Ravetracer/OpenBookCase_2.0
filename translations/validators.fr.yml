@@ -1,1 +1,3 @@
 bookcase.title_no_url: "Les liens ne sont pas autorisés dans le titre — placez les liens web dans le champ Site web ou Commentaire."
+position.latitude_out_of_range: "La latitude doit être comprise entre -90 et 90."
+position.longitude_out_of_range: "La longitude doit être comprise entre -180 et 180."
