@@ -2,18 +2,14 @@
 
 namespace App\Controller;
 
-use App\Entity\Image;
-use App\Entity\Message;
-use App\Entity\Rating;
 use App\Entity\User;
-use App\Entity\WatchlistItem;
 use App\Config\Locales;
-use App\Entity\WishlistItem;
 use App\Enums\NotificationChannel;
 use App\EventSubscriber\LocaleSubscriber;
 use App\Repository\ApiApplicationRepository;
 use App\Repository\MessageRepository;
 use App\Repository\WishlistItemRepository;
+use App\Service\UserDeletionService;
 
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -40,6 +36,7 @@ class ProfileController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly ApiApplicationRepository $apiApplications,
         private readonly MessageRepository $messages,
+        private readonly UserDeletionService $userDeletion,
     ) {
     }
 
@@ -234,46 +231,7 @@ class ProfileController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.invalid_token')], Response::HTTP_BAD_REQUEST);
         }
 
-        $userId = $current->id;
-
-        // Bulk operations keyed by id (not the entity) so they run straight against
-        // the DB regardless of what the UnitOfWork currently has managed.
-        // Keep the uploaded images but sever the personal link.
-        $this->entityManager->createQuery(
-            'UPDATE ' . Image::class . ' i SET i.uploadedBy = NULL WHERE i.uploadedBy = :id'
-        )->setParameter('id', $userId, 'ulid')->execute();
-
-        // Delete all personal data tied to the account.
-        $this->entityManager->createQuery(
-            'DELETE ' . Rating::class . ' r WHERE r.user = :id'
-        )->setParameter('id', $userId, 'ulid')->execute();
-
-        $this->entityManager->createQuery(
-            'DELETE ' . WishlistItem::class . ' w WHERE w.user = :id'
-        )->setParameter('id', $userId, 'ulid')->execute();
-
-        // Keep wishes this user dropped a copy for, but sever the personal link
-        // (the wish stays valid; it just no longer points at a deleted account).
-        $this->entityManager->createQuery(
-            'UPDATE ' . WishlistItem::class . ' w SET w.droppedBy = NULL WHERE w.droppedBy = :id'
-        )->setParameter('id', $userId, 'ulid')->execute();
-
-        $this->entityManager->createQuery(
-            'DELETE ' . Message::class . ' m WHERE m.recipient = :id'
-        )->setParameter('id', $userId, 'ulid')->execute();
-
-        $this->entityManager->createQuery(
-            'DELETE ' . WatchlistItem::class . ' w WHERE w.user = :id'
-        )->setParameter('id', $userId, 'ulid')->execute();
-
-        // Detach any stale managed entities (e.g. images with the old owner snapshot)
-        // so the flush below can't re-sync the link we just removed, then delete the user.
-        $this->entityManager->clear();
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
-        if ($user !== null) {
-            $this->entityManager->remove($user);
-            $this->entityManager->flush();
-        }
+        $this->userDeletion->deleteUser($current->id);
 
         // Log the (now deleted) user out.
         $this->tokenStorage->setToken(null);

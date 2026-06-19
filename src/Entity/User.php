@@ -44,6 +44,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     public bool $isVerified = false;
 
+    // When true the account is suspended: login is blocked in UserChecker.
+    // Reversible from the admin user-management area.
+    #[ORM\Column(options: ['default' => false])]
+    public bool $isSuspended = false;
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: WishlistItem::class, orphanRemoval: true)]
     public Collection $wishlistItems;
 

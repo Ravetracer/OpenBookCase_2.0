@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+{% set u = user %}
+
+{% block title %}{{ u.username }} – {{ 'admin.users.title'|trans }}{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-3xl p-4 sm:p-6">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <a href="{{ path('app_admin_users') }}" class="btn btn-ghost btn-sm gap-1">{{ ui.icon('chevron-left', 'size-4') }} {{ 'admin.back'|trans }}</a>
+    <h1 class="text-2xl font-bold">{{ ui.icon('user') }} {{ u.username }}</h1>
+    {% if 'ROLE_ADMIN' in u.roles %}<span class="badge badge-primary">{{ 'admin.users.badge_admin'|trans }}</span>{% endif %}
+    {% if u.isSuspended %}<span class="badge badge-error">{{ 'admin.users.badge_suspended'|trans }}</span>{% endif %}
+    {% if u.isVerified %}<span class="badge badge-success">{{ 'admin.users.badge_verified'|trans }}</span>{% else %}<span class="badge badge-warning">{{ 'admin.users.badge_unverified'|trans }}</span>{% endif %}
+  </div>
+  {{ include('admin/_flashes.html.twig') }}
+
+  {% if isSelf %}
+    <div class="alert alert-info mb-4"><span>{{ 'admin.users.self_notice'|trans }}</span></div>
+  {% endif %}
+
+  {# Account facts #}
+  <div class="mb-4 space-y-2 rounded-box border border-base-300 p-4 text-sm">
+    <div><span class="font-semibold">{{ 'admin.users.col_email'|trans }}:</span> {{ u.email }}</div>
+    <div><span class="font-semibold">{{ 'admin.users.notification_channel'|trans }}:</span> {{ u.notificationChannel.value }}</div>
+    {% if u.legacyUser and not u.legacyMigrated %}
+      <div><span class="badge badge-sm badge-ghost">{{ 'admin.users.badge_legacy'|trans }}</span> {{ 'admin.users.legacy_help'|trans }}</div>
+    {% endif %}
+  </div>
+
+  {# Correct e-mail address #}
+  <section class="mb-4 rounded-box border border-base-300 p-4">
+    <h2 class="mb-1 font-semibold">{{ ui.icon('edit', 'size-4') }} {{ 'admin.users.email_title'|trans }}</h2>
+    <p class="mb-2 text-sm text-base-content/70">{{ 'admin.users.email_help'|trans }}</p>
+    <form method="post" action="{{ path('app_admin_user_email', {user: u.id}) }}" class="flex flex-wrap items-end gap-2">
+      <input type="hidden" name="_token" value="{{ csrf_token('admin_user_email_' ~ u.id) }}">
+      <input type="email" name="email" required value="{{ u.email }}" class="input input-bordered input-sm flex-1">
+      <button class="btn btn-primary btn-sm gap-1">{{ 'admin.users.email_save'|trans }}</button>
+    </form>
+  </section>
+
+  {# Roles #}
+  <section class="mb-4 rounded-box border border-base-300 p-4">
+    <h2 class="mb-1 font-semibold">{{ ui.icon('shield-check', 'size-4') }} {{ 'admin.users.roles_title'|trans }}</h2>
+    <p class="mb-2 text-sm text-base-content/70">{{ 'admin.users.roles_help'|trans }}</p>
+    <form method="post" action="{{ path('app_admin_user_roles', {user: u.id}) }}" class="space-y-2">
+      <input type="hidden" name="_token" value="{{ csrf_token('admin_user_roles_' ~ u.id) }}">
+      <label class="flex cursor-not-allowed items-center gap-2 text-sm opacity-60">
+        <input type="checkbox" checked disabled class="checkbox checkbox-sm">
+        <span class="font-mono">ROLE_USER</span> <span class="text-xs">({{ 'admin.users.role_implicit'|trans }})</span>
+      </label>
+      {% for role in assignableRoles %}
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="roles[]" value="{{ role }}" {{ role in u.roles ? 'checked' }} class="checkbox checkbox-sm">
+          <span class="font-mono">{{ role }}</span>
+        </label>
+      {% endfor %}
+      <button class="btn btn-primary btn-sm">{{ 'admin.users.roles_save'|trans }}</button>
+    </form>
+  </section>
+
+  {# E-mail actions: re-send verification / send a reset link #}
+  <section class="mb-4 rounded-box border border-base-300 p-4">
+    <h2 class="mb-1 font-semibold">{{ ui.icon('key', 'size-4') }} {{ 'admin.users.mail_title'|trans }}</h2>
+    <p class="mb-2 text-sm text-base-content/70">{{ 'admin.users.mail_help'|trans }}</p>
+    <div class="flex flex-wrap gap-2">
+      <form method="post" action="{{ path('app_admin_user_resend', {user: u.id}) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_user_resend_' ~ u.id) }}">
+        <button class="btn btn-outline btn-sm gap-1">{{ ui.icon('bell', 'size-4') }} {{ 'admin.users.resend_verification'|trans }}</button>
+      </form>
+      <form method="post" action="{{ path('app_admin_user_reset_link', {user: u.id}) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_user_reset_link_' ~ u.id) }}">
+        <button class="btn btn-outline btn-sm gap-1">{{ ui.icon('key', 'size-4') }} {{ 'admin.users.send_reset'|trans }}</button>
+      </form>
+    </div>
+  </section>
+
+  {# Danger zone: suspend / delete #}
+  <section class="mb-4 rounded-box border border-error/40 p-4">
+    <h2 class="mb-1 font-semibold text-error">{{ ui.icon('warning', 'size-4') }} {{ 'admin.users.danger_title'|trans }}</h2>
+    <div class="flex flex-wrap gap-2">
+      {% if u.isSuspended %}
+        <form method="post" action="{{ path('app_admin_user_suspend', {user: u.id}) }}">
+          <input type="hidden" name="_token" value="{{ csrf_token('admin_user_suspend_' ~ u.id) }}">
+          <input type="hidden" name="suspend" value="0">
+          <button class="btn btn-success btn-sm gap-1">{{ ui.icon('check-circle', 'size-4') }} {{ 'admin.users.unsuspend'|trans }}</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ path('app_admin_user_suspend', {user: u.id}) }}"
+              onsubmit="return confirm('{{ 'admin.users.confirm_suspend'|trans|e('js') }}');">
+          <input type="hidden" name="_token" value="{{ csrf_token('admin_user_suspend_' ~ u.id) }}">
+          <input type="hidden" name="suspend" value="1">
+          <button class="btn btn-warning btn-sm gap-1" {{ isSelf ? 'disabled' }}>{{ ui.icon('x-circle', 'size-4') }} {{ 'admin.users.suspend'|trans }}</button>
+        </form>
+      {% endif %}
+      <form method="post" action="{{ path('app_admin_user_delete', {user: u.id}) }}"
+            onsubmit="return confirm('{{ 'admin.users.confirm_delete'|trans|e('js') }}');">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_user_delete_' ~ u.id) }}">
+        <button class="btn btn-error btn-sm gap-1" {{ isSelf ? 'disabled' }}>{{ ui.icon('trash', 'size-4') }} {{ 'admin.users.delete'|trans }}</button>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}
