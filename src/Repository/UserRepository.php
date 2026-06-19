@@ -65,6 +65,46 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
+    /**
+     * Count users matching a free-text query (username or e-mail, case-insensitive).
+     * Empty query counts every user.
+     */
+    public function countFiltered(string $q): int
+    {
+        return (int) $this->filteredQueryBuilder($q)
+            ->select('COUNT(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * One page of users matching a free-text query, newest first (ULIDs sort by
+     * creation time), for the admin user-management list.
+     *
+     * @return User[]
+     */
+    public function findFilteredPaginated(string $q, int $page, int $perPage): array
+    {
+        return $this->filteredQueryBuilder($q)
+            ->orderBy('u.id', 'DESC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+    }
+
+    private function filteredQueryBuilder(string $q): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('u');
+        $q = trim($q);
+        if ($q !== '') {
+            $qb->andWhere('LOWER(u.username) LIKE :q OR LOWER(u.email) LIKE :q')
+                ->setParameter('q', '%' . mb_strtolower($q) . '%');
+        }
+
+        return $qb;
+    }
+
     public function add(User $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);

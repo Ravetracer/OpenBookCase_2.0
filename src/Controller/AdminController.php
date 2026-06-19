@@ -7,15 +7,27 @@ use App\Entity\User;
 use App\Repository\ApiApplicationRepository;
 use App\Repository\ApiUsageLogRepository;
 use App\Repository\MessageRepository;
+use App\Repository\UserRepository;
+use App\Security\EmailVerifier;
 use App\Service\ApiApplicationService;
+use App\Service\UserDeletionService;
 
+use Doctrine\ORM\EntityManagerInterface;
+
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Administrative back office (ROLE_ADMIN). Phase 1 hosts the API-access
@@ -27,12 +39,30 @@ use Symfony\Component\Uid\Ulid;
 class AdminController extends AbstractController
 {
     private const USAGE_PER_PAGE = 50;
+    private const USERS_PER_PAGE = 50;
+    private const TOKEN_TTL = '+1 hour';
+
+    /**
+     * Roles an admin may assign/revoke from the user-management UI. ROLE_USER is
+     * implicit (granted to everyone in User::getRoles) and is never stored, so it
+     * is not listed here. Add new roles to this list as they are introduced.
+     *
+     * @var list<string>
+     */
+    public const ASSIGNABLE_ROLES = ['ROLE_ADMIN'];
 
     public function __construct(
         private readonly ApiApplicationRepository $applications,
         private readonly MessageRepository $messages,
         private readonly ApiApplicationService $applicationService,
         private readonly ApiUsageLogRepository $usageLogs,
+        private readonly UserRepository $users,
+        private readonly UserDeletionService $userDeletion,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly EmailVerifier $emailVerifier,
+        private readonly MailerInterface $mailer,
+        private readonly TranslatorInterface $translator,
+        private readonly ValidatorInterface $validator,
     ) {
     }
 
@@ -41,7 +71,167 @@ class AdminController extends AbstractController
     {
         return $this->render('admin/dashboard.html.twig', [
             'pendingCount' => $this->applications->countPending(),
+            'userCount' => $this->users->count([]),
         ]);
+    }
+
+    // ── User management ──────────────────────────────────────────────────────
+
+    #[Route('/users', name: 'users', methods: ['GET'])]
+    public function users(Request $request): Response
+    {
+        $q = trim((string) $request->query->get('q', ''));
+        $page = max(1, $request->query->getInt('page', 1));
+        $total = $this->users->countFiltered($q);
+
+        return $this->render('admin/users.html.twig', [
+            'users' => $this->users->findFilteredPaginated($q, $page, self::USERS_PER_PAGE),
+            'q' => $q,
+            'page' => $page,
+            'pages' => max(1, (int) ceil($total / self::USERS_PER_PAGE)),
+            'total' => $total,
+        ]);
+    }
+
+    #[Route('/users/{user}', name: 'user', methods: ['GET'])]
+    public function user(User $user): Response
+    {
+        return $this->render('admin/user.html.twig', [
+            'user' => $user,
+            'assignableRoles' => self::ASSIGNABLE_ROLES,
+            'isSelf' => $this->isSelf($user),
+        ]);
+    }
+
+    #[Route('/users/{user}/email', name: 'user_email', methods: ['POST'])]
+    public function updateUserEmail(Request $request, User $user): RedirectResponse
+    {
+        if ($this->validUserToken($request, 'admin_user_email', $user)) {
+            $email = trim((string) $request->request->get('email'));
+            $violations = $this->validator->validate($email, [new Assert\NotBlank(), new Assert\Email()]);
+            $existing = $email !== '' ? $this->users->loadUserByIdentifier($email) : null;
+
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'flash.invalid_email');
+            } elseif ($existing instanceof User && (string) $existing->id !== (string) $user->id) {
+                // Another account already uses this address.
+                $this->addFlash('error', 'admin.users.flash_email_taken');
+            } else {
+                $user->email = $email;
+                // A corrected address has not been proven yet — require re-verification.
+                $user->isVerified = false;
+                $this->entityManager->flush();
+                $this->addFlash('success', 'admin.users.flash_email_updated');
+            }
+        }
+
+        return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
+    }
+
+    #[Route('/users/{user}/roles', name: 'user_roles', methods: ['POST'])]
+    public function updateUserRoles(Request $request, User $user): RedirectResponse
+    {
+        if ($this->validUserToken($request, 'admin_user_roles', $user)) {
+            /** @var string[] $submitted */
+            $submitted = (array) $request->request->all('roles');
+            $roles = array_values(array_intersect(self::ASSIGNABLE_ROLES, $submitted));
+
+            // Guard against an admin removing their own ROLE_ADMIN and locking
+            // themselves out of the admin area.
+            if ($this->isSelf($user) && !in_array('ROLE_ADMIN', $roles, true)) {
+                $this->addFlash('error', 'admin.users.flash_no_self_demote');
+            } else {
+                $user->roles = $roles;
+                $this->entityManager->flush();
+                $this->addFlash('success', 'admin.users.flash_roles_updated');
+            }
+        }
+
+        return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
+    }
+
+    #[Route('/users/{user}/suspend', name: 'user_suspend', methods: ['POST'])]
+    public function toggleUserSuspension(Request $request, User $user): RedirectResponse
+    {
+        if ($this->validUserToken($request, 'admin_user_suspend', $user)) {
+            $suspend = $request->request->getBoolean('suspend');
+            if ($suspend && $this->isSelf($user)) {
+                $this->addFlash('error', 'admin.users.flash_no_self_suspend');
+            } else {
+                $user->isSuspended = $suspend;
+                $this->entityManager->flush();
+                $this->addFlash('success', $suspend ? 'admin.users.flash_suspended' : 'admin.users.flash_unsuspended');
+            }
+        }
+
+        return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
+    }
+
+    #[Route('/users/{user}/resend-verification', name: 'user_resend', methods: ['POST'])]
+    public function resendVerification(Request $request, User $user): RedirectResponse
+    {
+        if ($this->validUserToken($request, 'admin_user_resend', $user)) {
+            $this->emailVerifier->sendEmailConfirmation(
+                'app_verify_email',
+                $user,
+                (new TemplatedEmail())
+                    ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
+                    ->to($user->email)
+                    ->subject($this->translator->trans('email.confirm_subject'))
+                    ->htmlTemplate('registration/confirmation_email.html.twig')
+            );
+            $this->addFlash('success', 'admin.users.flash_verification_sent');
+        }
+
+        return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
+    }
+
+    #[Route('/users/{user}/reset-link', name: 'user_reset_link', methods: ['POST'])]
+    public function sendResetLink(Request $request, User $user): RedirectResponse
+    {
+        if ($this->validUserToken($request, 'admin_user_reset_link', $user)) {
+            // Same one-time, hashed, one-hour token as the public forgot-password flow.
+            $token = bin2hex(random_bytes(32));
+            $user->resetTokenHash = hash('sha256', $token);
+            $user->resetTokenExpiresAt = new \DateTimeImmutable(self::TOKEN_TTL);
+            $this->entityManager->flush();
+
+            $resetUrl = $this->generateUrl(
+                'app_reset_password',
+                ['token' => $token],
+                UrlGeneratorInterface::ABSOLUTE_URL,
+            );
+
+            $this->mailer->send((new TemplatedEmail())
+                ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
+                ->to($user->email)
+                ->subject($this->translator->trans('reset.email_subject'))
+                ->htmlTemplate('security/reset_email.html.twig')
+                ->context(['resetUrl' => $resetUrl, 'username' => $user->getUserIdentifier()]));
+
+            $this->addFlash('success', 'admin.users.flash_reset_sent');
+        }
+
+        return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
+    }
+
+    #[Route('/users/{user}/delete', name: 'user_delete', methods: ['POST'])]
+    public function deleteUser(Request $request, User $user): RedirectResponse
+    {
+        if ($this->validUserToken($request, 'admin_user_delete', $user)) {
+            if ($this->isSelf($user)) {
+                $this->addFlash('error', 'admin.users.flash_no_self_delete');
+
+                return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
+            }
+
+            $this->userDeletion->deleteUser($user->id);
+            $this->addFlash('success', 'admin.users.flash_deleted');
+
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        return $this->redirectToRoute('app_admin_user', ['user' => $user->id]);
     }
 
     #[Route('/api-usage', name: 'api_usage', methods: ['GET'])]
@@ -155,6 +345,22 @@ class AdminController extends AbstractController
         }
 
         return $valid;
+    }
+
+    private function validUserToken(Request $request, string $id, User $user): bool
+    {
+        $valid = $this->isCsrfTokenValid($id . '_' . $user->id, (string) $request->request->get('_token'));
+        if (!$valid) {
+            $this->addFlash('error', 'flash.invalid_token');
+        }
+
+        return $valid;
+    }
+
+    /** Is the given user the currently logged-in admin? (Self-action guard.) */
+    private function isSelf(User $user): bool
+    {
+        return $user->id !== null && (string) $this->admin()->id === (string) $user->id;
     }
 
     private function admin(): User

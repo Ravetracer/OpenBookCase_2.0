@@ -5,6 +5,7 @@ namespace App\Tests\Functional;
 use App\Entity\ApiApplication;
 use App\Entity\ApiUsageLog;
 use App\Entity\Message;
+use App\Entity\User;
 use App\Enums\ApiApplicationStatus;
 use App\Tests\Factory\ApiApplicationFactory;
 use App\Tests\Factory\UserFactory;
@@ -133,5 +134,176 @@ final class AdminControllerTest extends FunctionalTestCase
         $messages = $this->em()->getRepository(Message::class)->findBy(['recipient' => $applicant->id]);
         $this->assertCount(1, $messages);
         $this->assertNotNull($messages[0]->apiApplication);
+    }
+
+    // ── User management ──────────────────────────────────────────────────────
+
+    /** Read a form's hidden CSRF token off the rendered detail page. */
+    private function tokenFor(\Symfony\Component\DomCrawler\Crawler $crawler, string $actionSuffix): string
+    {
+        return $crawler->filter('form[action$="' . $actionSuffix . '"] input[name="_token"]')->attr('value');
+    }
+
+    public function testUsersListAndSearch(): void
+    {
+        $this->loginAsAdmin();
+        UserFactory::createOne(['username' => 'alice_wonder', 'email' => 'alice@example.com']);
+        UserFactory::createOne(['username' => 'bob_builder', 'email' => 'bob@example.com']);
+
+        $crawler = $this->client->request('GET', '/admin/users');
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('alice_wonder', $crawler->html());
+        $this->assertStringContainsString('bob_builder', $crawler->html());
+
+        // Search narrows the list.
+        $crawler = $this->client->request('GET', '/admin/users?q=alice');
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('alice_wonder', $crawler->html());
+        $this->assertStringNotContainsString('bob_builder', $crawler->html());
+    }
+
+    public function testCorrectEmailUpdatesAndRequiresReverification(): void
+    {
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne(['email' => 'old@example.com', 'isVerified' => true]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/email', [
+            '_token' => $this->tokenFor($crawler, '/email'),
+            'email' => 'fixed@example.com',
+        ]);
+        $this->assertResponseRedirects();
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($user->id);
+        $this->assertSame('fixed@example.com', $reloaded->email);
+        $this->assertFalse($reloaded->isVerified, 'a corrected address must be re-verified');
+    }
+
+    public function testAssignAndRevokeAdminRole(): void
+    {
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne(['roles' => []]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/roles', [
+            '_token' => $this->tokenFor($crawler, '/roles'),
+            'roles' => ['ROLE_ADMIN'],
+        ]);
+        $this->assertResponseRedirects();
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($user->id);
+        $this->assertContains('ROLE_ADMIN', $reloaded->roles);
+
+        // Revoke again (empty submission).
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/roles', [
+            '_token' => $this->tokenFor($crawler, '/roles'),
+        ]);
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($user->id);
+        $this->assertNotContains('ROLE_ADMIN', $reloaded->roles);
+    }
+
+    public function testSuspendAndUnsuspend(): void
+    {
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne(['isSuspended' => false]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/suspend', [
+            '_token' => $this->tokenFor($crawler, '/suspend'),
+            'suspend' => '1',
+        ]);
+        $this->em()->clear();
+        $this->assertTrue($this->em()->getRepository(User::class)->find($user->id)->isSuspended);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/suspend', [
+            '_token' => $this->tokenFor($crawler, '/suspend'),
+            'suspend' => '0',
+        ]);
+        $this->em()->clear();
+        $this->assertFalse($this->em()->getRepository(User::class)->find($user->id)->isSuspended);
+    }
+
+    public function testResendVerificationSendsEmail(): void
+    {
+        $this->client->enableProfiler();
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne(['isVerified' => false]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/resend-verification', [
+            '_token' => $this->tokenFor($crawler, '/resend-verification'),
+        ]);
+        $this->assertResponseRedirects();
+        self::assertEmailCount(1);
+    }
+
+    public function testSendResetLinkStoresTokenAndSendsEmail(): void
+    {
+        $this->client->enableProfiler();
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne();
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/reset-link', [
+            '_token' => $this->tokenFor($crawler, '/reset-link'),
+        ]);
+        $this->assertResponseRedirects();
+        self::assertEmailCount(1);
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($user->id);
+        $this->assertNotNull($reloaded->resetTokenHash);
+        $this->assertNotNull($reloaded->resetTokenExpiresAt);
+    }
+
+    public function testDeleteUserRemovesAccount(): void
+    {
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne();
+        $userId = $user->id;
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $userId);
+        $this->client->request('POST', '/admin/users/' . $userId . '/delete', [
+            '_token' => $this->tokenFor($crawler, '/delete'),
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+
+        $this->em()->clear();
+        $this->assertNull($this->em()->getRepository(User::class)->find($userId));
+    }
+
+    public function testAdminCannotDeleteOwnAccount(): void
+    {
+        $admin = $this->loginAsUser(['roles' => ['ROLE_ADMIN']]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $admin->id);
+        $this->client->request('POST', '/admin/users/' . $admin->id . '/delete', [
+            '_token' => $this->tokenFor($crawler, '/delete'),
+        ]);
+        // Stays on the detail page, account still present.
+        $this->assertResponseRedirects('/admin/users/' . $admin->id);
+
+        $this->em()->clear();
+        $this->assertNotNull($this->em()->getRepository(User::class)->find($admin->id));
+    }
+
+    public function testAdminCannotRemoveOwnAdminRole(): void
+    {
+        $admin = $this->loginAsUser(['roles' => ['ROLE_ADMIN']]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $admin->id);
+        $this->client->request('POST', '/admin/users/' . $admin->id . '/roles', [
+            '_token' => $this->tokenFor($crawler, '/roles'),
+            'roles' => [],
+        ]);
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($admin->id);
+        $this->assertContains('ROLE_ADMIN', $reloaded->roles, 'self-demotion must be blocked');
     }
 }

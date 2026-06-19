@@ -26,6 +26,14 @@
         <p class="text-sm text-base-content/70">{{ 'admin.usage.dashboard_help'|trans }}</p>
       </div>
     </a>
+    <a href="{{ path('app_admin_users') }}"
+       class="card border border-base-300 bg-base-100 shadow-sm transition hover:shadow-md">
+      <div class="card-body">
+        <h2 class="card-title">{{ ui.icon('user', 'size-5') }} {{ 'admin.users.title'|trans }}</h2>
+        <p class="text-sm text-base-content/70">{{ 'admin.users.dashboard_help'|trans }}</p>
+        <span class="badge badge-ghost">{{ 'admin.users.total'|trans({'%count%': userCount}) }}</span>
+      </div>
+    </a>
   </div>
 </div>
 {% endblock %}

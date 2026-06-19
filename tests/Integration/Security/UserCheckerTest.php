@@ -30,6 +30,18 @@ final class UserCheckerTest extends TestCase
         $this->addToAssertionCount(1); // no exception thrown
     }
 
+    public function testSuspendedUserIsBlocked(): void
+    {
+        $user = new User();
+        $user->isVerified = true;
+        $user->isSuspended = true;
+
+        $this->expectException(CustomUserMessageAccountStatusException::class);
+        $this->expectExceptionMessage('account.suspended');
+
+        (new UserChecker())->checkPreAuth($user);
+    }
+
     public function testNonAppUserIsIgnored(): void
     {
         // Foreign user types must not trip the verified check.
