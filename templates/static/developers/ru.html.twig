@@ -1,0 +1,254 @@
+{% import 'components/icon.html.twig' as ui %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">{{ ui.icon('chart-bar', 'inline-block size-7 align-text-bottom') }} OpenBookCase Developer API</h1>
+<p class="mb-2 text-base-content/70">
+  Создавай приложения на данных OpenBookCase. <strong>Чтение публичных данных открыто</strong> — ключ не нужен.
+  <strong>Запись</strong> (добавление/редактирование записей, фотографии, списки желаний, …) требует токена доступа OAuth&nbsp;2.0, который действует от
+  имени одного из твоих пользователей. Все запросы — JSON на вход / JSON на выход и находятся по адресу <code class="rounded bg-base-200 px-1">/api/v1</code>.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Базовый URL в продакшене: <code class="rounded bg-base-200 px-1">https://openbookcase.de</code>
+</p>
+
+{# ── Содержание ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#overview" class="badge badge-lg badge-ghost">{{ ui.icon('info', 'size-3') }} Обзор</a>
+  <a href="#access" class="badge badge-lg badge-ghost">{{ ui.icon('key', 'size-3') }} Получение доступа</a>
+  <a href="#auth" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Аутентификация</a>
+  <a href="#scopes" class="badge badge-lg badge-ghost">{{ ui.icon('shield-check', 'size-3') }} Области (scopes)</a>
+  <a href="#endpoints" class="badge badge-lg badge-ghost">{{ ui.icon('list', 'size-3') }} Конечные точки</a>
+  <a href="#examples" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Примеры</a>
+  <a href="#limits" class="badge badge-lg badge-ghost">{{ ui.icon('warning', 'size-3') }} Ограничения частоты</a>
+  <a href="#terms" class="badge badge-lg badge-ghost">{{ ui.icon('book', 'size-3') }} Условия данных</a>
+</div>
+
+{# ── Обзор ── #}
+<section id="overview" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('info', 'size-5') }} Как это работает</h2>
+    <ul class="ml-1 list-inside list-disc space-y-1 text-sm text-base-content/80">
+      <li><strong>Открытое чтение:</strong> список по области карты, отдельные записи, их фотографии и списки желаний публичны — вызывай их без токена.</li>
+      <li><strong>Аутентифицированная запись:</strong> каждое изменение делается <em>от имени одного из твоих пользователей</em>. Они один раз авторизуют твоё приложение (OAuth), и твой токен затем создаёт/редактирует данные под их именем.</li>
+      <li><strong>Нет конечных точек аккаунта:</strong> намеренно нет API для email, пароля, уведомлений или удаления аккаунта.</li>
+      <li><strong>Открытые данные:</strong> набор данных получен из OpenStreetMap и лицензирован по ODbL — см. <a href="#terms" class="link link-primary">Условия данных</a>.</li>
+    </ul>
+  </div>
+</section>
+
+{# ── Получение доступа ── #}
+<section id="access" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('key', 'size-5') }} Получение доступа</h2>
+    <p class="text-sm text-base-content/80">
+      Открой <strong>Профиль → Доступ к API</strong> и подай заявку с описанием своего приложения и того, как будут использоваться данные.
+      Администратор её рассматривает (есть встроенный обмен вопросами, если у него возникнут вопросы). После одобрения ты получаешь свои учётные данные:
+    </p>
+    <ul class="ml-1 mt-1 list-inside list-disc space-y-1 text-sm text-base-content/80">
+      <li><strong>Публичный клиент</strong> (мобильные / одностраничные приложения): <code>client_id</code>, <em>без секрета</em>. Должен использовать PKCE.</li>
+      <li><strong>Конфиденциальный клиент</strong> (приложения с защищённым бэкендом): <code>client_id</code> <em>и</em> <code>client_secret</code>, показываемый <strong>один раз</strong> — храни его в безопасности.</li>
+    </ul>
+    <p class="mt-1 text-sm text-base-content/60">Также ты регистрируешь один или несколько <strong>redirect URI</strong> и выбираешь нужные тебе области (scopes).</p>
+  </div>
+</section>
+
+{# ── Аутентификация ── #}
+<section id="auth" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Аутентификация (OAuth 2.0 Authorization Code)</h2>
+    <p class="text-sm text-base-content/80">
+      Две конечные точки: <code class="rounded bg-base-300 px-1">/oauth/authorize</code> (пользователь одобряет твоё приложение) и
+      <code class="rounded bg-base-300 px-1">/oauth/token</code> (ты обмениваешь полученный код на токены).
+      Токены доступа действуют <strong>1 час</strong>; refresh-токены действуют <strong>1 год</strong> (ротируются при использовании). Токены остаются действительными, пока не отозваны.
+    </p>
+
+    <h3 class="mt-3 font-semibold">1 · Публичные клиенты (мобильные/SPA) — PKCE</h3>
+    <p class="text-sm text-base-content/80">Сначала создай PKCE verifier + challenge:</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}# code_verifier: 43–128 random chars; code_challenge = base64url(sha256(verifier))
+CODE_VERIFIER=$(openssl rand -base64 60 | tr -d '\n=+/' | cut -c1-64)
+CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
+  | openssl dgst -binary -sha256 | openssl base64 | tr '+/' '-_' | tr -d '='){% endverbatim %}</code></pre>
+
+    <p class="mt-3 text-sm text-base-content/80">Отправь пользователя на URL авторизации (открой его в браузере / встроенном браузере):</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}https://openbookcase.de/oauth/authorize
+  ?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https://yourapp.example/callback
+  &scope=bookcases.write%20images.write
+  &state=RANDOM_STRING
+  &code_challenge=$CODE_CHALLENGE
+  &code_challenge_method=S256{% endverbatim %}</code></pre>
+    <p class="mt-1 text-sm text-base-content/60">После одобрения пользователя его перенаправят на
+      <code>https://yourapp.example/callback?code=AUTH_CODE&amp;state=RANDOM_STRING</code>.</p>
+
+    <p class="mt-3 text-sm text-base-content/80">Обменяй код на токены (публичные клиенты отправляют verifier, <em>без секрета</em>):</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/oauth/token \
+  -d grant_type=authorization_code \
+  -d client_id=YOUR_CLIENT_ID \
+  -d redirect_uri=https://yourapp.example/callback \
+  -d code_verifier=$CODE_VERIFIER \
+  -d code=AUTH_CODE{% endverbatim %}</code></pre>
+    <p class="mt-1 text-sm text-base-content/80">Ответ:</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}{
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "access_token": "eyJ0eXAiOiJKV1Qi...",
+  "refresh_token": "def502..."
+}{% endverbatim %}</code></pre>
+
+    <h3 class="mt-4 font-semibold">2 · Конфиденциальные клиенты (с бэкендом)</h3>
+    <p class="text-sm text-base-content/80">Тот же поток, но ты аутентифицируешься своим секретом вместо PKCE verifier:</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/oauth/token \
+  -d grant_type=authorization_code \
+  -d client_id=YOUR_CLIENT_ID \
+  -d client_secret=YOUR_CLIENT_SECRET \
+  -d redirect_uri=https://yourapp.example/callback \
+  -d code=AUTH_CODE{% endverbatim %}</code></pre>
+
+    <h3 class="mt-4 font-semibold">3 · Обновление токена</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/oauth/token \
+  -d grant_type=refresh_token \
+  -d client_id=YOUR_CLIENT_ID \
+  -d refresh_token=YOUR_REFRESH_TOKEN
+  # confidential clients also add: -d client_secret=YOUR_CLIENT_SECRET{% endverbatim %}</code></pre>
+  </div>
+</section>
+
+{# ── Области (scopes) ── #}
+<section id="scopes" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('shield-check', 'size-5') }} Области (scopes)</h2>
+    <p class="text-sm text-base-content/80">Запрашивай только то, что тебе нужно (через пробел в параметре <code>scope</code>). Для чтения область не нужна.</p>
+    <div class="mt-2 overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-sm table-zebra">
+        <thead><tr><th>Область</th><th>Даёт право</th></tr></thead>
+        <tbody>
+          <tr><td class="font-mono text-xs">bookcases.write</td><td>Добавлять &amp; редактировать записи, перемещать их позицию</td></tr>
+          <tr><td class="font-mono text-xs">bookcases.delete</td><td>Удалять запись (требуется причина; архивируется снимок)</td></tr>
+          <tr><td class="font-mono text-xs">images.write</td><td>Загружать фотографии к записи</td></tr>
+          <tr><td class="font-mono text-xs">wishlist.write</td><td>Добавлять элементы списка желаний к записи</td></tr>
+          <tr><td class="font-mono text-xs">watchlist.write</td><td>Наблюдать / прекращать наблюдение за записью для пользователя</td></tr>
+          <tr><td class="font-mono text-xs">home.write</td><td>Задавать домашнюю позицию пользователя на карте</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{# ── Конечные точки ── #}
+<section id="endpoints" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('list', 'size-5') }} Справочник конечных точек</h2>
+    <div class="mt-2 overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-sm table-zebra">
+        <thead><tr><th>Метод</th><th>Путь</th><th>Авторизация</th><th>Назначение</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список по ограничивающей рамке (<code>latMin,latMax,lonMin,lonMax</code>, <code>limit</code>≤1000, <code>offset</code>)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Отдельная запись со всеми подробностями</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/images</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список фотографий записи</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/wishlist</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список элементов списка желаний записи</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Создать запись</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Обновить поля (частично)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/position</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Переместить (latitude/longitude)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.delete</span></td><td>Удалить (требуется JSON <code>reason</code>)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/images</td><td><span class="badge badge-warning badge-sm font-mono">images.write</span></td><td>Загрузить фотографию (multipart)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/wishlist</td><td><span class="badge badge-warning badge-sm font-mono">wishlist.write</span></td><td>Добавить элемент списка желаний</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Наблюдать за записью</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Прекратить наблюдение за записью</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/profile/home</td><td><span class="badge badge-warning badge-sm font-mono">home.write</span></td><td>Задать домашнюю позицию пользователя</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-sm text-base-content/60">Bearer-токен передаётся в заголовке <code>Authorization</code>. Запись без токена возвращает <code>401</code>; с неверной областью — <code>403</code>.</p>
+  </div>
+</section>
+
+{# ── Примеры ── #}
+<section id="examples" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Использование API</h2>
+
+    <h3 class="mt-2 font-semibold">Чтение области карты (открыто)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl "https://openbookcase.de/api/v1/bookcases?latMin=52.4&latMax=52.6&lonMin=13.3&lonMax=13.5&limit=200"{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Чтение одной записи (открыто)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q0000000000000000{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Создание записи</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/api/v1/bookcases \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "title": "Community shelf at the park",
+        "entryType": "bookcase",
+        "latitude": 52.5200,
+        "longitude": 13.4050
+      }'
+# → 201 Created, returns the new entry (incl. its id). Titles may not contain URLs.{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Обновление полей (частично)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X PATCH https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q... \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"comment": "Refilled weekly", "isMobile": false, "accessibilityLevel": 3}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Перемещение записи</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q.../position \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": 52.5198, "longitude": 13.4042}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Загрузка фотографии (multipart)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q.../images \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -F imageFile=@shelf.jpg \
+  -F author="Jane Doe" \
+  -F altText="Front view of the shelf"
+# imageFile + author are required; altText is optional. Max 5 photos per entry.{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Удаление записи (требуется причина)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X DELETE https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q... \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Bookcase was removed by the property owner"}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Наблюдение · список желаний · дом</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}# Watch an entry (get notified of changes)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../watch \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+
+# Add a wishlist item (title required; author/isbn/misc optional)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../wishlist \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"title": "The Left Hand of Darkness", "author": "Ursula K. Le Guin"}'
+
+# Set the user's home map location
+curl -X POST https://openbookcase.de/api/v1/profile/home \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"latitude": 52.52, "longitude": 13.405, "zoom": 14}'{% endverbatim %}</code></pre>
+  </div>
+</section>
+
+{# ── Ограничения частоты ── #}
+<section id="limits" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('warning', 'size-5') }} Ограничения частоты &amp; ошибки</h2>
+    <ul class="ml-1 list-inside list-disc space-y-1 text-sm text-base-content/80">
+      <li><strong>Чтение:</strong> 600 запросов / минуту, на один IP.</li>
+      <li><strong>Запись:</strong> 60 запросов / 10 минут, на один токен доступа.</li>
+    </ul>
+    <p class="mt-1 text-sm text-base-content/80">
+      Превышение лимита возвращает <code>429 Too Many Requests</code> с заголовком <code>Retry-After</code> (в секундах) и
+      <code>X-RateLimit-Limit</code>. Остальные ошибки — JSON с сообщением <code>error</code>:
+      <code>400</code> неверный запрос, <code>401</code> отсутствует/недействительный токен, <code>403</code> неверная область,
+      <code>404</code> не найдено, <code>422</code> ошибка валидации (со списком <code>violations</code>).
+    </p>
+  </div>
+</section>
+
+{# ── Условия данных ── #}
+<section id="terms" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('book', 'size-5') }} Условия данных &amp; указание авторства</h2>
+    {{ include('static/_data_terms.html.twig') }}
+  </div>
+</section>

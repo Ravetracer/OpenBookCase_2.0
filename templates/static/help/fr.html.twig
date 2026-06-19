@@ -1,0 +1,243 @@
+{% import 'components/icon.html.twig' as ui %}
+{% set ic = 'inline-block size-4 align-text-bottom' %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">Premiers pas avec OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  OpenBookCase est une carte communautaire de bibliothèques publiques et de boîtes à dons. Ce guide te présente tout ce que tu peux faire —
+  trouver des entrées, les ajouter et les modifier, les photos, les listes de souhaits, les listes de suivi et bien plus encore.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Les étapes marquées <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+  nécessitent un compte gratuit. Parcourir, rechercher et lire fonctionnent sans connexion.
+</p>
+
+{# ── Sommaire ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#account" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Compte</a>
+  <a href="#search" class="badge badge-lg badge-ghost">{{ ui.icon('search', 'size-3') }} Trouver des bibliothèques</a>
+  <a href="#add" class="badge badge-lg badge-ghost">{{ ui.icon('plus', 'size-3') }} Ajouter</a>
+  <a href="#edit" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Modifier</a>
+  <a href="#photos" class="badge badge-lg badge-ghost">{{ ui.icon('photo', 'size-3') }} Photos</a>
+  <a href="#rating" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Noter</a>
+  <a href="#wishlist" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Liste de souhaits</a>
+  <a href="#watchlist" class="badge badge-lg badge-ghost">{{ ui.icon('eye', 'size-3') }} Liste de suivi</a>
+  <a href="#move" class="badge badge-lg badge-ghost">{{ ui.icon('location', 'size-3') }} Déplacer des marqueurs</a>
+  <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Position d'accueil</a>
+  <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Messages</a>
+  <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Partager</a>
+  <a href="#install" class="badge badge-lg badge-ghost">{{ ui.icon('download', 'size-3') }} Installer comme application</a>
+  <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Langue &amp; thème</a>
+</div>
+
+{# ── Compte ── #}
+<section id="account" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Compte &amp; connexion</h2>
+    <p class="text-base-content/70">Parcourir est ouvert à tout le monde ; un compte te permet d'ajouter et de modifier des entrées, d'envoyer des photos et d'utiliser les listes de souhaits.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>S'inscrire :</strong> clique sur {{ ui.icon('user', ic) }} <em>S'inscrire</em> dans la barre du haut et choisis un nom d'utilisateur, un e-mail et un mot de passe. Tu recevras un e-mail de confirmation — clique sur le lien qu'il contient pour vérifier ton adresse.</li>
+      <li><strong>Se connecter :</strong> clique sur {{ ui.icon('login', ic) }} <em>Connexion</em>.</li>
+      <li><strong>Mot de passe oublié ?</strong> Ouvre la fenêtre de connexion et clique sur <em>Mot de passe oublié ?</em>, saisis ton e-mail et suis le lien que nous t'envoyons pour définir un nouveau mot de passe.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Trouver ── #}
+<section id="search" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('search', 'size-5') }} Trouver des bibliothèques</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Barre de recherche</strong> (en haut à gauche de la carte) : saisis le nom d'une bibliothèque, un lieu ou une adresse (via OpenStreetMap / Photon), ou des coordonnées comme <code>50.19, 8.8</code>. Choisis une suggestion pour t'y rendre.</li>
+      <li><strong>Me localiser :</strong> le bouton {{ ui.icon('location', ic) }} à côté des commandes de zoom centre la carte sur ta position et affiche la distance jusqu'à chaque bibliothèque dans son infobulle.</li>
+      <li><strong>Vue en liste :</strong> la page {{ ui.icon('list', ic) }} <em>Liste</em> te permet de rechercher, de trier les colonnes et de classer par « Le plus proche de moi ». Tu peux aussi télécharger toutes les entrées au format JSON avec <em>Exporter</em>.</li>
+      <li><strong>Couleurs des marqueurs :</strong> les épingles sont colorées selon l'accessibilité (rouge / jaune / vert) ; les boîtes à dons et les entrées actuellement indisponibles ont leurs propres icônes.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Ajouter ── #}
+<section id="add" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('plus', 'size-5') }} Ajouter une entrée
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+    </h2>
+    <p class="text-base-content/70">Il existe trois façons de commencer un ajout :</p>
+    <ul class="ml-1 list-disc space-y-1 pl-5">
+      <li>Le bouton {{ ui.icon('plus', ic) }} <em>Ajouter une bibliothèque</em> dans la barre du haut.</li>
+      <li><strong>Clic droit</strong> n'importe où sur la carte (ou <strong>appui long</strong> sur écran tactile) → <em>Ajouter une bibliothèque ici</em>.</li>
+      <li>Depuis l'infobulle <em>Me localiser</em> → <em>Ajouter une bibliothèque ici</em>.</li>
+    </ul>
+    <p class="mt-2 text-base-content/70">Remplis ensuite le formulaire d'ajout rapide :</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Saisis un <strong>titre</strong>, le <strong>type</strong> (bibliothèque ou boîte à dons) et le <strong>type d'installation</strong>.</li>
+      <li>Définis les <strong>coordonnées</strong> — elles sont préremplies si tu as commencé depuis la carte. Tu peux aussi coller une chaîne <code>geo:lat,lon</code> ou rechercher une adresse pour les positionner.</li>
+      <li>Clique sur <strong>Ajouter</strong>. L'épingle apparaît immédiatement sur la carte et un panneau propose d'<em>ajouter tous les détails</em>, d'<em>ajouter des photos</em> ou de terminer avec <em>Terminé</em>.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Modifier ── #}
+<section id="edit" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Modifier une entrée
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Ouvre une entrée (clique sur son marqueur → <em>Détails</em>), puis clique sur {{ ui.icon('edit', ic) }} <em>Modifier</em>.</li>
+      <li>Ajuste le titre, le type, le site web et le bouton <strong>fixe / mobile</strong>.</li>
+      <li>Définis l'<strong>accessibilité</strong> avec le feu tricolore rouge / jaune / vert et une description facultative.</li>
+      <li>Définis le <strong>statut</strong> (actif ou inactif). Pour les entrées inactives, tu peux ajouter un motif qui s'affiche sur la carte et dans la vue détaillée.</li>
+      <li>Ajoute les <strong>horaires d'ouverture</strong> et les <strong>responsables</strong>, puis <strong>Enregistrer</strong>. Toute personne qui suit l'entrée est avertie des changements.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Photos ── #}
+<section id="photos" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('photo', 'size-5') }} Gérer les photos
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Ouvre une entrée → {{ ui.icon('photo', ic) }} <em>Photos</em>.</li>
+      <li><strong>Envoie</strong> jusqu'à cinq images. Un nom d'auteur est obligatoire ; tu peux ajouter une courte description (texte alternatif) que les lecteurs d'écran lisent à voix haute.</li>
+      <li>Utilise {{ ui.icon('rotate-cw', ic) }} pour faire pivoter une photo, modifier sa description ou la supprimer avec {{ ui.icon('trash', ic) }}.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Noter ── #}
+<section id="rating" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Noter une bibliothèque</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>La vue détaillée affiche la note moyenne sous forme de cœurs.</li>
+      <li>Une fois connecté, clique sur <em>Noter</em>, choisis tes cœurs, et c'est enregistré instantanément — la moyenne se met à jour en direct.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Liste de souhaits ── #}
+<section id="wishlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Liste de souhaits — demander &amp; remettre des livres</h2>
+    <p class="text-base-content/70">La liste de souhaits permet de demander un livre précis dans une bibliothèque et permet à d'autres d'y déposer un exemplaire.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Ouvre une entrée → {{ ui.icon('heart', ic) }} <em>Liste de souhaits</em> et ajoute le livre que tu cherches (titre, auteur facultatif).</li>
+      <li>Quelqu'un qui possède ce livre peut <strong>y déposer un exemplaire</strong> — tu es averti lorsque c'est le cas.</li>
+      <li>Une fois que tu l'as récupéré, marque-le comme <strong>récupéré</strong> ; s'il a disparu, marque-le comme <strong>non trouvé</strong>.</li>
+      <li>Un badge sur le marqueur de la carte indique le nombre de souhaits ouverts d'une bibliothèque.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Liste de suivi ── #}
+<section id="watchlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('eye', 'size-5') }} Liste de suivi — suivre une entrée
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Sur une entrée, clique sur {{ ui.icon('eye', ic) }} <em>Suivre</em> pour la suivre.</li>
+      <li>Tu recevras un message dès que quelqu'un la modifie ou la déplace.</li>
+      <li>Consulte et gère tout ce que tu suis dans ton profil.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Déplacer des marqueurs ── #}
+<section id="move" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('location', 'size-5') }} Déplacer un marqueur
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Une fois connecté, il te suffit de <strong>faire glisser un marqueur</strong> jusqu'à son emplacement correct.</li>
+      <li>Confirme le déplacement et la nouvelle position est enregistrée. Si tu annules, le marqueur revient en place.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Position d'accueil ── #}
+<section id="home" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('home', 'size-5') }} Ta position d'accueil
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} compte</span>
+    </h2>
+    <p class="text-base-content/70">Définis un point de départ personnel pour que la carte s'ouvre là où tu le souhaites.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Depuis la carte :</strong> clic droit (ou appui long) sur un point → <em>Définir comme position d'accueil</em> (juste sous le bouton d'ajout ; une confirmation est demandée). Cela enregistre le point et ton niveau de zoom actuel.</li>
+      <li><strong>Depuis ton profil :</strong> saisis la latitude, la longitude et le zoom, puis active le bouton.</li>
+      <li>Lorsqu'elle est activée, la carte s'ouvre centrée sur ta position d'accueil et un marqueur {{ ui.icon('home', ic) }} indique le point.</li>
+      <li>Supprime-la à tout moment avec <em>Supprimer la position d'accueil</em> dans ton profil.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Messages ── #}
+<section id="messages" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('inbox', 'size-5') }} Messages &amp; notifications</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>La boîte de réception {{ ui.icon('inbox', ic) }} dans la barre du haut rassemble les messages système — les mises à jour de la liste de suivi et de la liste de souhaits ainsi que les annonces.</li>
+      <li>Choisis comment tu es averti dans ton profil : dans l'application, par e-mail, ou les deux.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Partager ── #}
+<section id="share" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Partager une entrée</h2>
+    <p class="text-base-content/70">La vue détaillée de chaque entrée comporte un lien en lecture seule avec un bouton <em>Copier</em>. Quiconque l'ouvre arrive sur la carte centrée sur cette bibliothèque, avec ses détails ouverts.</p>
+  </div>
+</section>
+
+{# ── Installer comme application (PWA) ── #}
+<section id="install" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('download', 'size-5') }} Installer comme application</h2>
+    <p class="text-base-content/70">
+      OpenBookCase peut s'installer comme une application normale, te donnant une icône sur ton écran d'accueil ou ton bureau et sa propre
+      fenêtre — tandis que tout continue de se charger en direct depuis le site web. L'installation est facultative ; le site fonctionne tout aussi bien dans un navigateur.
+    </p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Le plus simple :</strong> lorsque ton navigateur le prend en charge, un bouton {{ ui.icon('download', ic) }} <em>Installer l'application</em> apparaît dans la barre du haut (et dans le menu sur téléphone). Touche-le et confirme.</li>
+      <li><strong>Android (Chrome) :</strong> certaines versions n'affichent pas d'invite évidente pendant la navigation. Si tu ne vois pas le bouton, ouvre le menu du navigateur ({{ ui.icon('menu', ic) }} <em>⋮</em>) et choisis <em>Installer l'application</em> / <em>Ajouter à l'écran d'accueil</em>.</li>
+      <li><strong>Ordinateur (Chrome / Edge) :</strong> utilise le bouton {{ ui.icon('download', ic) }} <em>Installer l'application</em>, ou la petite icône d'installation à l'extrémité droite de la barre d'adresse.</li>
+      <li>
+        <strong>iPhone &amp; iPad (Safari) :</strong> Apple ne propose pas d'invite d'installation automatique, donc il n'est pas évident que ce soit possible. Le bouton {{ ui.icon('download', ic) }} <em>Installer l'application</em> te montre comment : touche le bouton <em>Partager</em> dans Safari, puis choisis <em>Sur l'écran d'accueil</em>. (Cela ne fonctionne que dans Safari, pas dans Chrome ou Firefox sous iOS.)
+      </li>
+    </ol>
+
+    <div role="alert" class="alert mt-4">
+      {{ ui.icon('warning', 'size-5') }}
+      <div>
+        <h3 class="font-semibold">{{ ui.icon('location', ic) }} iPhone &amp; iPad : « Me localiser » et ta position</h3>
+        <p class="mt-1 text-sm text-base-content/80">
+          Sur les appareils Apple, le bouton {{ ui.icon('location', ic) }} <em>Me localiser</em> (et « ajouter une bibliothèque ici » depuis ta position) ne fonctionne que si l'accès à la localisation est autorisé :
+        </p>
+        <ol class="ml-1 mt-2 list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+          <li>Lorsque tu touches <em>Me localiser</em> pour la première fois, iOS demande l'autorisation — choisis <em>Autoriser</em>.</li>
+          <li>S'il ne se passe rien ou si tu as touché « Refuser » auparavant, réactive-la dans <em>Réglages → Confidentialité &amp; sécurité → Service de localisation</em> : assure-toi que le service de localisation est activé, puis règle <em>Sites web Safari</em> (ou, si tu as installé OpenBookCase sur l'écran d'accueil, l'app OpenBookCase) sur <em>Lorsque l'app est active</em>.</li>
+          <li>Pour une épingle précise, active aussi <em>Position exacte</em> pour cette entrée.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Langue & thème ── #}
+<section id="prefs" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('language', 'size-5') }} Langue &amp; thème</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Change la langue de l'interface avec le sélecteur {{ ui.icon('language', ic) }} dans la barre du haut.</li>
+      <li>Bascule entre le mode clair et le mode sombre avec l'interrupteur {{ ui.icon('sun', ic) }} / {{ ui.icon('moon', ic) }}. Ton choix est mémorisé sur cet appareil.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="mt-8 text-center text-sm text-base-content/60">
+  Toujours bloqué ? Contacte-nous à <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.
+</p>

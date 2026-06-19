@@ -25,6 +25,7 @@
   <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Zuhause</a>
   <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Nachrichten</a>
   <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Teilen</a>
+  <a href="#install" class="badge badge-lg badge-ghost">{{ ui.icon('download', 'size-3') }} Als App installieren</a>
   <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Sprache &amp; Design</a>
 </div>
 
@@ -189,6 +190,40 @@
   <div class="card-body">
     <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Einen Eintrag teilen</h2>
     <p class="text-base-content/70">Die Detailansicht jedes Eintrags enthält einen schreibgeschützten Link mit einer <em>Kopieren</em>-Schaltfläche. Wer ihn öffnet, landet auf der Karte zentriert auf diesem Schrank mit geöffneten Details.</p>
+  </div>
+</section>
+
+{# ── Als App installieren (PWA) ── #}
+<section id="install" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('download', 'size-5') }} Als App installieren</h2>
+    <p class="text-base-content/70">
+      OpenBookCase lässt sich wie eine normale App installieren — mit einem Symbol auf dem Startbildschirm oder Desktop und
+      einem eigenen Fenster — während alles weiterhin live von der Website geladen wird. Die Installation ist optional; im Browser funktioniert die Seite genauso.
+    </p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Am einfachsten:</strong> Wenn dein Browser es unterstützt, erscheint oben in der Leiste (auf dem Handy im Menü) eine Schaltfläche {{ ui.icon('download', ic) }} <em>App installieren</em>. Tippe darauf und bestätige.</li>
+      <li><strong>Android (Chrome):</strong> Manche Versionen zeigen beim Surfen keine eindeutige Aufforderung. Siehst du die Schaltfläche nicht, öffne das Browser-Menü ({{ ui.icon('menu', ic) }} <em>⋮</em>) und wähle <em>App installieren</em> / <em>Zum Startbildschirm hinzufügen</em>.</li>
+      <li><strong>Desktop (Chrome / Edge):</strong> Nutze die Schaltfläche {{ ui.icon('download', ic) }} <em>App installieren</em> oder das kleine Installations-Symbol am rechten Ende der Adressleiste.</li>
+      <li>
+        <strong>iPhone &amp; iPad (Safari):</strong> Apple bietet keine automatische Installations-Aufforderung, daher ist nicht offensichtlich, dass es möglich ist. Die Schaltfläche {{ ui.icon('download', ic) }} <em>App installieren</em> zeigt dir, wie: Tippe in Safari auf die Schaltfläche <em>Teilen</em> und wähle dann <em>Zum Home-Bildschirm</em>. (Das geht nur in Safari, nicht in Chrome oder Firefox unter iOS.)
+      </li>
+    </ol>
+
+    <div role="alert" class="alert mt-4">
+      {{ ui.icon('warning', 'size-5') }}
+      <div>
+        <h3 class="font-semibold">{{ ui.icon('location', ic) }} iPhone &amp; iPad: „Mein Standort“ und deine Position</h3>
+        <p class="mt-1 text-sm text-base-content/80">
+          Auf Apple-Geräten funktioniert die Schaltfläche {{ ui.icon('location', ic) }} <em>Mein Standort</em> (und „Bücherschrank hier hinzufügen“ von deinem Standort aus) nur, wenn der Standortzugriff erlaubt ist:
+        </p>
+        <ol class="ml-1 mt-2 list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+          <li>Wenn du zum ersten Mal auf <em>Mein Standort</em> tippst, fragt iOS nach der Berechtigung — wähle <em>Erlauben</em>.</li>
+          <li>Passiert nichts oder hast du zuvor „Nicht erlauben“ getippt, schalte sie unter <em>Einstellungen → Datenschutz &amp; Sicherheit → Ortungsdienste</em> wieder ein: Stelle sicher, dass die Ortungsdienste an sind, und setze <em>Safari-Websites</em> (oder, falls du OpenBookCase zum Home-Bildschirm hinzugefügt hast, die OpenBookCase-App) auf <em>Beim Verwenden der App</em>.</li>
+          <li>Für einen genauen Pin aktiviere zusätzlich <em>Genauer Standort</em> für diesen Eintrag.</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
