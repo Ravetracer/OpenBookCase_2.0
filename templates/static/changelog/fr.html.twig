@@ -1,0 +1,110 @@
+{# Changelog — Français. Garder la version la plus récente EN HAUT.
+   Convention de badges : badge-success = Nouveau, badge-info = Amélioré, badge-warning = Corrigé.
+   Lorsque tu ajoutes une version ici, reporte-la aussi dans en.html.twig. #}
+<h1 class="text-3xl font-bold">{{ 'static.changelog.title'|trans }}</h1>
+<p class="mt-2 text-base-content/70">{{ 'static.changelog.lead'|trans }}</p>
+
+<div class="mt-8 space-y-10">
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">19 juin 2026</h2>
+      <span class="badge badge-info badge-soft">Mise à jour</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-info badge-sm shrink-0">Amélioré</span>
+        <span>Le <strong>Guide</strong> explique désormais comment <strong>installer OpenBookCase comme application</strong> (écran d'accueil / bureau) — y compris les étapes pas si évidentes sur Android et iPhone — et comment activer l'accès à la localisation sur iPhone &amp; iPad pour que le bouton <strong>« Me localiser »</strong> fonctionne.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">18 juin 2026</h2>
+      <span class="badge badge-warning badge-soft">Correctif</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-warning badge-sm shrink-0">Corrigé</span>
+        <span>Les horaires d'ouverture peuvent à nouveau être ajoutés et modifiés : la section « Horaires d'ouverture » de l'éditeur dispose maintenant d'un bouton <strong>Ajouter un horaire d'ouverture</strong>, qui permet de définir « 24/7 » ou des heures précises — y compris sur des entrées toutes neuves. La suppression d'un horaire d'ouverture est désormais bien enregistrée également.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-warning badge-sm shrink-0">Corrigé</span>
+        <span>Le <strong>compteur d'entrées</strong> de la barre de menu est de nouveau exact (une entrée avait une coordonnée erronée qui la laissait hors de la carte) et s'incrémente maintenant <strong>instantanément</strong> lorsque tu ajoutes une bibliothèque, sans avoir besoin de recharger la page.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">17 juin 2026</h2>
+      <span class="badge badge-info badge-soft">Mise à jour</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>La page Liste peut désormais être triée par « Ajouté » pour afficher d'abord les ajouts les plus récents de la communauté, chacun avec la date de son ajout. (Les imports en masse depuis OpenStreetMap sont exclus de cette vue.)</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>Demande un <strong>accès à l'API</strong> depuis ton profil — les développeurs peuvent demander une clé OAuth&nbsp;2.0 pour créer des applications sur les données d'OpenBookCase (examiné par un administrateur, avec un dialogue intégré).</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>Une nouvelle <strong>API publique</strong> (<code>/api/v1</code>) : des points d'accès en lecture ouverts (zone de carte, entrée unique, photos, liste de souhaits) ainsi que des points d'accès en écriture sécurisés par OAuth (ajouter/modifier/déplacer/supprimer des entrées, envoyer des photos, liste de souhaits, liste de suivi, position d'accueil). Une page <a class="link link-primary" href="{{ path('app_developers') }}">Pour&nbsp;les développeurs</a> sous Info la documente avec des exemples.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>Un <strong>espace d'administration</strong> pour examiner, approuver, refuser et révoquer les demandes d'accès à l'API (administrateurs uniquement).</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">15 juin 2026</h2>
+      <span class="badge badge-info badge-soft">Mise à jour</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>Installe OpenBookCase comme application sur ton téléphone ou ton ordinateur (« Ajouter à l'écran d'accueil ») — elle s'ouvre dans sa propre fenêtre et affiche toujours des données en direct.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>« Me suivre » sur la carte : un nouveau bouton suit ta position en direct et garde la carte centrée pendant que tu te déplaces. Touche-le à nouveau, ou déplace la carte, pour arrêter.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-warning badge-sm shrink-0">Corrigé</span>
+        <span>La localisation fonctionne maintenant dans l'application installée sur iPhone, avec une indication claire te dirigeant vers les Réglages si l'accès à la localisation est bloqué.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-warning badge-sm shrink-0">Corrigé</span>
+        <span>L'export de données sur la page Liste n'échoue plus sur l'ensemble du jeu de données — il est désormais diffusé en flux au lieu d'être construit d'un seul coup.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>L'export peut maintenant être téléchargé compressé (<code>.json.gz</code>) — un fichier bien plus petit pour l'ensemble du jeu de données.</span>
+      </li>
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-info badge-sm shrink-0">Amélioré</span>
+        <span>Le téléchargement de l'export de données affiche désormais d'abord les conditions d'utilisation (licence ODbL, attribution OpenStreetMap, pas de réimport dans OSM) — le téléchargement démarre une fois que tu acceptes.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="flex flex-wrap items-baseline gap-3">
+      <h2 class="text-xl font-semibold">14 juin 2026</h2>
+      <span class="badge badge-primary badge-soft">Première version</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <li class="flex flex-wrap items-start gap-2">
+        <span class="badge badge-success badge-sm shrink-0">Nouveau</span>
+        <span>Première version publique d'OpenBookCase 2.0 : rechercher sur la carte les bibliothèques publiques et les boîtes à dons, consulter les détails et les photos, gérer ta liste de souhaits, noter les emplacements, ajouter ou repositionner des entrées — avec une interface multilingue et un thème clair/sombre.</span>
+      </li>
+    </ul>
+  </section>
+
+</div>

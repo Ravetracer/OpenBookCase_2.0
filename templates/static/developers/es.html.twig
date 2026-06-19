@@ -1,0 +1,254 @@
+{% import 'components/icon.html.twig' as ui %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">{{ ui.icon('chart-bar', 'inline-block size-7 align-text-bottom') }} API para desarrolladores de OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  Crea apps con los datos de OpenBookCase. <strong>Leer datos públicos es abierto</strong> — no se necesita clave.
+  <strong>Escribir</strong> (añadir/editar entradas, fotos, listas de deseos, …) requiere un token de acceso OAuth&nbsp;2.0 que actúa en
+  nombre de uno de tus usuarios. Todas las peticiones son JSON de entrada / JSON de salida y viven bajo <code class="rounded bg-base-200 px-1">/api/v1</code>.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  URL base en producción: <code class="rounded bg-base-200 px-1">https://openbookcase.de</code>
+</p>
+
+{# ── Índice ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#overview" class="badge badge-lg badge-ghost">{{ ui.icon('info', 'size-3') }} Resumen</a>
+  <a href="#access" class="badge badge-lg badge-ghost">{{ ui.icon('key', 'size-3') }} Obtener acceso</a>
+  <a href="#auth" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Autenticación</a>
+  <a href="#scopes" class="badge badge-lg badge-ghost">{{ ui.icon('shield-check', 'size-3') }} Ámbitos (scopes)</a>
+  <a href="#endpoints" class="badge badge-lg badge-ghost">{{ ui.icon('list', 'size-3') }} Endpoints</a>
+  <a href="#examples" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Ejemplos</a>
+  <a href="#limits" class="badge badge-lg badge-ghost">{{ ui.icon('warning', 'size-3') }} Límites de uso</a>
+  <a href="#terms" class="badge badge-lg badge-ghost">{{ ui.icon('book', 'size-3') }} Condiciones de los datos</a>
+</div>
+
+{# ── Resumen ── #}
+<section id="overview" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('info', 'size-5') }} Cómo funciona</h2>
+    <ul class="ml-1 list-inside list-disc space-y-1 text-sm text-base-content/80">
+      <li><strong>Lecturas abiertas:</strong> el listado del área del mapa, las entradas individuales, sus fotos y listas de deseos son públicos — llámalos sin token.</li>
+      <li><strong>Escrituras autenticadas:</strong> cada cambio se realiza <em>como uno de tus usuarios</em>. Ellos autorizan tu app una vez (OAuth) y tu token crea/edita datos a su nombre.</li>
+      <li><strong>Sin endpoints de cuenta:</strong> deliberadamente no hay API para el correo, la contraseña, las notificaciones ni la eliminación de la cuenta.</li>
+      <li><strong>Datos abiertos:</strong> el conjunto de datos procede de OpenStreetMap y está licenciado bajo la ODbL — consulta las <a href="#terms" class="link link-primary">Condiciones de los datos</a>.</li>
+    </ul>
+  </div>
+</section>
+
+{# ── Obtener acceso ── #}
+<section id="access" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('key', 'size-5') }} Obtener acceso</h2>
+    <p class="text-sm text-base-content/80">
+      Abre tu <strong>Perfil → Acceso a la API</strong> y envía una solicitud describiendo tu app y cómo usarás los datos.
+      Un administrador la revisa (hay un intercambio integrado de preguntas y respuestas si tienen dudas). Tras la aprobación recibes tus credenciales:
+    </p>
+    <ul class="ml-1 mt-1 list-inside list-disc space-y-1 text-sm text-base-content/80">
+      <li><strong>Cliente público</strong> (apps móviles / de página única): un <code>client_id</code>, <em>sin secreto</em>. Debe usar PKCE.</li>
+      <li><strong>Cliente confidencial</strong> (apps con un backend seguro): un <code>client_id</code> <em>y</em> un <code>client_secret</code> que se muestra <strong>una sola vez</strong> — guárdalo de forma segura.</li>
+    </ul>
+    <p class="mt-1 text-sm text-base-content/60">También registras una o varias <strong>URIs de redirección</strong> y eliges los ámbitos que necesitas.</p>
+  </div>
+</section>
+
+{# ── Autenticación ── #}
+<section id="auth" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Autenticación (OAuth 2.0 Authorization Code)</h2>
+    <p class="text-sm text-base-content/80">
+      Dos endpoints: <code class="rounded bg-base-300 px-1">/oauth/authorize</code> (el usuario aprueba tu app) y
+      <code class="rounded bg-base-300 px-1">/oauth/token</code> (intercambias el código resultante por tokens).
+      Los tokens de acceso duran <strong>1 hora</strong>; los tokens de actualización duran <strong>1 año</strong> (se rotan al usarlos). Los tokens siguen siendo válidos hasta que se revocan.
+    </p>
+
+    <h3 class="mt-3 font-semibold">1 · Clientes públicos (móvil/SPA) — PKCE</h3>
+    <p class="text-sm text-base-content/80">Primero crea un verificador + reto (challenge) PKCE:</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}# code_verifier: 43–128 random chars; code_challenge = base64url(sha256(verifier))
+CODE_VERIFIER=$(openssl rand -base64 60 | tr -d '\n=+/' | cut -c1-64)
+CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
+  | openssl dgst -binary -sha256 | openssl base64 | tr '+/' '-_' | tr -d '='){% endverbatim %}</code></pre>
+
+    <p class="mt-3 text-sm text-base-content/80">Envía al usuario a la URL de autorización (ábrela en un navegador / navegador integrado):</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}https://openbookcase.de/oauth/authorize
+  ?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https://yourapp.example/callback
+  &scope=bookcases.write%20images.write
+  &state=RANDOM_STRING
+  &code_challenge=$CODE_CHALLENGE
+  &code_challenge_method=S256{% endverbatim %}</code></pre>
+    <p class="mt-1 text-sm text-base-content/60">Después de que el usuario apruebe, se le redirige a
+      <code>https://yourapp.example/callback?code=AUTH_CODE&amp;state=RANDOM_STRING</code>.</p>
+
+    <p class="mt-3 text-sm text-base-content/80">Intercambia el código por tokens (los clientes públicos envían el verificador, <em>sin secreto</em>):</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/oauth/token \
+  -d grant_type=authorization_code \
+  -d client_id=YOUR_CLIENT_ID \
+  -d redirect_uri=https://yourapp.example/callback \
+  -d code_verifier=$CODE_VERIFIER \
+  -d code=AUTH_CODE{% endverbatim %}</code></pre>
+    <p class="mt-1 text-sm text-base-content/80">Respuesta:</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}{
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "access_token": "eyJ0eXAiOiJKV1Qi...",
+  "refresh_token": "def502..."
+}{% endverbatim %}</code></pre>
+
+    <h3 class="mt-4 font-semibold">2 · Clientes confidenciales (con un backend)</h3>
+    <p class="text-sm text-base-content/80">El mismo flujo, pero te autenticas con tu secreto en lugar de un verificador PKCE:</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/oauth/token \
+  -d grant_type=authorization_code \
+  -d client_id=YOUR_CLIENT_ID \
+  -d client_secret=YOUR_CLIENT_SECRET \
+  -d redirect_uri=https://yourapp.example/callback \
+  -d code=AUTH_CODE{% endverbatim %}</code></pre>
+
+    <h3 class="mt-4 font-semibold">3 · Actualizar un token</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/oauth/token \
+  -d grant_type=refresh_token \
+  -d client_id=YOUR_CLIENT_ID \
+  -d refresh_token=YOUR_REFRESH_TOKEN
+  # confidential clients also add: -d client_secret=YOUR_CLIENT_SECRET{% endverbatim %}</code></pre>
+  </div>
+</section>
+
+{# ── Ámbitos (scopes) ── #}
+<section id="scopes" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('shield-check', 'size-5') }} Ámbitos (scopes)</h2>
+    <p class="text-sm text-base-content/80">Solicita solo lo que necesites (separados por espacios en el parámetro <code>scope</code>). Las lecturas no necesitan ámbito.</p>
+    <div class="mt-2 overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-sm table-zebra">
+        <thead><tr><th>Ámbito</th><th>Concede</th></tr></thead>
+        <tbody>
+          <tr><td class="font-mono text-xs">bookcases.write</td><td>Añadir y editar entradas, mover su posición</td></tr>
+          <tr><td class="font-mono text-xs">bookcases.delete</td><td>Eliminar una entrada (se requiere un motivo; se archiva una instantánea)</td></tr>
+          <tr><td class="font-mono text-xs">images.write</td><td>Subir fotos a una entrada</td></tr>
+          <tr><td class="font-mono text-xs">wishlist.write</td><td>Añadir elementos a la lista de deseos de una entrada</td></tr>
+          <tr><td class="font-mono text-xs">watchlist.write</td><td>Seguir / dejar de seguir una entrada para el usuario</td></tr>
+          <tr><td class="font-mono text-xs">home.write</td><td>Establecer la posición de inicio del mapa del usuario</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{# ── Endpoints ── #}
+<section id="endpoints" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('list', 'size-5') }} Referencia de endpoints</h2>
+    <div class="mt-2 overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-sm table-zebra">
+        <thead><tr><th>Método</th><th>Ruta</th><th>Auth</th><th>Propósito</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases</td><td><span class="badge badge-success badge-sm">abierto</span></td><td>Listar por área delimitadora (<code>latMin,latMax,lonMin,lonMax</code>, <code>limit</code>≤1000, <code>offset</code>)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-success badge-sm">abierto</span></td><td>Entrada individual con todo el detalle</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/images</td><td><span class="badge badge-success badge-sm">abierto</span></td><td>Listar las fotos de una entrada</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/wishlist</td><td><span class="badge badge-success badge-sm">abierto</span></td><td>Listar los elementos de la lista de deseos de una entrada</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Crear una entrada</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Actualizar campos (parcial)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/position</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Mover (latitude/longitude)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.delete</span></td><td>Eliminar (se requiere <code>reason</code> en JSON)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/images</td><td><span class="badge badge-warning badge-sm font-mono">images.write</span></td><td>Subir una foto (multipart)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/wishlist</td><td><span class="badge badge-warning badge-sm font-mono">wishlist.write</span></td><td>Añadir un elemento a la lista de deseos</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Seguir una entrada</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Dejar de seguir una entrada</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/profile/home</td><td><span class="badge badge-warning badge-sm font-mono">home.write</span></td><td>Establecer la posición de inicio del usuario</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-sm text-base-content/60">El token Bearer va en la cabecera <code>Authorization</code>. Una escritura sin token devuelve <code>401</code>; con el ámbito incorrecto, <code>403</code>.</p>
+  </div>
+</section>
+
+{# ── Ejemplos ── #}
+<section id="examples" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Usar la API</h2>
+
+    <h3 class="mt-2 font-semibold">Leer el área del mapa (abierto)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl "https://openbookcase.de/api/v1/bookcases?latMin=52.4&latMax=52.6&lonMin=13.3&lonMax=13.5&limit=200"{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Leer una entrada (abierto)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q0000000000000000{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Crear una entrada</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/api/v1/bookcases \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "title": "Community shelf at the park",
+        "entryType": "bookcase",
+        "latitude": 52.5200,
+        "longitude": 13.4050
+      }'
+# → 201 Created, returns the new entry (incl. its id). Titles may not contain URLs.{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Actualizar campos (parcial)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X PATCH https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q... \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"comment": "Refilled weekly", "isMobile": false, "accessibilityLevel": 3}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Mover una entrada</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q.../position \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": 52.5198, "longitude": 13.4042}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Subir una foto (multipart)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q.../images \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -F imageFile=@shelf.jpg \
+  -F author="Jane Doe" \
+  -F altText="Front view of the shelf"
+# imageFile + author are required; altText is optional. Max 5 photos per entry.{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Eliminar una entrada (motivo obligatorio)</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}curl -X DELETE https://openbookcase.de/api/v1/bookcases/01JZ8M4P3Q... \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Bookcase was removed by the property owner"}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Seguir · lista de deseos · inicio</h3>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}# Watch an entry (get notified of changes)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../watch \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+
+# Add a wishlist item (title required; author/isbn/misc optional)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../wishlist \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"title": "The Left Hand of Darkness", "author": "Ursula K. Le Guin"}'
+
+# Set the user's home map location
+curl -X POST https://openbookcase.de/api/v1/profile/home \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"latitude": 52.52, "longitude": 13.405, "zoom": 14}'{% endverbatim %}</code></pre>
+  </div>
+</section>
+
+{# ── Límites de uso ── #}
+<section id="limits" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('warning', 'size-5') }} Límites de uso y errores</h2>
+    <ul class="ml-1 list-inside list-disc space-y-1 text-sm text-base-content/80">
+      <li><strong>Lecturas:</strong> 600 peticiones / minuto, por IP.</li>
+      <li><strong>Escrituras:</strong> 60 peticiones / 10 minutos, por token de acceso.</li>
+    </ul>
+    <p class="mt-1 text-sm text-base-content/80">
+      Superar el límite devuelve <code>429 Too Many Requests</code> con una cabecera <code>Retry-After</code> (segundos) y
+      <code>X-RateLimit-Limit</code>. Los demás errores son JSON con un mensaje <code>error</code>:
+      <code>400</code> petición incorrecta, <code>401</code> token ausente/no válido, <code>403</code> ámbito incorrecto,
+      <code>404</code> no encontrado, <code>422</code> validación fallida (con una lista <code>violations</code>).
+    </p>
+  </div>
+</section>
+
+{# ── Condiciones de los datos ── #}
+<section id="terms" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('book', 'size-5') }} Condiciones de los datos y atribución</h2>
+    {{ include('static/_data_terms.html.twig') }}
+  </div>
+</section>

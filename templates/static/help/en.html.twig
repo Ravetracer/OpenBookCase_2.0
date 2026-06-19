@@ -25,6 +25,7 @@
   <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Home position</a>
   <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Messages</a>
   <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Sharing</a>
+  <a href="#install" class="badge badge-lg badge-ghost">{{ ui.icon('download', 'size-3') }} Install as an app</a>
   <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Language &amp; theme</a>
 </div>
 
@@ -189,6 +190,40 @@
   <div class="card-body">
     <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Sharing an entry</h2>
     <p class="text-base-content/70">Every entry's detail view has a read-only link with a <em>Copy</em> button. Anyone who opens it lands on the map centred on that bookcase with its details open.</p>
+  </div>
+</section>
+
+{# ── Install as an app (PWA) ── #}
+<section id="install" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('download', 'size-5') }} Install as an app</h2>
+    <p class="text-base-content/70">
+      OpenBookCase can be installed like a normal app, giving you an icon on your home screen or desktop and its own
+      window — while everything still loads live from the website. Installing is optional; the site works just the same in a browser.
+    </p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Easiest way:</strong> when your browser supports it, an {{ ui.icon('download', ic) }} <em>Install app</em> button appears in the top bar (and in the menu on phones). Tap it and confirm.</li>
+      <li><strong>Android (Chrome):</strong> some versions don't show an obvious prompt while you browse. If you don't see the button, open the browser menu ({{ ui.icon('menu', ic) }} <em>⋮</em>) and choose <em>Install app</em> / <em>Add to Home screen</em>.</li>
+      <li><strong>Desktop (Chrome / Edge):</strong> use the {{ ui.icon('download', ic) }} <em>Install app</em> button, or the small install icon at the right end of the address bar.</li>
+      <li>
+        <strong>iPhone &amp; iPad (Safari):</strong> Apple doesn't offer an automatic install prompt, so it isn't obvious that it's possible. The {{ ui.icon('download', ic) }} <em>Install app</em> button shows you how: tap the <em>Share</em> button in Safari, then choose <em>Add to Home Screen</em>. (This only works in Safari, not Chrome or Firefox on iOS.)
+      </li>
+    </ol>
+
+    <div role="alert" class="alert mt-4">
+      {{ ui.icon('warning', 'size-5') }}
+      <div>
+        <h3 class="font-semibold">{{ ui.icon('location', ic) }} iPhone &amp; iPad: “Locate me” and your position</h3>
+        <p class="mt-1 text-sm text-base-content/80">
+          On Apple devices the {{ ui.icon('location', ic) }} <em>Locate me</em> button (and “add a bookcase here” from your location) only works when location access is allowed:
+        </p>
+        <ol class="ml-1 mt-2 list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+          <li>When you first tap <em>Locate me</em>, iOS asks for permission — choose <em>Allow</em>.</li>
+          <li>If nothing happens or you tapped “Don't Allow” earlier, turn it back on under <em>Settings → Privacy &amp; Security → Location Services</em>: make sure Location Services is on, then set <em>Safari Websites</em> (or, if you installed OpenBookCase to the home screen, the OpenBookCase app) to <em>While Using the App</em>.</li>
+          <li>For an accurate pin, also enable <em>Precise Location</em> for that entry.</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 

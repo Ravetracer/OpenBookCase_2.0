@@ -1,0 +1,243 @@
+{% import 'components/icon.html.twig' as ui %}
+{% set ic = 'inline-block size-4 align-text-bottom' %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">Начало работы с OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  OpenBookCase — это совместная карта публичных книжных шкафов и give-box. Это руководство покажет тебе всё,
+  что ты можешь делать — находить записи, добавлять и редактировать их, фотографии, список желаний, список наблюдения и многое другое.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Шаги, отмеченные значком <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+  требуют бесплатного аккаунта. Просмотр, поиск и чтение работают и без входа в систему.
+</p>
+
+{# ── Содержание ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#account" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Аккаунт</a>
+  <a href="#search" class="badge badge-lg badge-ghost">{{ ui.icon('search', 'size-3') }} Поиск шкафов</a>
+  <a href="#add" class="badge badge-lg badge-ghost">{{ ui.icon('plus', 'size-3') }} Добавление</a>
+  <a href="#edit" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Редактирование</a>
+  <a href="#photos" class="badge badge-lg badge-ghost">{{ ui.icon('photo', 'size-3') }} Фотографии</a>
+  <a href="#rating" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Оценка</a>
+  <a href="#wishlist" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Список желаний</a>
+  <a href="#watchlist" class="badge badge-lg badge-ghost">{{ ui.icon('eye', 'size-3') }} Список наблюдения</a>
+  <a href="#move" class="badge badge-lg badge-ghost">{{ ui.icon('location', 'size-3') }} Перемещение маркеров</a>
+  <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Домашняя позиция</a>
+  <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Сообщения</a>
+  <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Поделиться</a>
+  <a href="#install" class="badge badge-lg badge-ghost">{{ ui.icon('download', 'size-3') }} Установить как приложение</a>
+  <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Язык &amp; тема</a>
+</div>
+
+{# ── Аккаунт ── #}
+<section id="account" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Аккаунт &amp; вход</h2>
+    <p class="text-base-content/70">Просмотр открыт для всех; с аккаунтом ты можешь добавлять и редактировать записи, загружать фотографии и пользоваться списком желаний.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Регистрация:</strong> нажми {{ ui.icon('user', ic) }} <em>Регистрация</em> в верхней панели и выбери имя пользователя, email и пароль. Ты получишь письмо для подтверждения — перейди по ссылке в нём, чтобы подтвердить свой адрес.</li>
+      <li><strong>Вход:</strong> нажми {{ ui.icon('login', ic) }} <em>Войти</em>.</li>
+      <li><strong>Забыл пароль?</strong> Открой окно входа и нажми <em>Забыли пароль?</em>, введи свой email и перейди по ссылке, которую мы тебе отправим, чтобы задать новый пароль.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Поиск ── #}
+<section id="search" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('search', 'size-5') }} Поиск шкафов</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Строка поиска</strong> (вверху слева на карте): введи название шкафа, место или адрес (через OpenStreetMap / Photon) или координаты вроде <code>50.19, 8.8</code>. Выбери подсказку, чтобы перенестись туда.</li>
+      <li><strong>Моё местоположение:</strong> кнопка {{ ui.icon('location', ic) }} рядом с кнопками масштабирования центрирует карту на твоей позиции и показывает во всплывающем окне расстояние до каждого шкафа.</li>
+      <li><strong>Список:</strong> на странице {{ ui.icon('list', ic) }} <em>Список</em> ты можешь искать, сортировать столбцы и упорядочивать по «Ближайшие ко мне». Через <em>Экспорт</em> можно скачать все записи в формате JSON.</li>
+      <li><strong>Цвета маркеров:</strong> пины окрашены по доступности (красный / жёлтый / зелёный); у give-box и временно недоступных записей свои значки.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Добавление ── #}
+<section id="add" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('plus', 'size-5') }} Добавление записи
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+    </h2>
+    <p class="text-base-content/70">Есть три способа начать добавление:</p>
+    <ul class="ml-1 list-disc space-y-1 pl-5">
+      <li>Кнопка {{ ui.icon('plus', ic) }} <em>Добавить шкаф</em> в верхней панели.</li>
+      <li><strong>Правый клик</strong> в любом месте карты (или <strong>долгое нажатие</strong> на сенсорном экране) → <em>Добавить шкаф здесь</em>.</li>
+      <li>Из всплывающего окна <em>Моё местоположение</em> → <em>Добавить шкаф здесь</em>.</li>
+    </ul>
+    <p class="mt-2 text-base-content/70">Затем заполни форму быстрого добавления:</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Введи <strong>название</strong>, <strong>тип</strong> (книжный шкаф или give-box) и <strong>тип установки</strong>.</li>
+      <li>Задай <strong>координаты</strong> — они уже заполнены, если ты начал с карты. Также можно вставить строку <code>geo:lat,lon</code> или найти адрес, чтобы задать их.</li>
+      <li>Нажми <strong>Добавить</strong>. Пин сразу появляется на карте, и панель предложит <em>добавить полные сведения</em>, <em>добавить фотографии</em> или завершить с помощью <em>Готово</em>.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Редактирование ── #}
+<section id="edit" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Редактирование записи
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Открой запись (нажми на её маркер → <em>Подробности</em>), затем нажми {{ ui.icon('edit', ic) }} <em>Редактировать</em>.</li>
+      <li>Измени название, тип, веб-сайт и переключатель <strong>стационарный / мобильный</strong>.</li>
+      <li>Задай <strong>доступность</strong> с помощью красного / жёлтого / зелёного светофора и необязательного описания.</li>
+      <li>Задай <strong>статус</strong> (активный или неактивный). Для неактивных записей можно указать причину, которая показывается на карте и в подробном виде.</li>
+      <li>Добавь <strong>часы работы</strong> и <strong>смотрителей</strong>, затем <strong>Сохранить</strong>. Все, кто наблюдает за записью, получают уведомление об изменениях.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Фотографии ── #}
+<section id="photos" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('photo', 'size-5') }} Управление фотографиями
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Открой запись → {{ ui.icon('photo', ic) }} <em>Фотографии</em>.</li>
+      <li><strong>Загрузи</strong> до пяти изображений. Имя автора обязательно; можно добавить короткое описание (альтернативный текст), которое зачитывают программы чтения с экрана.</li>
+      <li>С помощью {{ ui.icon('rotate-cw', ic) }} можно повернуть фотографию, изменить её описание или удалить её через {{ ui.icon('trash', ic) }}.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Оценка ── #}
+<section id="rating" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Оценка книжного шкафа</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Подробный вид показывает среднюю оценку в виде сердечек.</li>
+      <li>После входа нажми <em>Оценить</em>, выбери свои сердечки — оценка сохраняется мгновенно, а среднее обновляется в реальном времени.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Список желаний ── #}
+<section id="wishlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Список желаний — запрашивай &amp; передавай книги</h2>
+    <p class="text-base-content/70">Список желаний позволяет людям попросить определённую книгу у шкафа, а другим — оставить там экземпляр.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Открой запись → {{ ui.icon('heart', ic) }} <em>Список желаний</em> и впиши книгу, которую ищешь (название, при желании автор).</li>
+      <li>Тот, у кого есть эта книга, может <strong>оставить там экземпляр</strong> — ты получишь уведомление.</li>
+      <li>Как только ты её заберёшь, отметь её как <strong>забрана</strong>; если её нет, отметь как <strong>не найдена</strong>.</li>
+      <li>Значок на маркере карты показывает, сколько открытых желаний у шкафа.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Список наблюдения ── #}
+<section id="watchlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('eye', 'size-5') }} Список наблюдения — следи за записью
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>В записи нажми {{ ui.icon('eye', ic) }} <em>Наблюдать</em>, чтобы следить за ней.</li>
+      <li>Ты получишь сообщение, как только кто-то её отредактирует или переместит.</li>
+      <li>В своём профиле ты видишь и управляешь всем, за чем следишь.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Перемещение маркеров ── #}
+<section id="move" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('location', 'size-5') }} Перемещение маркера
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>После входа ты можешь просто <strong>перетащить маркер</strong> на правильное место.</li>
+      <li>Подтверди перемещение, и новая позиция сохранится. Если отменишь, маркер вернётся обратно.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Домашняя позиция ── #}
+<section id="home" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('home', 'size-5') }} Твоя домашняя позиция
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} аккаунт</span>
+    </h2>
+    <p class="text-base-content/70">Задай личную начальную точку, чтобы карта открывалась там, где тебе нужно.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Через карту:</strong> правый клик (или долгое нажатие) на точку → <em>Установить как дом</em> (прямо под кнопкой добавления; с подтверждением). При этом сохраняются точка и твой текущий масштаб.</li>
+      <li><strong>Через профиль:</strong> введи широту, долготу и масштаб и включи переключатель.</li>
+      <li>Когда включено, карта открывается с центром на твоём доме, а маркер {{ ui.icon('home', ic) }} показывает эту точку.</li>
+      <li>Удалить её можно в любой момент через <em>Удалить домашнюю позицию</em> в своём профиле.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Сообщения ── #}
+<section id="messages" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('inbox', 'size-5') }} Сообщения &amp; уведомления</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Папка «Входящие» {{ ui.icon('inbox', ic) }} в верхней панели собирает системные сообщения — обновления из списков наблюдения и желаний, а также объявления.</li>
+      <li>В своём профиле ты задаёшь, как получать уведомления: в приложении, по email или и так, и так.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Поделиться ── #}
+<section id="share" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Поделиться записью</h2>
+    <p class="text-base-content/70">Подробный вид каждой записи содержит ссылку только для чтения с кнопкой <em>Копировать</em>. Любой, кто откроет её, попадёт на карту с центром на этом шкафу и открытыми подробностями.</p>
+  </div>
+</section>
+
+{# ── Установить как приложение (PWA) ── #}
+<section id="install" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('download', 'size-5') }} Установить как приложение</h2>
+    <p class="text-base-content/70">
+      OpenBookCase можно установить как обычное приложение — со значком на главном экране или рабочем столе и
+      собственным окном — при этом всё по-прежнему загружается с сайта в реальном времени. Установка необязательна; в браузере сайт работает точно так же.
+    </p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Самый простой способ:</strong> если твой браузер это поддерживает, в верхней панели (а на телефоне — в меню) появляется кнопка {{ ui.icon('download', ic) }} <em>Установить приложение</em>. Нажми на неё и подтверди.</li>
+      <li><strong>Android (Chrome):</strong> некоторые версии не показывают явного предложения во время просмотра. Если ты не видишь кнопку, открой меню браузера ({{ ui.icon('menu', ic) }} <em>⋮</em>) и выбери <em>Установить приложение</em> / <em>Добавить на главный экран</em>.</li>
+      <li><strong>Десктоп (Chrome / Edge):</strong> используй кнопку {{ ui.icon('download', ic) }} <em>Установить приложение</em> или маленький значок установки в правой части адресной строки.</li>
+      <li>
+        <strong>iPhone &amp; iPad (Safari):</strong> Apple не предлагает автоматического приглашения к установке, поэтому неочевидно, что это возможно. Кнопка {{ ui.icon('download', ic) }} <em>Установить приложение</em> покажет тебе, как: нажми в Safari кнопку <em>Поделиться</em>, затем выбери <em>На экран «Домой»</em>. (Это работает только в Safari, а не в Chrome или Firefox на iOS.)
+      </li>
+    </ol>
+
+    <div role="alert" class="alert mt-4">
+      {{ ui.icon('warning', 'size-5') }}
+      <div>
+        <h3 class="font-semibold">{{ ui.icon('location', ic) }} iPhone &amp; iPad: «Моё местоположение» и твоя позиция</h3>
+        <p class="mt-1 text-sm text-base-content/80">
+          На устройствах Apple кнопка {{ ui.icon('location', ic) }} <em>Моё местоположение</em> (и «добавить шкаф здесь» от твоего местоположения) работает только при разрешённом доступе к геолокации:
+        </p>
+        <ol class="ml-1 mt-2 list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+          <li>Когда ты впервые нажимаешь <em>Моё местоположение</em>, iOS запрашивает разрешение — выбери <em>Разрешить</em>.</li>
+          <li>Если ничего не происходит или ты раньше нажал «Запретить», включи его снова в <em>Настройки → Конфиденциальность и безопасность → Службы геолокации</em>: убедись, что службы геолокации включены, затем установи для <em>Веб-сайтов Safari</em> (или, если ты добавил OpenBookCase на главный экран, для приложения OpenBookCase) значение <em>При использовании приложения</em>.</li>
+          <li>Для точного пина дополнительно включи <em>Точное местоположение</em> для этой записи.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Язык & тема ── #}
+<section id="prefs" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('language', 'size-5') }} Язык &amp; тема</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Меняй язык интерфейса с помощью селектора {{ ui.icon('language', ic) }} в верхней панели.</li>
+      <li>Переключай светлый и тёмный режим переключателем {{ ui.icon('sun', ic) }} / {{ ui.icon('moon', ic) }}. Твой выбор запоминается на этом устройстве.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="mt-8 text-center text-sm text-base-content/60">
+  Всё ещё нужна помощь? Напиши нам на <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.
+</p>

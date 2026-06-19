@@ -27,6 +27,32 @@ final class StaticPageControllerTest extends FunctionalTestCase
         ];
     }
 
+    /**
+     * The /help, /changelog and /developers pages have a written per-locale partial
+     * for every supported UI locale (no English fallback for real locales). A missing
+     * partial would make the Twig include throw → HTTP 500, so a plain 200 per locale
+     * guards that all six partials exist and are wired.
+     */
+    #[DataProvider('localizedStaticPageProvider')]
+    public function testLocalizedStaticPageRendersInEveryLocale(string $path, string $locale): void
+    {
+        $this->client->getCookieJar()->set(
+            new \Symfony\Component\BrowserKit\Cookie('obc_locale', $locale),
+        );
+        $this->client->request('GET', $path);
+        $this->assertResponseIsSuccessful();
+    }
+
+    /** @return iterable<string, array{string, string}> */
+    public static function localizedStaticPageProvider(): iterable
+    {
+        foreach (['/help', '/changelog', '/developers'] as $path) {
+            foreach (['en', 'de', 'ru', 'nl', 'es', 'fr'] as $locale) {
+                yield "$path [$locale]" => [$path, $locale];
+            }
+        }
+    }
+
     public function testDevelopersPageShowsApiDocs(): void
     {
         $html = $this->client->request('GET', '/developers')->html();

@@ -1,0 +1,243 @@
+{% import 'components/icon.html.twig' as ui %}
+{% set ic = 'inline-block size-4 align-text-bottom' %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">Aan de slag met OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  OpenBookCase is een gezamenlijke kaart van openbare boekenkasten en weggeefkastjes. Deze handleiding laat je alles zien
+  wat je kunt doen — vermeldingen vinden, toevoegen en bewerken, foto's, verlanglijst, volglijst en meer.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Stappen met de markering <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+  vereisen een gratis account. Bladeren, zoeken en lezen werken ook zonder aanmelden.
+</p>
+
+{# ── Inhoudsopgave ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#account" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Account</a>
+  <a href="#search" class="badge badge-lg badge-ghost">{{ ui.icon('search', 'size-3') }} Boekenkasten vinden</a>
+  <a href="#add" class="badge badge-lg badge-ghost">{{ ui.icon('plus', 'size-3') }} Toevoegen</a>
+  <a href="#edit" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Bewerken</a>
+  <a href="#photos" class="badge badge-lg badge-ghost">{{ ui.icon('photo', 'size-3') }} Foto's</a>
+  <a href="#rating" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Beoordelen</a>
+  <a href="#wishlist" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Verlanglijst</a>
+  <a href="#watchlist" class="badge badge-lg badge-ghost">{{ ui.icon('eye', 'size-3') }} Volglijst</a>
+  <a href="#move" class="badge badge-lg badge-ghost">{{ ui.icon('location', 'size-3') }} Markers verplaatsen</a>
+  <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Thuislocatie</a>
+  <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Berichten</a>
+  <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Delen</a>
+  <a href="#install" class="badge badge-lg badge-ghost">{{ ui.icon('download', 'size-3') }} Als app installeren</a>
+  <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Taal &amp; thema</a>
+</div>
+
+{# ── Account ── #}
+<section id="account" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Account &amp; aanmelden</h2>
+    <p class="text-base-content/70">Bladeren staat voor iedereen open; met een account kun je vermeldingen toevoegen en bewerken, foto's uploaden en de verlanglijst gebruiken.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Registreren:</strong> klik bovenin op {{ ui.icon('user', ic) }} <em>Registreren</em> en kies een gebruikersnaam, e-mailadres en wachtwoord. Je ontvangt een bevestigingsmail — klik op de link daarin om je adres te bevestigen.</li>
+      <li><strong>Aanmelden:</strong> klik op {{ ui.icon('login', ic) }} <em>Login</em>.</li>
+      <li><strong>Wachtwoord vergeten?</strong> Open het aanmeldvenster en klik op <em>Wachtwoord vergeten?</em>, voer je e-mailadres in en volg de link die we je sturen om een nieuw wachtwoord in te stellen.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Vinden ── #}
+<section id="search" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('search', 'size-5') }} Boekenkasten vinden</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Zoekbalk</strong> (linksboven op de kaart): typ een naam van een kast, een plaats of adres (via OpenStreetMap / Photon) of coördinaten zoals <code>50.19, 8.8</code>. Kies een suggestie om er meteen naartoe te springen.</li>
+      <li><strong>Mijn locatie:</strong> de knop {{ ui.icon('location', ic) }} naast de zoomknoppen centreert de kaart op jouw positie en toont in de popup de afstand tot elke kast.</li>
+      <li><strong>Lijstweergave:</strong> op de pagina {{ ui.icon('list', ic) }} <em>Lijst</em> kun je zoeken, kolommen sorteren en ordenen op „Dichtst bij mij”. Via <em>Export</em> download je alle vermeldingen als JSON.</li>
+      <li><strong>Markerkleuren:</strong> de pins zijn gekleurd op toegankelijkheid (rood / geel / groen); weggeefkastjes en momenteel niet beschikbare vermeldingen hebben hun eigen pictogrammen.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Toevoegen ── #}
+<section id="add" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('plus', 'size-5') }} Een vermelding toevoegen
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <p class="text-base-content/70">Er zijn drie manieren om te beginnen met toevoegen:</p>
+    <ul class="ml-1 list-disc space-y-1 pl-5">
+      <li>De knop {{ ui.icon('plus', ic) }} <em>Boekenkast toevoegen</em> bovenin de balk.</li>
+      <li><strong>Rechtermuisklik</strong> ergens op de kaart (of <strong>lang ingedrukt houden</strong> op een touchscreen) → <em>Boekenkast hier toevoegen</em>.</li>
+      <li>Vanuit de <em>Mijn locatie</em>-popup → <em>Boekenkast hier toevoegen</em>.</li>
+    </ul>
+    <p class="mt-2 text-base-content/70">Vul daarna het snelformulier in:</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Geef een <strong>titel</strong> op, het <strong>type</strong> (boekenkast of weggeefkastje) en de <strong>opstellingsvorm</strong>.</li>
+      <li>Stel de <strong>coördinaten</strong> in — ze zijn vooraf ingevuld als je vanaf de kaart bent begonnen. Je kunt ook een <code>geo:lat,lon</code>-tekst plakken of een adres zoeken om ze in te stellen.</li>
+      <li>Klik op <strong>Toevoegen</strong>. De pin verschijnt meteen op de kaart en een paneel biedt aan om <em>volledige gegevens toe te voegen</em>, <em>foto's toe te voegen</em> of af te ronden met <em>Klaar</em>.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Bewerken ── #}
+<section id="edit" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Een vermelding bewerken
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Open een vermelding (klik op de marker → <em>Details</em>) en klik op {{ ui.icon('edit', ic) }} <em>Bewerken</em>.</li>
+      <li>Pas de titel, het type, de website en de schakelaar <strong>vast / mobiel</strong> aan.</li>
+      <li>Stel de <strong>toegankelijkheid</strong> in met het rood / geel / groene stoplicht en een optionele beschrijving.</li>
+      <li>Stel de <strong>status</strong> in (actief of inactief). Bij inactieve vermeldingen kun je een reden opgeven die op de kaart en in de detailweergave wordt getoond.</li>
+      <li>Voeg <strong>openingstijden</strong> en <strong>beheerders</strong> toe en klik op <strong>Opslaan</strong>. Iedereen die de vermelding volgt, krijgt bericht over wat er is gewijzigd.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Foto's ── #}
+<section id="photos" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('photo', 'size-5') }} Foto's beheren
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Open een vermelding → {{ ui.icon('photo', ic) }} <em>Foto's</em>.</li>
+      <li><strong>Upload</strong> tot vijf afbeeldingen. Een naam van de maker is verplicht; je kunt een korte beschrijving (alt-tekst) toevoegen die schermlezers voorlezen.</li>
+      <li>Met {{ ui.icon('rotate-cw', ic) }} draai je een foto, bewerk je de beschrijving of verwijder je hem met {{ ui.icon('trash', ic) }}.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Beoordelen ── #}
+<section id="rating" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Een boekenkast beoordelen</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>De detailweergave toont de gemiddelde beoordeling als hartjes.</li>
+      <li>Wanneer je bent aangemeld, klik je op <em>Beoordelen</em>, kies je je hartjes en wordt het meteen opgeslagen — het gemiddelde wordt live bijgewerkt.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Verlanglijst ── #}
+<section id="wishlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Verlanglijst — boeken wensen &amp; doorgeven</h2>
+    <p class="text-base-content/70">Met de verlanglijst kunnen mensen een bepaald boek bij een kast wensen, en kunnen anderen er een exemplaar achterlaten.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Open een vermelding → {{ ui.icon('heart', ic) }} <em>Verlanglijst</em> en voeg het gezochte boek toe (titel, optioneel auteur).</li>
+      <li>Iemand die dat boek bezit, kan er een <strong>exemplaar achterlaten</strong> — je krijgt hiervan bericht.</li>
+      <li>Zodra je het hebt opgehaald, markeer je het als <strong>opgehaald</strong>; is het weg, markeer je het als <strong>niet gevonden</strong>.</li>
+      <li>Een badge op de kaartmarker toont hoeveel open wensen een kast heeft.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Volglijst ── #}
+<section id="watchlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('eye', 'size-5') }} Volglijst — een vermelding volgen
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Klik bij een vermelding op {{ ui.icon('eye', ic) }} <em>Volgen</em> om hem te volgen.</li>
+      <li>Je krijgt een bericht zodra iemand hem bewerkt of verplaatst.</li>
+      <li>In je profiel zie en beheer je alles wat je volgt.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Markers verplaatsen ── #}
+<section id="move" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('location', 'size-5') }} Een marker verplaatsen
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Wanneer je bent aangemeld, <strong>sleep je een marker</strong> gewoon naar de juiste plek.</li>
+      <li>Bevestig de verplaatsing en de nieuwe positie wordt opgeslagen. Annuleer je, dan springt de marker terug.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Thuislocatie ── #}
+<section id="home" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('home', 'size-5') }} Jouw thuislocatie
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} account</span>
+    </h2>
+    <p class="text-base-content/70">Stel een persoonlijk startpunt in zodat de kaart opent waar jij wilt.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Via de kaart:</strong> rechtermuisklik (of lang ingedrukt houden) op een punt → <em>Als thuislocatie instellen</em> (vlak onder de toevoegknop; met bevestiging). Hierbij worden het punt en je huidige zoomniveau opgeslagen.</li>
+      <li><strong>Via je profiel:</strong> voer breedtegraad, lengtegraad en zoomniveau in en zet de schakelaar aan.</li>
+      <li>Wanneer ingeschakeld, opent de kaart gecentreerd op je thuislocatie en toont een {{ ui.icon('home', ic) }} marker het punt.</li>
+      <li>Verwijder hem op elk moment via <em>Thuislocatie verwijderen</em> in je profiel.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Berichten ── #}
+<section id="messages" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('inbox', 'size-5') }} Berichten &amp; meldingen</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>De {{ ui.icon('inbox', ic) }} postvak bovenin de balk verzamelt systeemberichten — updates van de volg- en verlanglijst en aankondigingen.</li>
+      <li>In je profiel bepaal je hoe je op de hoogte wordt gebracht: in de app, per e-mail of allebei.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Delen ── #}
+<section id="share" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Een vermelding delen</h2>
+    <p class="text-base-content/70">De detailweergave van elke vermelding bevat een alleen-lezen link met een knop <em>Kopiëren</em>. Wie hem opent, komt terecht op de kaart gecentreerd op die boekenkast met de details geopend.</p>
+  </div>
+</section>
+
+{# ── Als app installeren (PWA) ── #}
+<section id="install" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('download', 'size-5') }} Als app installeren</h2>
+    <p class="text-base-content/70">
+      OpenBookCase kan als een gewone app worden geïnstalleerd — met een pictogram op je startscherm of bureaublad en
+      een eigen venster — terwijl alles nog steeds live van de website wordt geladen. Installeren is optioneel; in een browser werkt de site precies hetzelfde.
+    </p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>De makkelijkste manier:</strong> als je browser het ondersteunt, verschijnt er bovenin de balk (op de telefoon in het menu) een knop {{ ui.icon('download', ic) }} <em>App installeren</em>. Tik erop en bevestig.</li>
+      <li><strong>Android (Chrome):</strong> sommige versies tonen tijdens het bladeren geen duidelijke melding. Zie je de knop niet, open dan het browsermenu ({{ ui.icon('menu', ic) }} <em>⋮</em>) en kies <em>App installeren</em> / <em>Toevoegen aan startscherm</em>.</li>
+      <li><strong>Desktop (Chrome / Edge):</strong> gebruik de knop {{ ui.icon('download', ic) }} <em>App installeren</em> of het kleine installatiepictogram aan het rechteruiteinde van de adresbalk.</li>
+      <li>
+        <strong>iPhone &amp; iPad (Safari):</strong> Apple biedt geen automatische installatiemelding, dus het is niet vanzelfsprekend dat het mogelijk is. De knop {{ ui.icon('download', ic) }} <em>App installeren</em> laat je zien hoe: tik in Safari op de knop <em>Delen</em> en kies vervolgens <em>Zet op beginscherm</em>. (Dit werkt alleen in Safari, niet in Chrome of Firefox op iOS.)
+      </li>
+    </ol>
+
+    <div role="alert" class="alert mt-4">
+      {{ ui.icon('warning', 'size-5') }}
+      <div>
+        <h3 class="font-semibold">{{ ui.icon('location', ic) }} iPhone &amp; iPad: „Mijn locatie” en je positie</h3>
+        <p class="mt-1 text-sm text-base-content/80">
+          Op Apple-apparaten werkt de knop {{ ui.icon('location', ic) }} <em>Mijn locatie</em> (en „boekenkast hier toevoegen” vanaf je locatie) alleen als locatietoegang is toegestaan:
+        </p>
+        <ol class="ml-1 mt-2 list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+          <li>Wanneer je voor het eerst op <em>Mijn locatie</em> tikt, vraagt iOS om toestemming — kies <em>Sta toe</em>.</li>
+          <li>Gebeurt er niets of heb je eerder op „Sta niet toe” getikt, schakel het dan weer in via <em>Instellingen → Privacy &amp; beveiliging → Locatievoorzieningen</em>: zorg dat Locatievoorzieningen aan staan en zet <em>Safari-websites</em> (of, als je OpenBookCase op het beginscherm hebt gezet, de OpenBookCase-app) op <em>Tijdens gebruik van app</em>.</li>
+          <li>Voor een nauwkeurige pin schakel je ook <em>Nauwkeurige locatie</em> in voor die vermelding.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Taal & thema ── #}
+<section id="prefs" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('language', 'size-5') }} Taal &amp; thema</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Wijzig de taal van de interface via de keuze {{ ui.icon('language', ic) }} bovenin de balk.</li>
+      <li>Schakel met de schakelaar {{ ui.icon('sun', ic) }} / {{ ui.icon('moon', ic) }} tussen licht en donker thema. Je keuze wordt op dit apparaat onthouden.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="mt-8 text-center text-sm text-base-content/60">
+  Kom je er niet uit? Mail ons op <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.
+</p>

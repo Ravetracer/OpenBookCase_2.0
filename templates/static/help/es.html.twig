@@ -1,0 +1,243 @@
+{% import 'components/icon.html.twig' as ui %}
+{% set ic = 'inline-block size-4 align-text-bottom' %}
+
+<h1 class="mb-2 text-2xl font-bold sm:text-3xl">Primeros pasos con OpenBookCase</h1>
+<p class="mb-2 text-base-content/70">
+  OpenBookCase es un mapa comunitario de bibliotecas públicas y cajas de intercambio (give-boxes). Esta guía te muestra todo lo que puedes hacer —
+  encontrar entradas, añadirlas y editarlas, fotos, listas de deseos, listas de seguimiento y mucho más.
+</p>
+<p class="mb-6 text-sm text-base-content/60">
+  Los pasos marcados con <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+  necesitan una cuenta gratuita. Explorar, buscar y leer funcionan sin iniciar sesión.
+</p>
+
+{# ── Índice ── #}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="#account" class="badge badge-lg badge-ghost">{{ ui.icon('login', 'size-3') }} Cuenta</a>
+  <a href="#search" class="badge badge-lg badge-ghost">{{ ui.icon('search', 'size-3') }} Encontrar bibliotecas</a>
+  <a href="#add" class="badge badge-lg badge-ghost">{{ ui.icon('plus', 'size-3') }} Añadir</a>
+  <a href="#edit" class="badge badge-lg badge-ghost">{{ ui.icon('edit', 'size-3') }} Editar</a>
+  <a href="#photos" class="badge badge-lg badge-ghost">{{ ui.icon('photo', 'size-3') }} Fotos</a>
+  <a href="#rating" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Valorar</a>
+  <a href="#wishlist" class="badge badge-lg badge-ghost">{{ ui.icon('heart', 'size-3') }} Lista de deseos</a>
+  <a href="#watchlist" class="badge badge-lg badge-ghost">{{ ui.icon('eye', 'size-3') }} Lista de seguimiento</a>
+  <a href="#move" class="badge badge-lg badge-ghost">{{ ui.icon('location', 'size-3') }} Mover marcadores</a>
+  <a href="#home" class="badge badge-lg badge-ghost">{{ ui.icon('home', 'size-3') }} Posición de inicio</a>
+  <a href="#messages" class="badge badge-lg badge-ghost">{{ ui.icon('inbox', 'size-3') }} Mensajes</a>
+  <a href="#share" class="badge badge-lg badge-ghost">{{ ui.icon('external', 'size-3') }} Compartir</a>
+  <a href="#install" class="badge badge-lg badge-ghost">{{ ui.icon('download', 'size-3') }} Instalar como app</a>
+  <a href="#prefs" class="badge badge-lg badge-ghost">{{ ui.icon('language', 'size-3') }} Idioma y tema</a>
+</div>
+
+{# ── Cuenta ── #}
+<section id="account" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('login', 'size-5') }} Cuenta e inicio de sesión</h2>
+    <p class="text-base-content/70">Explorar está abierto a todo el mundo; con una cuenta puedes añadir y editar entradas, subir fotos y usar las listas de deseos.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Registrarse:</strong> haz clic en {{ ui.icon('user', ic) }} <em>Registrarse</em> en la barra superior y elige un nombre de usuario, correo y contraseña. Recibirás un correo de confirmación — haz clic en el enlace para verificar tu dirección.</li>
+      <li><strong>Iniciar sesión:</strong> haz clic en {{ ui.icon('login', ic) }} <em>Login</em>.</li>
+      <li><strong>¿Olvidaste tu contraseña?</strong> Abre el cuadro de inicio de sesión y haz clic en <em>¿Olvidaste tu contraseña?</em>, introduce tu correo y sigue el enlace que te enviamos para establecer una nueva contraseña.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Encontrar ── #}
+<section id="search" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('search', 'size-5') }} Encontrar bibliotecas</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Barra de búsqueda</strong> (arriba a la izquierda del mapa): escribe el nombre de una biblioteca, un lugar o una dirección (a través de OpenStreetMap / Photon), o coordenadas como <code>50.19, 8.8</code>. Elige una sugerencia para volar hasta allí.</li>
+      <li><strong>Localizarme:</strong> el botón {{ ui.icon('location', ic) }} junto a los controles de zoom centra el mapa en tu posición y muestra la distancia a cada biblioteca en su ventana emergente.</li>
+      <li><strong>Vista de lista:</strong> la página {{ ui.icon('list', ic) }} <em>Lista</em> te permite buscar, ordenar columnas y clasificar por «Más cercanas a mí». También puedes descargar todas las entradas como JSON con <em>Exportar</em>.</li>
+      <li><strong>Colores de los marcadores:</strong> los pines se colorean según la accesibilidad (rojo / amarillo / verde); las cajas de intercambio y las entradas no disponibles actualmente tienen sus propios iconos.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Añadir ── #}
+<section id="add" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('plus', 'size-5') }} Añadir una entrada
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+    </h2>
+    <p class="text-base-content/70">Hay tres formas de empezar a añadir:</p>
+    <ul class="ml-1 list-disc space-y-1 pl-5">
+      <li>El botón {{ ui.icon('plus', ic) }} <em>Añadir biblioteca</em> en la barra superior.</li>
+      <li><strong>Haz clic con el botón derecho</strong> en cualquier punto del mapa (o <strong>mantén pulsado</strong> en pantallas táctiles) → <em>Añadir biblioteca aquí</em>.</li>
+      <li>Desde la ventana emergente de <em>Localizarme</em> → <em>Añadir biblioteca aquí</em>.</li>
+    </ul>
+    <p class="mt-2 text-base-content/70">Después completa el formulario rápido:</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Introduce un <strong>título</strong>, el <strong>tipo</strong> (biblioteca o caja de intercambio) y el <strong>tipo de instalación</strong>.</li>
+      <li>Establece las <strong>coordenadas</strong> — se rellenan automáticamente si empezaste desde el mapa. También puedes pegar una cadena <code>geo:lat,lon</code> o buscar una dirección para situarlas.</li>
+      <li>Haz clic en <strong>Añadir</strong>. El pin aparece de inmediato en el mapa y un panel te ofrece <em>añadir todos los detalles</em>, <em>añadir fotos</em> o terminar con <em>Hecho</em>.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Editar ── #}
+<section id="edit" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('edit', 'size-5') }} Editar una entrada
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Abre una entrada (haz clic en su marcador → <em>Detalles</em>) y luego haz clic en {{ ui.icon('edit', ic) }} <em>Editar</em>.</li>
+      <li>Ajusta el título, el tipo, el sitio web y el interruptor <strong>fija / móvil</strong>.</li>
+      <li>Establece la <strong>accesibilidad</strong> con el semáforo rojo / amarillo / verde y una descripción opcional.</li>
+      <li>Establece el <strong>estado</strong> (activa o inactiva). Para las entradas inactivas puedes añadir un motivo que se muestra en el mapa y en la vista de detalle.</li>
+      <li>Añade <strong>horarios de apertura</strong> y <strong>responsables</strong>, y luego <strong>Guarda</strong>. Quienes sigan la entrada serán notificados de los cambios.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Fotos ── #}
+<section id="photos" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('photo', 'size-5') }} Gestionar fotos
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Abre una entrada → {{ ui.icon('photo', ic) }} <em>Fotos</em>.</li>
+      <li><strong>Sube</strong> hasta cinco imágenes. Se requiere un nombre de autor; puedes añadir una breve descripción (texto alternativo) que los lectores de pantalla leen en voz alta.</li>
+      <li>Usa {{ ui.icon('rotate-cw', ic) }} para girar una foto, editar su descripción o {{ ui.icon('trash', ic) }} eliminarla.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Valorar ── #}
+<section id="rating" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Valorar una biblioteca</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>La vista de detalle muestra la valoración media como corazones.</li>
+      <li>Con la sesión iniciada, haz clic en <em>Valorar</em>, elige tus corazones y se guarda al instante — la media se actualiza en directo.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Lista de deseos ── #}
+<section id="wishlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('heart', 'size-5') }} Lista de deseos — pedir y entregar libros</h2>
+    <p class="text-base-content/70">La lista de deseos permite que la gente pida un libro concreto en una biblioteca y que otras personas dejen un ejemplar.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Abre una entrada → {{ ui.icon('heart', ic) }} <em>Lista de deseos</em> y añade el libro que buscas (título, autor opcional).</li>
+      <li>Alguien que posea ese libro puede <strong>dejar un ejemplar</strong> allí — se te notifica cuando lo hace.</li>
+      <li>Una vez lo hayas recogido, márcalo como <strong>recogido</strong>; si ya no está, márcalo como <strong>no encontrado</strong>.</li>
+      <li>Una insignia en el marcador del mapa muestra cuántos deseos abiertos tiene una biblioteca.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Lista de seguimiento ── #}
+<section id="watchlist" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('eye', 'size-5') }} Lista de seguimiento — seguir una entrada
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>En una entrada, haz clic en {{ ui.icon('eye', ic) }} <em>Seguir</em> para seguirla.</li>
+      <li>Recibirás un mensaje cada vez que alguien la edite o la mueva.</li>
+      <li>Consulta y gestiona todo lo que sigues en tu perfil.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Mover marcadores ── #}
+<section id="move" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('location', 'size-5') }} Mover un marcador
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+    </h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Con la sesión iniciada, simplemente <strong>arrastra un marcador</strong> a su lugar correcto.</li>
+      <li>Confirma el movimiento y la nueva posición se guarda. Si cancelas, el marcador vuelve a su sitio.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Posición de inicio ── #}
+<section id="home" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('home', 'size-5') }} Tu posición de inicio
+      <span class="badge badge-outline badge-sm gap-1">{{ ui.icon('user', 'size-3') }} cuenta</span>
+    </h2>
+    <p class="text-base-content/70">Establece un punto de partida personal para que el mapa se abra donde quieras.</p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>Desde el mapa:</strong> haz clic con el botón derecho (o mantén pulsado) en un punto → <em>Establecer como inicio</em> (justo debajo del botón de añadir; pide confirmación). Esto guarda el punto y tu zoom actual.</li>
+      <li><strong>Desde tu perfil:</strong> introduce latitud, longitud y zoom, y activa el interruptor.</li>
+      <li>Cuando está activado, el mapa se abre centrado en tu inicio y un marcador {{ ui.icon('home', ic) }} muestra el punto.</li>
+      <li>Elimínalo en cualquier momento con <em>Quitar posición de inicio</em> en tu perfil.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Mensajes ── #}
+<section id="messages" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('inbox', 'size-5') }} Mensajes y notificaciones</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>La bandeja de entrada {{ ui.icon('inbox', ic) }} de la barra superior recoge los mensajes del sistema — actualizaciones de la lista de seguimiento y de la lista de deseos, y anuncios.</li>
+      <li>Elige cómo recibir las notificaciones en tu perfil: en la app, por correo o ambos.</li>
+    </ol>
+  </div>
+</section>
+
+{# ── Compartir ── #}
+<section id="share" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('external', 'size-5') }} Compartir una entrada</h2>
+    <p class="text-base-content/70">La vista de detalle de cada entrada tiene un enlace de solo lectura con un botón <em>Copiar</em>. Quien lo abra aterriza en el mapa centrado en esa biblioteca con sus detalles abiertos.</p>
+  </div>
+</section>
+
+{# ── Instalar como app (PWA) ── #}
+<section id="install" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('download', 'size-5') }} Instalar como app</h2>
+    <p class="text-base-content/70">
+      OpenBookCase se puede instalar como una app normal, lo que te da un icono en tu pantalla de inicio o escritorio y su propia
+      ventana — mientras todo se sigue cargando en directo desde la web. Instalarla es opcional; el sitio funciona igual en un navegador.
+    </p>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li><strong>La forma más fácil:</strong> cuando tu navegador lo admite, aparece un botón {{ ui.icon('download', ic) }} <em>Instalar app</em> en la barra superior (y en el menú en teléfonos). Púlsalo y confirma.</li>
+      <li><strong>Android (Chrome):</strong> algunas versiones no muestran un aviso evidente mientras navegas. Si no ves el botón, abre el menú del navegador ({{ ui.icon('menu', ic) }} <em>⋮</em>) y elige <em>Instalar app</em> / <em>Añadir a la pantalla de inicio</em>.</li>
+      <li><strong>Escritorio (Chrome / Edge):</strong> usa el botón {{ ui.icon('download', ic) }} <em>Instalar app</em>, o el pequeño icono de instalación en el extremo derecho de la barra de direcciones.</li>
+      <li>
+        <strong>iPhone y iPad (Safari):</strong> Apple no ofrece un aviso de instalación automático, así que no es evidente que sea posible. El botón {{ ui.icon('download', ic) }} <em>Instalar app</em> te muestra cómo: pulsa el botón <em>Compartir</em> en Safari y luego elige <em>Añadir a pantalla de inicio</em>. (Esto solo funciona en Safari, no en Chrome ni Firefox en iOS.)
+      </li>
+    </ol>
+
+    <div role="alert" class="alert mt-4">
+      {{ ui.icon('warning', 'size-5') }}
+      <div>
+        <h3 class="font-semibold">{{ ui.icon('location', ic) }} iPhone y iPad: «Localizarme» y tu posición</h3>
+        <p class="mt-1 text-sm text-base-content/80">
+          En los dispositivos Apple, el botón {{ ui.icon('location', ic) }} <em>Localizarme</em> (y «añadir una biblioteca aquí» desde tu ubicación) solo funciona si se permite el acceso a la ubicación:
+        </p>
+        <ol class="ml-1 mt-2 list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+          <li>La primera vez que pulsas <em>Localizarme</em>, iOS te pide permiso — elige <em>Permitir</em>.</li>
+          <li>Si no pasa nada o pulsaste «No permitir» antes, vuelve a activarlo en <em>Ajustes → Privacidad y seguridad → Localización</em>: asegúrate de que la Localización esté activada y luego pon <em>Sitios web de Safari</em> (o, si instalaste OpenBookCase en la pantalla de inicio, la app de OpenBookCase) en <em>Al usar la app</em>.</li>
+          <li>Para un pin preciso, activa además <em>Ubicación precisa</em> para esa entrada.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Idioma y tema ── #}
+<section id="prefs" class="card mb-6 scroll-mt-20 bg-base-200">
+  <div class="card-body">
+    <h2 class="card-title">{{ ui.icon('language', 'size-5') }} Idioma y tema</h2>
+    <ol class="ml-1 list-decimal space-y-2 pl-5">
+      <li>Cambia el idioma de la interfaz con el selector {{ ui.icon('language', ic) }} de la barra superior.</li>
+      <li>Alterna entre modo claro y oscuro con el interruptor {{ ui.icon('sun', ic) }} / {{ ui.icon('moon', ic) }}. Tu elección se recuerda en este dispositivo.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="mt-8 text-center text-sm text-base-content/60">
+  ¿Sigues con dudas? Escríbenos a <a class="link link-primary" href="mailto:info@openbookcase.de">info@openbookcase.de</a>.
+</p>
