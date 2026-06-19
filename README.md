@@ -63,6 +63,28 @@ It is the modern rebuild of an older platform.
 
 ## Getting Started
 
+### Quick start (one command) ⚡
+
+After cloning, the guided setup gets you from zero to a runnable app — it installs
+PHP + JS dependencies, builds the frontend, generates the dev OAuth keypair,
+creates the database (it asks whether you want **sample data** or an **empty** DB),
+and creates an admin account with a password you choose:
+
+```bash
+make setup      # interactive — just answer the prompts
+# …then:
+make serve      # start the web server, open http://localhost:8000
+```
+
+No `make`? Run the script directly: `bash bin/setup.sh`. It's safe to re-run.
+
+Run `make help` to see all the handy targets (`make fixtures`, `make admin`,
+`make test`, `make build`, `make watch`, …). The rest of this section documents
+the same steps done manually.
+
+<details>
+<summary><strong>Manual setup (what <code>make setup</code> does under the hood)</strong></summary>
+
 ### 1. Clone & install dependencies
 
 ```bash
@@ -71,6 +93,7 @@ cd openbookcase
 
 composer install
 npm install
+npm run build
 ```
 
 ### 2. Configure environment
@@ -139,6 +162,8 @@ php -S localhost:8000 -t public/
 ```
 
 Then open **http://localhost:8000**.
+
+</details>
 
 ## Useful commands
 
