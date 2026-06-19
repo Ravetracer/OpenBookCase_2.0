@@ -7,7 +7,12 @@
     {% for image in bookcase.images %}
       <div class="card border border-base-300 bg-base-100" data-image-card>
         <figure class="aspect-[4/3] bg-base-200">
-          <img src="/images/{{ image.filename }}" class="h-full w-full object-contain p-1" alt="{{ image.altText|default('')|e('html_attr') }}">
+          <img src="/images/{{ image.filename }}" class="h-full w-full cursor-zoom-in object-contain p-1"
+               alt="{{ image.altText|default('')|e('html_attr') }}"
+               data-lightbox="bc-photos-{{ bookcase.id }}"
+               data-lightbox-caption="{{ image.author|default('')|e('html_attr') }}"
+               role="button" tabindex="0"
+               title="{{ 'lightbox.enlarge'|trans }}" aria-label="{{ 'lightbox.enlarge'|trans }}">
         </figure>
         <div class="card-body gap-2 p-2">
           <p class="truncate text-xs text-base-content/60" title="{{ image.author|e('html_attr') }}">{{ image.author }}</p>

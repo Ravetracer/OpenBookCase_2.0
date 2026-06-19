@@ -271,6 +271,32 @@
             <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
         </dialog>
 
+        {# ───────────────────────── Image lightbox ───────────────────────── #}
+        <dialog id="lightboxModal" class="modal" data-controller="lightbox"
+                data-trans-previous="{{ 'lightbox.previous'|trans }}"
+                data-trans-next="{{ 'lightbox.next'|trans }}">
+            <div class="modal-box flex max-h-[95vh] w-full max-w-5xl flex-col bg-base-100 p-2 sm:p-4">
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost absolute right-3 top-3 z-10 text-base-content" aria-label="{{ 'close'|trans }}">{{ ui.icon('close', 'size-5 stroke-[2.5]') }}</button>
+                </form>
+                <div class="relative flex min-h-0 flex-1 items-center justify-center">
+                    <img data-lightbox-target="image" src="" alt=""
+                         class="max-h-[80vh] w-auto max-w-full object-contain">
+                    <button type="button" data-lightbox-target="prev" data-action="lightbox#prev"
+                            class="btn btn-circle absolute left-1 top-1/2 -translate-y-1/2 sm:left-2"
+                            aria-label="{{ 'lightbox.previous'|trans }}">{{ ui.icon('chevron-left', 'size-5') }}</button>
+                    <button type="button" data-lightbox-target="next" data-action="lightbox#next"
+                            class="btn btn-circle absolute right-1 top-1/2 -translate-y-1/2 sm:right-2"
+                            aria-label="{{ 'lightbox.next'|trans }}">{{ ui.icon('chevron-right', 'size-5') }}</button>
+                </div>
+                <div class="mt-2 flex items-center justify-between gap-2 text-sm text-base-content/70">
+                    <p data-lightbox-target="caption" class="hidden truncate"></p>
+                    <span data-lightbox-target="counter" class="ml-auto hidden whitespace-nowrap tabular-nums"></span>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
+        </dialog>
+
         {# ───────────────────────── Wishlist modal ───────────────────────── #}
         <dialog id="wishlistModal" class="modal" data-controller="wishlist-modal"
                 data-trans-confirm-cancel="{{ 'js.confirm_cancel_wish'|trans }}"

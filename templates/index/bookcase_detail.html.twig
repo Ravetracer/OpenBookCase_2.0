@@ -30,7 +30,12 @@
     {% for image in bookcase.images %}
       <div id="bc-slide-{{ loop.index }}" class="carousel-item w-full flex-col">
         <div class="relative flex w-full justify-center">
-          <img src="/images/{{ image.filename }}" class="max-h-72 w-full object-contain" alt="{{ image.altText ?: bookcase.title }}">
+          <img src="/images/{{ image.filename }}" class="max-h-72 w-full cursor-zoom-in object-contain"
+               alt="{{ image.altText ?: bookcase.title }}"
+               data-lightbox="bc-{{ bookcase.id }}"
+               data-lightbox-caption="{{ (image.author ? '© photo by ' ~ image.author : '')|e('html_attr') }}"
+               role="button" tabindex="0"
+               title="{{ 'lightbox.enlarge'|trans }}" aria-label="{{ 'lightbox.enlarge'|trans }}">
           {% if bookcase.images.count > 1 %}
             <div class="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 justify-between">
               <a href="#bc-slide-{{ loop.first ? bookcase.images.count : loop.index - 1 }}" class="btn btn-circle btn-sm" aria-label="Previous">❮</a>

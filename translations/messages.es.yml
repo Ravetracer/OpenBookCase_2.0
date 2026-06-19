@@ -639,3 +639,9 @@ filter:
 'seo.index_description': "Descubre bibliotecas públicas de calle y cajas de intercambio cerca de ti en un mapa interactivo. Ubicaciones, horarios y fotos, mantenido por la comunidad."
 'seo.index_h1': "Encuentra bibliotecas públicas de calle y cajas de intercambio cerca de ti"
 'seo.index_intro': "OpenBookCase muestra bibliotecas públicas de calle, estanterías de libros gratis y cajas de intercambio cerca de ti en un mapa interactivo. Consulta ubicaciones, horarios y fotos, o añade tú mismo una nueva y compártela con la comunidad."
+
+# ── Image lightbox ──
+lightbox:
+  previous: 'Imagen anterior'
+  next: 'Imagen siguiente'
+  enlarge: 'Ver más grande'

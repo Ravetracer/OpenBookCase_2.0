@@ -639,3 +639,9 @@ filter:
 'seo.index_description': "Discover public bookcases and give-boxes near you on an interactive map. Locations, opening times and photos – community-maintained. Add a public bookcase yourself."
 'seo.index_h1': "Find public bookcases and give-boxes near you"
 'seo.index_intro': "OpenBookCase shows public bookcases, open book-sharing shelves and give-boxes near you on an interactive map. Browse locations, opening times and photos of public bookcases – or add a new one and share it with the community."
+
+# ── Image lightbox ──
+lightbox:
+  previous: 'Previous image'
+  next: 'Next image'
+  enlarge: 'View larger'

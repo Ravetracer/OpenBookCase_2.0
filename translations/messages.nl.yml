@@ -639,3 +639,9 @@ filter:
 'seo.index_description': "Ontdek openbare boekenkasten en weggeefkasten bij jou in de buurt op een interactieve kaart. Locaties, openingstijden en foto's – beheerd door de community."
 'seo.index_h1': "Openbare boekenkasten en weggeefkasten bij jou in de buurt vinden"
 'seo.index_intro': "OpenBookCase toont openbare boekenkasten, minibiebs en weggeefkasten bij jou in de buurt op een interactieve kaart. Bekijk locaties, openingstijden en foto's – of voeg zelf een boekenkast toe en deel die met de community."
+
+# ── Image lightbox ──
+lightbox:
+  previous: 'Vorige afbeelding'
+  next: 'Volgende afbeelding'
+  enlarge: 'Vergroten'

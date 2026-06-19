@@ -639,3 +639,9 @@ filter:
 'seo.index_description': "Entdecke öffentliche Bücherschränke und Giveboxen in deiner Nähe auf einer interaktiven Karte. Standorte, Öffnungszeiten und Fotos – gemeinschaftlich gepflegt. Trage selbst einen öffentlichen Bücherschrank bei."
 'seo.index_h1': "Öffentliche Bücherschränke und Giveboxen finden"
 'seo.index_intro': "OpenBookCase zeigt dir öffentliche Bücherschränke, offene Bücherregale und Giveboxen in deiner Nähe auf einer interaktiven Karte. Entdecke Standorte, Öffnungszeiten und Fotos öffentlicher Bücherschränke – oder trage selbst einen neuen Bücherschrank bei und teile ihn mit der Community."
+
+# ── Image lightbox ──
+lightbox:
+  previous: 'Vorheriges Bild'
+  next: 'Nächstes Bild'
+  enlarge: 'Vergrößern'
