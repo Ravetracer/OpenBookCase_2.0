@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+{% import 'components/icon.html.twig' as ui %}
+
+{% block title %}{{ 'admin.users.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-5xl p-4 sm:p-6">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-ghost btn-sm gap-1">{{ ui.icon('chevron-left', 'size-4') }} {{ 'admin.back'|trans }}</a>
+    <h1 class="text-2xl font-bold">{{ 'admin.users.title'|trans }}</h1>
+    <span class="badge badge-ghost">{{ 'admin.users.total'|trans({'%count%': total}) }}</span>
+  </div>
+  {{ include('admin/_flashes.html.twig') }}
+
+  {# Search #}
+  <form method="get" action="{{ path('app_admin_users') }}" class="mb-4 flex flex-wrap items-end gap-2">
+    <label class="form-control flex-1">
+      <span class="label-text mb-1 text-xs">{{ 'admin.users.search'|trans }}</span>
+      <input type="search" name="q" value="{{ q }}" placeholder="{{ 'admin.users.search_placeholder'|trans }}" class="input input-bordered input-sm">
+    </label>
+    <button class="btn btn-primary btn-sm gap-1">{{ ui.icon('search', 'size-4') }} {{ 'admin.users.search_apply'|trans }}</button>
+  </form>
+
+  {% if users is empty %}
+    <div class="alert">{{ 'admin.users.none'|trans }}</div>
+  {% else %}
+    <div class="overflow-x-auto rounded-box border border-base-300">
+      <table class="table table-zebra table-sm">
+        <thead>
+          <tr>
+            <th>{{ 'admin.users.col_username'|trans }}</th>
+            <th>{{ 'admin.users.col_email'|trans }}</th>
+            <th>{{ 'admin.users.col_status'|trans }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+            <tr>
+              <td class="font-medium">{{ u.username }}</td>
+              <td class="break-all">{{ u.email }}</td>
+              <td class="space-x-1 whitespace-nowrap">
+                {% if 'ROLE_ADMIN' in u.roles %}<span class="badge badge-sm badge-primary">{{ 'admin.users.badge_admin'|trans }}</span>{% endif %}
+                {% if u.isSuspended %}<span class="badge badge-sm badge-error">{{ 'admin.users.badge_suspended'|trans }}</span>{% endif %}
+                {% if u.isVerified %}<span class="badge badge-sm badge-success">{{ 'admin.users.badge_verified'|trans }}</span>{% else %}<span class="badge badge-sm badge-warning">{{ 'admin.users.badge_unverified'|trans }}</span>{% endif %}
+                {% if u.legacyUser and not u.legacyMigrated %}<span class="badge badge-sm badge-ghost">{{ 'admin.users.badge_legacy'|trans }}</span>{% endif %}
+              </td>
+              <td class="text-right">
+                <a href="{{ path('app_admin_user', {user: u.id}) }}" class="btn btn-ghost btn-xs gap-1">{{ ui.icon('eye', 'size-4') }} {{ 'admin.users.manage'|trans }}</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pages > 1 %}
+      <div class="mt-4 flex justify-center">
+        <div class="join">
+          {% if page > 1 %}
+            <a href="{{ path('app_admin_users', {q: q, page: page - 1}) }}" class="btn btn-sm join-item">«</a>
+          {% endif %}
+          <span class="btn btn-sm join-item btn-disabled">{{ 'admin.users.page'|trans({'%page%': page, '%pages%': pages}) }}</span>
+          {% if page < pages %}
+            <a href="{{ path('app_admin_users', {q: q, page: page + 1}) }}" class="btn btn-sm join-item">»</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

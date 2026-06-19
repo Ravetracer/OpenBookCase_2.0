@@ -16,6 +16,11 @@ class UserChecker implements UserCheckerInterface
             return;
         }
 
+        // A suspended account cannot log in at all, regardless of verification.
+        if ($user->isSuspended) {
+            throw new CustomUserMessageAccountStatusException('account.suspended');
+        }
+
         // Block login until the account is unlocked via the e-mailed
         // verification link. Legacy users are imported as already verified.
         if (!$user->isVerified) {
