@@ -640,6 +640,11 @@ filter:
 'seo.index_h1': "Find public bookcases and give-boxes near you"
 'seo.index_intro': "OpenBookCase shows public bookcases, open book-sharing shelves and give-boxes near you on an interactive map. Browse locations, opening times and photos of public bookcases – or add a new one and share it with the community."
 
+# ── Image lightbox ──
+lightbox:
+  previous: 'Previous image'
+  next: 'Next image'
+  enlarge: 'View larger'
 # ── Admin: user management ──
 'admin.users.title': "User management"
 'admin.users.dashboard_help': "Find accounts, correct e-mail addresses, manage roles, suspend or delete users."

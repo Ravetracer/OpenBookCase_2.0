@@ -640,6 +640,11 @@ filter:
 'seo.index_h1': "Trouver des boîtes à livres et des give-boxes près de chez vous"
 'seo.index_intro': "OpenBookCase affiche des boîtes à livres publiques, des bibliothèques de rue et des give-boxes près de chez vous sur une carte interactive. Consultez les adresses, horaires et photos, ou ajoutez vous-même une nouvelle boîte à livres et partagez-la avec la communauté."
 
+# ── Image lightbox ──
+lightbox:
+  previous: 'Image précédente'
+  next: 'Image suivante'
+  enlarge: 'Agrandir'
 # ── Admin : gestion des utilisateurs ──
 'admin.users.title': "Gestion des utilisateurs"
 'admin.users.dashboard_help': "Trouvez des comptes, corrigez des adresses e-mail, gérez les rôles, suspendez ou supprimez des utilisateurs."

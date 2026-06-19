@@ -640,6 +640,11 @@ filter:
 'seo.index_h1': "Öffentliche Bücherschränke und Giveboxen finden"
 'seo.index_intro': "OpenBookCase zeigt dir öffentliche Bücherschränke, offene Bücherregale und Giveboxen in deiner Nähe auf einer interaktiven Karte. Entdecke Standorte, Öffnungszeiten und Fotos öffentlicher Bücherschränke – oder trage selbst einen neuen Bücherschrank bei und teile ihn mit der Community."
 
+# ── Image lightbox ──
+lightbox:
+  previous: 'Vorheriges Bild'
+  next: 'Nächstes Bild'
+  enlarge: 'Vergrößern'
 # ── Admin: Benutzerverwaltung ──
 'admin.users.title': "Benutzerverwaltung"
 'admin.users.dashboard_help': "Konten finden, E-Mail-Adressen korrigieren, Rollen verwalten, Benutzer sperren oder löschen."

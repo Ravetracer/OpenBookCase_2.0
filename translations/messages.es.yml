@@ -640,6 +640,11 @@ filter:
 'seo.index_h1': "Encuentra bibliotecas públicas de calle y cajas de intercambio cerca de ti"
 'seo.index_intro': "OpenBookCase muestra bibliotecas públicas de calle, estanterías de libros gratis y cajas de intercambio cerca de ti en un mapa interactivo. Consulta ubicaciones, horarios y fotos, o añade tú mismo una nueva y compártela con la comunidad."
 
+# ── Image lightbox ──
+lightbox:
+  previous: 'Imagen anterior'
+  next: 'Imagen siguiente'
+  enlarge: 'Ver más grande'
 # ── Admin: gestión de usuarios ──
 'admin.users.title': "Gestión de usuarios"
 'admin.users.dashboard_help': "Encuentra cuentas, corrige direcciones de correo, gestiona roles, suspende o elimina usuarios."

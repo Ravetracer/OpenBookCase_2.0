@@ -335,6 +335,22 @@ final class BookcaseApiTest extends FunctionalTestCase
         $this->assertStringContainsString('No Address Entry', $this->client->getResponse()->getContent());
     }
 
+    /**
+     * The detail carousel marks each photo as a lightbox trigger so it can be
+     * opened large with prev/next navigation (lightbox_controller.js).
+     */
+    public function testRetrieveDetailHtmlImagesAreLightboxTriggers(): void
+    {
+        $bc = BookcaseFactory::createOne(['title' => 'Has Photos']);
+        \App\Tests\Factory\ImageFactory::createOne(['bookcase' => $bc, 'filename' => 'photo.jpg']);
+
+        $this->client->request('GET', '/api/bookcase/' . $bc->id . '/html');
+        $this->assertResponseIsSuccessful();
+        $html = $this->client->getResponse()->getContent();
+        $this->assertStringContainsString('data-lightbox="bc-' . $bc->id . '"', $html);
+        $this->assertStringContainsString('/images/photo.jpg', $html);
+    }
+
     public function testEditFragmentRequiresAuth(): void
     {
         $bc = BookcaseFactory::createOne();
