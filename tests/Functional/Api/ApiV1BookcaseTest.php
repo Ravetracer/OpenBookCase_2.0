@@ -96,6 +96,20 @@ final class ApiV1BookcaseTest extends OAuthApiTestCase
         $this->assertSame('After', $this->em()->getRepository(Bookcase::class)->find($bc->id)->title);
     }
 
+    public function testUpdateTitleClearsProvisionalFlag(): void
+    {
+        // Regression: an OSM-imported entry (provisional title) edited via the API
+        // must drop the "help name this bookcase" prompt once a real title is set.
+        $token = $this->tokenFor(UserFactory::createOne(), ['bookcases.write']);
+        $bc = BookcaseFactory::createOne(['title' => 'Public bookcase', 'titleProvisional' => true]);
+
+        $this->api('PATCH', '/api/v1/bookcases/' . $bc->id, $token, ['title' => 'Named by user']);
+        $this->assertResponseIsSuccessful();
+
+        $this->em()->clear();
+        $this->assertFalse($this->em()->getRepository(Bookcase::class)->find($bc->id)->titleProvisional);
+    }
+
     public function testPositionUpdate(): void
     {
         $token = $this->tokenFor(UserFactory::createOne(), ['bookcases.write']);

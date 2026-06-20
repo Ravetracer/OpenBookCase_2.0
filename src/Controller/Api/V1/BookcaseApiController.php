@@ -149,6 +149,10 @@ class BookcaseApiController extends AbstractController
 
         if (array_key_exists('title', $data)) {
             $bookcase->title = trim((string) $data['title']);
+            // The user has supplied a real title, so it's no longer the provisional
+            // auto-generated one (clears the OSM "help name this bookcase" prompt) —
+            // mirrors the website's full edit-form save.
+            $bookcase->titleProvisional = false;
         }
         if (array_key_exists('webpage', $data)) {
             $bookcase->webpage = $this->nullableString($data['webpage']);
