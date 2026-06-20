@@ -598,6 +598,7 @@ filter:
 'oauth.scope_images_write': "Téléverser des photos"
 'oauth.scope_wishlist_write': "Ajouter des éléments à la liste de souhaits"
 'oauth.scope_watchlist_write': "Gérer votre liste de suivi"
+'oauth.scope_ratings_write': "Noter des entrées"
 'oauth.scope_home_write': "Définir votre position d'accueil"
 
 'profile.api_client_id': "ID client"

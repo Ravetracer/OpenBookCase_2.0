@@ -598,6 +598,7 @@ filter:
 'oauth.scope_images_write': "Загружать фотографии"
 'oauth.scope_wishlist_write': "Добавлять элементы в список желаний"
 'oauth.scope_watchlist_write': "Управлять списком наблюдения"
+'oauth.scope_ratings_write': "Оценивать записи"
 'oauth.scope_home_write': "Задавать домашнее местоположение"
 
 'profile.api_client_id': "Идентификатор клиента"

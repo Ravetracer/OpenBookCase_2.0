@@ -598,6 +598,7 @@ filter:
 'oauth.scope_images_write': "Foto's uploaden"
 'oauth.scope_wishlist_write': "Verlanglijst-items toevoegen"
 'oauth.scope_watchlist_write': "Je volglijst beheren"
+'oauth.scope_ratings_write': "Items beoordelen"
 'oauth.scope_home_write': "Je startlocatie instellen"
 
 'profile.api_client_id': "Client-ID"

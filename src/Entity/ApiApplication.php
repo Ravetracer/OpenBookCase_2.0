@@ -35,6 +35,7 @@ class ApiApplication
         'images.write',
         'wishlist.write',
         'watchlist.write',
+        'ratings.write',
         'home.write',
     ];
 

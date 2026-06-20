@@ -127,6 +127,7 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
           <tr><td class="font-mono text-xs">images.write</td><td>Загружать фотографии к записи</td></tr>
           <tr><td class="font-mono text-xs">wishlist.write</td><td>Добавлять элементы списка желаний к записи</td></tr>
           <tr><td class="font-mono text-xs">watchlist.write</td><td>Наблюдать / прекращать наблюдение за записью для пользователя</td></tr>
+          <tr><td class="font-mono text-xs">ratings.write</td><td>Оценивать запись (1–5) от имени пользователя и удалять его оценку</td></tr>
           <tr><td class="font-mono text-xs">home.write</td><td>Задавать домашнюю позицию пользователя на карте</td></tr>
         </tbody>
       </table>
@@ -146,6 +147,9 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
           <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Отдельная запись со всеми подробностями</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/images</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список фотографий записи</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/wishlist</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список элементов списка желаний записи</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список смотрителей записи</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Список часов работы записи</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/rating</td><td><span class="badge badge-success badge-sm">открыто</span></td><td>Сводка оценок (количество + среднее)</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Создать запись</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Обновить поля (частично)</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/position</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Переместить (latitude/longitude)</td></tr>
@@ -155,6 +159,14 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Наблюдать за записью</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Прекратить наблюдение за записью</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/profile/home</td><td><span class="badge badge-warning badge-sm font-mono">home.write</span></td><td>Задать домашнюю позицию пользователя</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Добавить смотрителя к записи</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers/{caretakerId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Обновить смотрителя (частично)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers/{caretakerId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Удалить смотрителя</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Добавить часы работы</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times/{openingTimeId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Обновить часы работы (частично)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times/{openingTimeId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Удалить часы работы</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PUT</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/rating</td><td><span class="badge badge-warning badge-sm font-mono">ratings.write</span></td><td>Добавить или обновить оценку пользователя (1–5)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/rating</td><td><span class="badge badge-warning badge-sm font-mono">ratings.write</span></td><td>Удалить оценку пользователя</td></tr>
         </tbody>
       </table>
     </div>
@@ -225,6 +237,28 @@ curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../wishlist \
 curl -X POST https://openbookcase.de/api/v1/profile/home \
   -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
   -d '{"latitude": 52.52, "longitude": 13.405, "zoom": 14}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Смотрители, часы работы &amp; оценки</h3>
+    <p class="text-sm text-base-content/80">Смотрители и часы работы являются частью записи, поэтому используют <code>bookcases.write</code>. Оценка принадлежит пользователю, поэтому использует <code>ratings.write</code>.</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}# Добавить смотрителя (требуется имя и/или контакт; адрес необязателен)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../caretakers \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"name": "Local library", "contact": "hello@example.org",
+       "address": {"street": "Main St", "houseNumber": "5", "city": "Berlin"}}'
+# → 201 Created, возвращает смотрителя (вкл. его id). PATCH .../caretakers/{id} редактирует его,
+#   DELETE .../caretakers/{id} отвязывает его (и удаляет, если его больше не использует ни одна запись).
+
+# Добавить часы работы (свободный текст text ИЛИ флаг 24/7 — одно из двух обязательно)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../opening-times \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"openTime": "Mo-Fr 08:00-20:00"}'        # или: {"twentyFourSeven": true}
+# PATCH/DELETE .../opening-times/{id} редактирует или удаляет их.
+
+# Оценить запись от имени пользователя (1–5; создаёт или обновляет его единственную оценку)
+curl -X PUT https://openbookcase.de/api/v1/bookcases/01JZ.../rating \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"value": 5}'
+# → возвращает {userValue, count, average, rounded}. DELETE .../rating удаляет его оценку.{% endverbatim %}</code></pre>
   </div>
 </section>
 

@@ -127,6 +127,7 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
           <tr><td class="font-mono text-xs">images.write</td><td>Envoyer des photos sur une entrée</td></tr>
           <tr><td class="font-mono text-xs">wishlist.write</td><td>Ajouter des éléments de liste de souhaits à une entrée</td></tr>
           <tr><td class="font-mono text-xs">watchlist.write</td><td>Suivre / ne plus suivre une entrée pour l'utilisateur</td></tr>
+          <tr><td class="font-mono text-xs">ratings.write</td><td>Noter une entrée (1–5) pour l'utilisateur, et supprimer sa note</td></tr>
           <tr><td class="font-mono text-xs">home.write</td><td>Définir la position d'accueil de l'utilisateur sur la carte</td></tr>
         </tbody>
       </table>
@@ -146,6 +147,9 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
           <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-success badge-sm">ouvert</span></td><td>Entrée unique avec tous les détails</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/images</td><td><span class="badge badge-success badge-sm">ouvert</span></td><td>Lister les photos d'une entrée</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/wishlist</td><td><span class="badge badge-success badge-sm">ouvert</span></td><td>Lister les éléments de liste de souhaits d'une entrée</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers</td><td><span class="badge badge-success badge-sm">ouvert</span></td><td>Lister les responsables d'une entrée</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times</td><td><span class="badge badge-success badge-sm">ouvert</span></td><td>Lister les horaires d'ouverture d'une entrée</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">GET</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/rating</td><td><span class="badge badge-success badge-sm">ouvert</span></td><td>Résumé des notes (nombre + moyenne)</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Créer une entrée</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Mettre à jour des champs (partiel)</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/position</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Déplacer (latitude/longitude)</td></tr>
@@ -155,6 +159,14 @@ CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" \
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Suivre une entrée</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/watch</td><td><span class="badge badge-warning badge-sm font-mono">watchlist.write</span></td><td>Ne plus suivre une entrée</td></tr>
           <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/profile/home</td><td><span class="badge badge-warning badge-sm font-mono">home.write</span></td><td>Définir la position d'accueil de l'utilisateur</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Ajouter un responsable à une entrée</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers/{caretakerId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Mettre à jour un responsable (partiel)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/caretakers/{caretakerId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Retirer un responsable</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">POST</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Ajouter un horaire d'ouverture</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PATCH</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times/{openingTimeId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Mettre à jour un horaire d'ouverture (partiel)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/opening-times/{openingTimeId}</td><td><span class="badge badge-warning badge-sm font-mono">bookcases.write</span></td><td>Retirer un horaire d'ouverture</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">PUT</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/rating</td><td><span class="badge badge-warning badge-sm font-mono">ratings.write</span></td><td>Ajouter ou mettre à jour la note de l'utilisateur (1–5)</td></tr>
+          <tr><td><span class="badge badge-ghost badge-sm font-mono">DELETE</span></td><td class="font-mono text-xs">/api/v1/bookcases/{id}/rating</td><td><span class="badge badge-warning badge-sm font-mono">ratings.write</span></td><td>Supprimer la note de l'utilisateur</td></tr>
         </tbody>
       </table>
     </div>
@@ -225,6 +237,28 @@ curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../wishlist \
 curl -X POST https://openbookcase.de/api/v1/profile/home \
   -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
   -d '{"latitude": 52.52, "longitude": 13.405, "zoom": 14}'{% endverbatim %}</code></pre>
+
+    <h3 class="mt-3 font-semibold">Responsables, horaires d'ouverture &amp; notes</h3>
+    <p class="text-sm text-base-content/80">Les responsables et les horaires d'ouverture font partie de l'entrée, ils utilisent donc <code>bookcases.write</code>. Une note appartient à l'utilisateur, elle utilise donc <code>ratings.write</code>.</p>
+    <pre class="mt-2 overflow-x-auto rounded-box bg-base-300 p-3 text-xs leading-relaxed"><code>{% verbatim %}# Ajouter un responsable (un nom et/ou un contact est requis ; l'adresse est facultative)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../caretakers \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"name": "Local library", "contact": "hello@example.org",
+       "address": {"street": "Main St", "houseNumber": "5", "city": "Berlin"}}'
+# → 201 Created, renvoie le responsable (avec son id). PATCH .../caretakers/{id} le modifie,
+#   DELETE .../caretakers/{id} le détache (et le supprime si plus aucune entrée ne l'utilise).
+
+# Ajouter un horaire d'ouverture (texte libre, OU le drapeau 24/7 — l'un des deux est requis)
+curl -X POST https://openbookcase.de/api/v1/bookcases/01JZ.../opening-times \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"openTime": "Mo-Fr 08:00-20:00"}'        # ou : {"twentyFourSeven": true}
+# PATCH/DELETE .../opening-times/{id} le modifie ou le supprime.
+
+# Noter l'entrée pour l'utilisateur (1–5 ; crée ou met à jour sa note unique)
+curl -X PUT https://openbookcase.de/api/v1/bookcases/01JZ.../rating \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"value": 5}'
+# → renvoie {userValue, count, average, rounded}. DELETE .../rating supprime sa note.{% endverbatim %}</code></pre>
   </div>
 </section>
 

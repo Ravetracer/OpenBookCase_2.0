@@ -38,6 +38,7 @@ league_oauth2_server:
             - 'images.write'
             - 'wishlist.write'
             - 'watchlist.write'
+            - 'ratings.write'
             - 'home.write'
         default: ['read']
     persistence:

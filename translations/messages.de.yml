@@ -598,6 +598,7 @@ filter:
 'oauth.scope_images_write': "Fotos hochladen"
 'oauth.scope_wishlist_write': "Wunschlisten-Einträge hinzufügen"
 'oauth.scope_watchlist_write': "Deine Beobachtungsliste verwalten"
+'oauth.scope_ratings_write': "Einträge bewerten"
 'oauth.scope_home_write': "Deine Heimatposition festlegen"
 
 'profile.api_client_id': "Client-ID"
