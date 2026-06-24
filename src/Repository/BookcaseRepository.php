@@ -3,9 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Bookcase;
+use App\Enums\AccessibilityLevel;
 use App\Enums\WishlistItemStatus;
+use App\Model\BookcaseFilter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Ulid;
 
@@ -75,6 +78,7 @@ class BookcaseRepository extends ServiceEntityRepository
                 'bc.accessibility.level AS accessibilityLevel',
                 'bc.isMobile AS isMobile',
                 'bc.isBookcrossingZone AS isBookcrossingZone',
+                'bc.source AS source',
                 // COUNT/AVG are DISTINCT/id-safe: two one-to-many joins (wishes +
                 // ratings) cross-multiply rows, so plain COUNT(wi.id) would inflate.
                 // AVG is unaffected by the uniform row duplication.
@@ -99,6 +103,7 @@ class BookcaseRepository extends ServiceEntityRepository
             ->addGroupBy('bc.accessibility.level')
             ->addGroupBy('bc.isMobile')
             ->addGroupBy('bc.isBookcrossingZone')
+            ->addGroupBy('bc.source')
             ->setParameter('open', WishlistItemStatus::Open->value)
             ->setParameter('latMin', $latMin)
             ->setParameter('latMax', $latMax)
@@ -162,6 +167,32 @@ class BookcaseRepository extends ServiceEntityRepository
             ->orderBy('bc.title', 'ASC')
             ->getQuery()
             ->toIterable();
+    }
+
+    /**
+     * Streaming export that mirrors the list view's free-text search, filters and
+     * sort, so "export with current filters & sorting" produces exactly the rows
+     * the user is looking at. Same memory profile as {@see iterateForExport()} —
+     * no collection fetch-joins, so `toIterable()` is valid.
+     *
+     * @return iterable<Bookcase>
+     */
+    public function iterateFilteredForExport(
+        ?string $q,
+        string $sortKey,
+        string $dir,
+        ?float $uLat,
+        ?float $uLon,
+        ?float $cosLat,
+        BookcaseFilter $filter,
+        ?string $watcherId = null,
+    ): iterable {
+        $qb = $this->createQueryBuilder('bc');
+        $this->applyListFilter($qb, $q);
+        $this->applyFilterSet($qb, $filter, $watcherId);
+        $this->applySort($qb, $sortKey, $dir, $uLat, $uLon, $cosLat);
+
+        return $qb->getQuery()->toIterable();
     }
 
     /**
@@ -272,64 +303,143 @@ class BookcaseRepository extends ServiceEntityRepository
         }
 
         $qb->andWhere(
-            'LOWER(bc.title) LIKE :q'
+            '(LOWER(bc.title) LIKE :q'
             . ' OR LOWER(bc.address.street) LIKE :q'
             . ' OR LOWER(bc.address.houseNumber) LIKE :q'
             . ' OR LOWER(bc.address.zipcode) LIKE :q'
             . ' OR LOWER(bc.address.city) LIKE :q'
-            . ' OR LOWER(bc.address.additionalData) LIKE :q'
+            . ' OR LOWER(bc.address.additionalData) LIKE :q)'
         )->setParameter('q', '%' . mb_strtolower($q) . '%');
     }
 
     /**
-     * Restrict to community-contributed entries (legacy + user-added), excluding
-     * bulk-imported OpenStreetMap rows — used by the "newest additions" view so a
-     * recent OSM import batch can't drown out genuine community additions.
+     * Apply the map-style filter set (accessibility / status / type / mobility /
+     * minimum rating / open-wishes / bookcrossing / watched / OSM provenance) to a
+     * query builder. Each dimension is a plain WHERE clause — correlated EXISTS /
+     * scalar subqueries for the rating & relation filters — so no GROUP BY is
+     * needed and the count query stays a simple COUNT. $watcherId is the current
+     * user's ULID (string); the "watched" filter matches nothing without it.
      */
-    private function applyCommunityFilter(\Doctrine\ORM\QueryBuilder $qb): void
+    private function applyFilterSet(QueryBuilder $qb, BookcaseFilter $filter, ?string $watcherId): void
     {
-        $qb->andWhere('bc.source IS NULL OR bc.source != :osmSource')
-            ->setParameter('osmSource', 'osm');
-    }
-
-    /** Count entries matching the list-view search filter (for pagination). */
-    public function countFiltered(?string $q, bool $communityOnly = false): int
-    {
-        $qb = $this->createQueryBuilder('bc')->select('COUNT(bc.id)');
-        $this->applyListFilter($qb, $q);
-        if ($communityOnly) {
-            $this->applyCommunityFilter($qb);
+        // Accessibility: colour tokens → traffic-light levels; 'unset' = no level set.
+        if (count($filter->accessibility) !== count(BookcaseFilter::ACCESSIBILITY)) {
+            if ($filter->accessibility === []) {
+                $qb->andWhere('1 = 0');
+            } else {
+                $levels = [];
+                $unset = false;
+                foreach ($filter->accessibility as $token) {
+                    match ($token) {
+                        'green' => $levels[] = AccessibilityLevel::Full->value,
+                        'yellow' => $levels[] = AccessibilityLevel::Partial->value,
+                        'red' => $levels[] = AccessibilityLevel::None->value,
+                        'unset' => $unset = true,
+                        default => null,
+                    };
+                }
+                $or = [];
+                if ($levels !== []) {
+                    $or[] = 'bc.accessibility.level IN (:accLevels)';
+                    $qb->setParameter('accLevels', $levels);
+                }
+                if ($unset) {
+                    $or[] = 'bc.accessibility.level IS NULL';
+                }
+                $qb->andWhere('(' . implode(' OR ', $or) . ')');
+            }
         }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        // Status (active / inactive) and entry type (bookcase / givebox).
+        $this->applyInFilter($qb, 'bc.active.status', $filter->status, BookcaseFilter::STATUS, 'fStatus');
+        $this->applyInFilter($qb, 'bc.entryType', $filter->types, BookcaseFilter::TYPES, 'fType');
+
+        // Mobility (fixed = not mobile, mobile = mobile).
+        if (count($filter->mobility) !== count(BookcaseFilter::MOBILITY)) {
+            if ($filter->mobility === []) {
+                $qb->andWhere('1 = 0');
+            } elseif (in_array('mobile', $filter->mobility, true)) {
+                $qb->andWhere('bc.isMobile = true');
+            } else {
+                $qb->andWhere('bc.isMobile = false');
+            }
+        }
+
+        // Minimum average rating — scalar subquery; entries with no ratings (AVG
+        // is NULL) never satisfy `>= n`, so they drop out, matching the map.
+        if ($filter->minRating > 0) {
+            $qb->andWhere(
+                '(SELECT AVG(r_f.value) FROM App\Entity\Rating r_f WHERE r_f.bookcase = bc) >= :minRating'
+            )->setParameter('minRating', $filter->minRating);
+        }
+
+        // Has at least one still-open wish.
+        if ($filter->wishlist) {
+            $qb->andWhere(
+                'EXISTS (SELECT 1 FROM App\Entity\WishlistItem wi_f WHERE wi_f.bookcase = bc AND wi_f.status = :openWish)'
+            )->setParameter('openWish', WishlistItemStatus::Open->value);
+        }
+
+        // Official BookCrossing zone.
+        if ($filter->bookcrossing) {
+            $qb->andWhere('bc.isBookcrossingZone = true');
+        }
+
+        // Only entries the current user watches (nothing for anonymous visitors).
+        if ($filter->watching) {
+            if ($watcherId === null) {
+                $qb->andWhere('1 = 0');
+            } else {
+                $qb->andWhere(
+                    'EXISTS (SELECT 1 FROM App\Entity\WatchlistItem wl_f WHERE wl_f.bookcase = bc AND wl_f.user = :watcherId)'
+                )->setParameter('watcherId', Ulid::fromString($watcherId), 'ulid');
+            }
+        }
+
+        // OSM provenance tri-state.
+        if ($filter->osm === 'only') {
+            $qb->andWhere('bc.source = :osmSource')->setParameter('osmSource', 'osm');
+        } elseif ($filter->osm === 'without') {
+            $qb->andWhere('(bc.source IS NULL OR bc.source != :osmSource)')->setParameter('osmSource', 'osm');
+        }
     }
 
     /**
-     * Paginated list-view fetch: free-text search + sort. When $sortKey is
-     * 'distance' and user coordinates are given, orders by an equirectangular
-     * planar approximation (portable — only +,-,* — no DB trig). $cosLat is
-     * cos(userLat) precomputed in PHP.
+     * Restrict $field to a selected token subset. A full selection is a no-op; an
+     * empty selection matches nothing (the user unchecked everything in that group).
      *
-     * @return Bookcase[]
+     * @param list<string> $selected
+     * @param list<string> $all
      */
-    public function findFilteredPaginated(
-        ?string $q,
+    private function applyInFilter(QueryBuilder $qb, string $field, array $selected, array $all, string $param): void
+    {
+        if (count($selected) === count($all)) {
+            return;
+        }
+        if ($selected === []) {
+            $qb->andWhere('1 = 0');
+
+            return;
+        }
+
+        $qb->andWhere(sprintf('%s IN (:%s)', $field, $param))->setParameter($param, array_values($selected));
+    }
+
+    /**
+     * Apply the list-view sort. When $sortKey is 'distance' and user coordinates
+     * are given, orders by an equirectangular planar approximation (portable —
+     * only +,-,* — no DB trig); $cosLat is cos(userLat) precomputed in PHP. A
+     * stable secondary order on the (time-ordered) id makes paging deterministic.
+     */
+    private function applySort(
+        QueryBuilder $qb,
         string $sortKey,
         string $dir,
         ?float $uLat,
         ?float $uLon,
         ?float $cosLat,
-        int $limit,
-        int $offset,
-        bool $communityOnly = false,
-    ): array {
+    ): void {
         $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
-
-        $qb = $this->createQueryBuilder('bc');
-        $this->applyListFilter($qb, $q);
-        if ($communityOnly) {
-            $this->applyCommunityFilter($qb);
-        }
 
         if ($sortKey === 'distance' && $uLat !== null && $uLon !== null && $cosLat !== null) {
             $qb->addSelect(
@@ -346,8 +456,40 @@ class BookcaseRepository extends ServiceEntityRepository
             $qb->orderBy($column, $dir);
         }
 
-        // Stable secondary order so equal keys (and identical distances) paginate deterministically.
         $qb->addOrderBy('bc.id', 'ASC');
+    }
+
+    /** Count entries matching the list-view search + filter set (for pagination). */
+    public function countFiltered(?string $q, BookcaseFilter $filter, ?string $watcherId = null): int
+    {
+        $qb = $this->createQueryBuilder('bc')->select('COUNT(bc.id)');
+        $this->applyListFilter($qb, $q);
+        $this->applyFilterSet($qb, $filter, $watcherId);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Paginated list-view fetch: free-text search + filter set + sort.
+     *
+     * @return Bookcase[]
+     */
+    public function findFilteredPaginated(
+        ?string $q,
+        string $sortKey,
+        string $dir,
+        ?float $uLat,
+        ?float $uLon,
+        ?float $cosLat,
+        int $limit,
+        int $offset,
+        BookcaseFilter $filter,
+        ?string $watcherId = null,
+    ): array {
+        $qb = $this->createQueryBuilder('bc');
+        $this->applyListFilter($qb, $q);
+        $this->applyFilterSet($qb, $filter, $watcherId);
+        $this->applySort($qb, $sortKey, $dir, $uLat, $uLon, $cosLat);
 
         return $qb->setMaxResults($limit)->setFirstResult($offset)->getQuery()->getResult();
     }

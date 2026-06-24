@@ -166,6 +166,8 @@ list:
   export_compressed: Сжатый JSON (.json.gz)
   export_plain: Несжатый JSON (.json)
   export_recommended: рекомендуется
+  export_all: Всё
+  export_filtered: Текущий вид (фильтры и сортировка)
   export_terms_title: Как можно использовать эти данные
   export_terms_intro: 'Прежде чем скачать, обратите внимание, как можно использовать эти данные:'
   export_terms_odbl: 'Все данные на этом сайте опубликованы под лицензией %odbl%.'
@@ -498,6 +500,10 @@ filter:
   wishlist: Есть открытые пожелания
   bookcrossing: Официальная зона BookCrossing
   watching: Только отслеживаемые
+  osm: OpenStreetMap
+  osm_with: Включая импорт из OSM
+  osm_only: Только импорт из OSM
+  osm_without: Без импорта из OSM
 
 'yes': 'Да'
 'no': 'Нет'

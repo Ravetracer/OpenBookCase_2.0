@@ -16,12 +16,15 @@ use App\Enums\MapSymbol;
 use App\Enums\MessageType;
 use App\Form\BookcaseCreateType;
 use App\Form\BookcaseType;
+use App\Model\BookcaseFilter;
 use App\Repository\BookcaseRepository;
 use App\Repository\RatingRepository;
 use App\Repository\WatchlistItemRepository;
 use App\Repository\WishlistItemRepository;
 use App\Service\MessageService;
 use App\Service\ShortCodeGenerator;
+
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -57,6 +60,8 @@ class BookcaseController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly LoggerInterface $logger,
         private readonly ShortCodeGenerator $shortCodeGenerator,
+        #[Autowire('%env(SHORTENER_BASE_URL)%')]
+        private readonly string $shortenerBaseUrl = 'https://obc.onl',
     ) {
     }
 
@@ -199,6 +204,8 @@ class BookcaseController extends AbstractController
                 'accessibility' => $level instanceof AccessibilityLevel ? $level->markerColor() : null,
                 'isMobile' => (bool) $row['isMobile'],
                 'isBookcrossingZone' => (bool) $row['isBookcrossingZone'],
+                // Provenance marker so the map's OSM filter can include/exclude imports.
+                'source' => $row['source'],
                 'ratingCount' => (int) $row['ratingCount'],
                 'ratingAverage' => $row['ratingAverage'] !== null ? round((float) $row['ratingAverage'], 1) : null,
                 'openWishlistCount' => (int) $row['openWishlistCount'],
@@ -233,14 +240,37 @@ class BookcaseController extends AbstractController
         // row — lazy-loading them per entity would be 100k+ queries.
         $caretakerMap = $this->bookcaseRepository->exportCaretakerMap();
         $openingMap = $this->bookcaseRepository->exportOpeningTimeMap();
-        $count = $this->bookcaseRepository->count([]);
 
-        $repo = $this->bookcaseRepository;
+        // "Export with current filters & sorting" (filtered=1) mirrors the list
+        // view's search/filter/sort; otherwise the dump is the full data set.
+        $filtered = $request->query->getBoolean('filtered');
+        if ($filtered) {
+            $filter = BookcaseFilter::fromRequest($request);
+            $q = trim((string) $request->query->get('q', '')) ?: null;
+            $sort = (string) $request->query->get('sort', 'title');
+            $dir = (string) $request->query->get('dir', 'asc');
+            $uLat = is_numeric($request->query->get('userLat')) ? (float) $request->query->get('userLat') : null;
+            $uLon = is_numeric($request->query->get('userLon')) ? (float) $request->query->get('userLon') : null;
+            $cosLat = $uLat !== null ? cos(deg2rad($uLat)) : null;
+
+            $user = $this->getUser();
+            $watcherId = $user instanceof User && $user->id !== null ? (string) $user->id : null;
+
+            $count = $this->bookcaseRepository->countFiltered($q, $filter, $watcherId);
+            $rows = fn () => $this->bookcaseRepository->iterateFilteredForExport(
+                $q, $sort, $dir, $uLat, $uLon, $cosLat, $filter, $watcherId,
+            );
+        } else {
+            $count = $this->bookcaseRepository->count([]);
+            $rows = fn () => $this->bookcaseRepository->iterateForExport();
+        }
+
         $em = $this->entityManager;
+        $shortBase = rtrim($this->shortenerBaseUrl, '/');
 
         $jsonFlags = JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
 
-        $callback = function () use ($repo, $em, $caretakerMap, $openingMap, $count, $compress, $jsonFlags): void {
+        $callback = function () use ($rows, $em, $caretakerMap, $openingMap, $count, $compress, $jsonFlags, $shortBase): void {
             // Incremental gzip: compress chunk-by-chunk so neither the JSON nor its
             // compressed form is ever fully held in memory.
             $deflate = $compress ? deflate_init(ZLIB_ENCODING_GZIP, ['level' => 6]) : null;
@@ -252,10 +282,23 @@ class BookcaseController extends AbstractController
 
             $first = true;
             $i = 0;
-            foreach ($repo->iterateForExport() as $bc) {
+            foreach ($rows() as $bc) {
                 $key = (string) $bc->id;
                 $entry = [
                     'id' => $key,
+                    // Short share code + its full obc.onl link (null when an entry
+                    // somehow has no code).
+                    'shortCode' => $bc->shortCode,
+                    'shortUrl' => $bc->shortCode !== null ? $shortBase . '/' . $bc->shortCode : null,
+                    // Legacy numeric id (from the old system) so consumers can match
+                    // entries against their own data; null for entries added since.
+                    'legacyId' => $bc->legacyId,
+                    // Stable OpenStreetMap element ref ("{n|w|r}{id}") for imported
+                    // entries; null when not sourced from OSM.
+                    'osmId' => $bc->osmId,
+                    // Provenance: 'osm' for OpenStreetMap imports, null otherwise — so
+                    // consumers know whether an entry comes from OSM.
+                    'source' => $bc->source,
                     'title' => $bc->title,
                     'type' => $bc->entryType->value,
                     'status' => $bc->active?->status->value,

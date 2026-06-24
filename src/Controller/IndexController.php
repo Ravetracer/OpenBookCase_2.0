@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\BookcaseType;
+use App\Model\BookcaseFilter;
 use App\Repository\BookcaseRepository;
 use App\Repository\WatchlistItemRepository;
 
@@ -134,11 +135,19 @@ class IndexController extends AbstractController
         }
         $cosLat = $hasLocation ? cos(deg2rad($userLat)) : null;
 
-        // "Newest additions" is scoped to community-contributed entries so a recent
-        // bulk OpenStreetMap import can't dominate the list (the user's intent).
-        $communityOnly = $sort === 'newest';
+        $filter = BookcaseFilter::fromRequest($request);
 
-        $total = $bookcaseRepository->countFiltered($q, $communityOnly);
+        // "Newest additions" hides bulk OpenStreetMap imports by default so a recent
+        // import batch can't dominate the list — unless the user explicitly chooses
+        // an OSM provenance mode.
+        if ($sort === 'newest' && $filter->osm === 'with') {
+            $filter = $filter->withOsm('without');
+        }
+        $communityOnly = $sort === 'newest' && $filter->osm === 'without';
+
+        $watcherId = $this->currentUserId();
+
+        $total = $bookcaseRepository->countFiltered($q !== '' ? $q : null, $filter, $watcherId);
         $totalPages = max(1, (int) ceil($total / $perPage));
         $page = max(1, min((int) $request->query->get('page', 1), $totalPages));
 
@@ -151,7 +160,8 @@ class IndexController extends AbstractController
             $cosLat,
             $perPage,
             ($page - 1) * $perPage,
-            $communityOnly,
+            $filter,
+            $watcherId,
         );
 
         // Per-row distance (km) for the visible page only — accurate Haversine.
@@ -184,7 +194,25 @@ class IndexController extends AbstractController
             'userLat' => $userLat,
             'userLon' => $userLon,
             'distances' => $distances,
+            'filter' => $filter,
+            // Canonical filter query params + free-text/sort, for the "export with
+            // current filters" links (the JS keeps them current as filters change).
+            'exportParams' => $filter->toQueryParams() + array_filter([
+                'q' => $q,
+                'sort' => $sort,
+                'dir' => $dir,
+                'userLat' => $userLat !== null ? (string) $userLat : null,
+                'userLon' => $userLon !== null ? (string) $userLon : null,
+            ], static fn ($v) => $v !== null && $v !== ''),
         ];
+    }
+
+    /** The current user's ULID as a string, or null for anonymous visitors. */
+    private function currentUserId(): ?string
+    {
+        $user = $this->getUser();
+
+        return $user instanceof User && $user->id !== null ? (string) $user->id : null;
     }
 
     private function floatOrNull(mixed $value): ?float

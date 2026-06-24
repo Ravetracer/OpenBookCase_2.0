@@ -162,6 +162,23 @@
                     </label>
                 </fieldset>
 
+                {# OpenStreetMap provenance #}
+                <fieldset class="mb-3">
+                    <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.osm'|trans }}</legend>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="radio" class="radio radio-sm" name="f-osm" value="with" checked>
+                        <span class="label-text">{{ 'filter.osm_with'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="radio" class="radio radio-sm" name="f-osm" value="only">
+                        <span class="label-text">{{ 'filter.osm_only'|trans }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2 py-0.5">
+                        <input type="radio" class="radio radio-sm" name="f-osm" value="without">
+                        <span class="label-text">{{ 'filter.osm_without'|trans }}</span>
+                    </label>
+                </fieldset>
+
                 {# Minimum average rating #}
                 <label class="mb-3 block">
                     <span class="mb-1 block text-sm font-medium opacity-70">{{ 'filter.rating'|trans }}</span>

@@ -24,7 +24,8 @@
       <div tabindex="0" role="button" class="btn btn-outline btn-sm gap-1">
         {{ ui.icon('external', 'size-4') }} {{ 'list.export'|trans }}
       </div>
-      <ul tabindex="0" class="menu dropdown-content z-40 mt-1 w-60 rounded-box bg-base-100 p-2 shadow-lg">
+      <ul tabindex="0" class="menu dropdown-content z-40 mt-1 w-72 rounded-box bg-base-100 p-2 shadow-lg">
+        <li class="menu-title">{{ 'list.export_all'|trans }}</li>
         <li>
           <a href="{{ path('api_bookcase_export', { gzip: 1 }) }}" download data-export-download>
             {{ 'list.export_compressed'|trans }}
@@ -32,11 +33,26 @@
           </a>
         </li>
         <li><a href="{{ path('api_bookcase_export') }}" download data-export-download>{{ 'list.export_plain'|trans }}</a></li>
+
+        {# Reflects the current search, filters and sort. The list controller keeps
+           these hrefs in sync as the user changes filters. #}
+        <li class="menu-title">{{ 'list.export_filtered'|trans }}</li>
+        <li>
+          <a href="{{ path('api_bookcase_export', exportParams|merge({ filtered: 1, gzip: 1 })) }}" download
+             data-export-download data-list-target="exportFilteredCompressed">
+            {{ 'list.export_compressed'|trans }}
+            <span class="badge badge-success badge-xs">{{ 'list.export_recommended'|trans }}</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ path('api_bookcase_export', exportParams|merge({ filtered: 1 })) }}" download
+             data-export-download data-list-target="exportFilteredPlain">{{ 'list.export_plain'|trans }}</a>
+        </li>
       </ul>
     </div>
   </div>
 
-  {# Toolbar: live search + sort-by-distance. #}
+  {# Toolbar: live search + filters + sort-by-distance. #}
   <div class="mb-4 flex flex-wrap items-center gap-2">
     <label class="input input-bordered flex flex-1 items-center gap-2 sm:max-w-md">
       {{ ui.icon('search', 'size-5 opacity-60') }}
@@ -45,6 +61,113 @@
              aria-label="{{ 'list.search_placeholder'|trans }}"
              value="{{ q }}" data-list-target="search" data-action="input->list#onSearch">
     </label>
+
+    {# Filter panel — mirrors the map's filters. Lives in the permanent shell, so
+       Stimulus actions are fine here (the swapped table fragment carries none). #}
+    <div class="dropdown dropdown-end" data-list-target="filterContainer">
+      <div tabindex="0" role="button"
+           class="btn btn-sm gap-1 {{ filter.isActive ? 'btn-primary' : 'btn-outline' }}"
+           data-list-target="filterButton">
+        {{ ui.icon('filter', 'size-4') }} {{ 'filter.title'|trans }}
+        <span class="badge badge-sm {{ filter.isActive ? '' : 'hidden' }}" data-list-target="filterBadge"></span>
+      </div>
+      <div tabindex="0"
+           class="dropdown-content z-40 mt-1 max-h-[75vh] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-box bg-base-100 p-4 shadow-xl"
+           data-list-target="filterPanel"
+           data-action="change->list#onFilterChange">
+        <div class="mb-3 flex items-center justify-between">
+          <h2 class="font-semibold">{{ 'filter.title'|trans }}</h2>
+          <button type="button" class="btn btn-ghost btn-xs" data-action="list#resetFilters">{{ 'filter.reset'|trans }}</button>
+        </div>
+
+        {# Accessibility level #}
+        <fieldset class="mb-3">
+          <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.accessibility'|trans }}</legend>
+          {% for token, label in {'green': 'filter.acc_full', 'yellow': 'filter.acc_partial', 'red': 'filter.acc_none', 'unset': 'filter.acc_unknown'} %}
+            <label class="label cursor-pointer justify-start gap-2 py-0.5">
+              <input type="checkbox" class="checkbox checkbox-sm" name="f-accessibility" value="{{ token }}" {{ token in filter.accessibility ? 'checked' : '' }}>
+              <span class="label-text">{{ label|trans }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+
+        {# Status #}
+        <fieldset class="mb-3">
+          <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.status'|trans }}</legend>
+          {% for token, label in {'active': 'list.active', 'inactive': 'list.inactive'} %}
+            <label class="label cursor-pointer justify-start gap-2 py-0.5">
+              <input type="checkbox" class="checkbox checkbox-sm" name="f-status" value="{{ token }}" {{ token in filter.status ? 'checked' : '' }}>
+              <span class="label-text">{{ label|trans }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+
+        {# Type #}
+        <fieldset class="mb-3">
+          <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.type'|trans }}</legend>
+          {% for token, label in {'bookcase': 'filter.type_bookcase', 'givebox': 'filter.type_givebox'} %}
+            <label class="label cursor-pointer justify-start gap-2 py-0.5">
+              <input type="checkbox" class="checkbox checkbox-sm" name="f-type" value="{{ token }}" {{ token in filter.types ? 'checked' : '' }}>
+              <span class="label-text">{{ label|trans }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+
+        {# Installation (mobile vs fixed) #}
+        <fieldset class="mb-3">
+          <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.mobility'|trans }}</legend>
+          {% for token, label in {'fixed': 'filter.fixed', 'mobile': 'filter.mobile'} %}
+            <label class="label cursor-pointer justify-start gap-2 py-0.5">
+              <input type="checkbox" class="checkbox checkbox-sm" name="f-mobility" value="{{ token }}" {{ token in filter.mobility ? 'checked' : '' }}>
+              <span class="label-text">{{ label|trans }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+
+        {# OpenStreetMap provenance #}
+        <fieldset class="mb-3">
+          <legend class="mb-1 text-sm font-medium opacity-70">{{ 'filter.osm'|trans }}</legend>
+          {% for token, label in {'with': 'filter.osm_with', 'only': 'filter.osm_only', 'without': 'filter.osm_without'} %}
+            <label class="label cursor-pointer justify-start gap-2 py-0.5">
+              <input type="radio" class="radio radio-sm" name="f-osm" value="{{ token }}" {{ token == filter.osm ? 'checked' : '' }}>
+              <span class="label-text">{{ label|trans }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+
+        {# Minimum average rating #}
+        <label class="mb-3 block">
+          <span class="mb-1 block text-sm font-medium opacity-70">{{ 'filter.rating'|trans }}</span>
+          <select class="select select-bordered select-sm w-full" name="f-rating">
+            <option value="0" {{ filter.minRating == 0 ? 'selected' : '' }}>{{ 'filter.rating_any'|trans }}</option>
+            {% for n in 1..5 %}
+              <option value="{{ n }}" {{ filter.minRating == n ? 'selected' : '' }}>★ {{ n }}{{ n < 5 ? '+' : '' }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        {# Open wishlist items #}
+        <label class="label cursor-pointer justify-between gap-3 py-1">
+          <span class="label-text flex-1">{{ 'filter.wishlist'|trans }}</span>
+          <input type="checkbox" class="toggle toggle-sm toggle-primary shrink-0" name="f-wishlist" {{ filter.wishlist ? 'checked' : '' }}>
+        </label>
+
+        {# Official BookCrossing zones #}
+        <label class="label cursor-pointer justify-between gap-3 py-1">
+          <span class="label-text flex-1">{{ 'filter.bookcrossing'|trans }}</span>
+          <input type="checkbox" class="toggle toggle-sm toggle-primary shrink-0" name="f-bookcrossing" {{ filter.bookcrossing ? 'checked' : '' }}>
+        </label>
+
+        {% if app.user %}
+          {# Entries the user is watching #}
+          <label class="label cursor-pointer justify-between gap-3 py-1">
+            <span class="label-text flex-1">{{ 'filter.watching'|trans }}</span>
+            <input type="checkbox" class="toggle toggle-sm toggle-primary shrink-0" name="f-watching" {{ filter.watching ? 'checked' : '' }}>
+          </label>
+        {% endif %}
+      </div>
+    </div>
+
     <button type="button" class="btn btn-sm gap-1 {{ hasLocation ? 'btn-primary' : 'btn-outline' }}"
             data-action="list#sortByDistance" data-list-target="distanceBtn">
       {{ ui.icon('location', 'size-4') }} {{ 'list.sort_by_distance'|trans }}

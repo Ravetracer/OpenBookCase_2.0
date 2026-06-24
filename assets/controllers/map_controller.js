@@ -1071,6 +1071,8 @@ export default class extends Controller {
             wishlist: !!panel.querySelector('input[name="f-wishlist"]:checked'),
             bookcrossing: !!panel.querySelector('input[name="f-bookcrossing"]:checked'),
             watching: !!panel.querySelector('input[name="f-watching"]:checked'),
+            // OSM provenance tri-state: 'with' (all) / 'only' / 'without'.
+            osm: panel.querySelector('input[name="f-osm"]:checked')?.value || 'with',
             totals: {
                 accessibility: total('f-accessibility'),
                 status: total('f-status'),
@@ -1095,6 +1097,11 @@ export default class extends Controller {
         if (f.wishlist && !(item.openWishlistCount > 0)) return false;
         if (f.bookcrossing && !item.isBookcrossingZone) return false;
         if (f.watching && !this.watchedIds.has(item.id)) return false;
+
+        // OSM provenance: 'only' keeps imports, 'without' drops them ('with' = all).
+        const isOsm = item.source === 'osm';
+        if (f.osm === 'only' && !isOsm) return false;
+        if (f.osm === 'without' && isOsm) return false;
 
         return true;
     }
@@ -1131,6 +1138,9 @@ export default class extends Controller {
         });
         const ratingEl = panel.querySelector('select[name="f-rating"]');
         if (ratingEl) ratingEl.value = '0';
+        // OSM provenance back to "with" (show all).
+        const osmWith = panel.querySelector('input[name="f-osm"][value="with"]');
+        if (osmWith) osmWith.checked = true;
 
         this.applyFilters();
     }
@@ -1149,6 +1159,7 @@ export default class extends Controller {
             if (f.wishlist) n += 1;
             if (f.bookcrossing) n += 1;
             if (f.watching) n += 1;
+            if (f.osm && f.osm !== 'with') n += 1;
         }
 
         this.filterBadgeTarget.textContent = String(n);

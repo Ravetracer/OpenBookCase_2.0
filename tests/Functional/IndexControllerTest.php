@@ -136,6 +136,49 @@ final class IndexControllerTest extends FunctionalTestCase
         );
     }
 
+    public function testListShowsFilterPanel(): void
+    {
+        $this->client->request('GET', '/list');
+        $this->assertResponseIsSuccessful();
+        $html = $this->client->getResponse()->getContent();
+
+        // The map-style filter panel (and the new OSM provenance control) ship on the list.
+        $this->assertStringContainsString('data-action="change->list#onFilterChange"', $html);
+        $this->assertStringContainsString('name="f-osm"', $html);
+        $this->assertStringContainsString('name="f-accessibility"', $html);
+        // And the "export with current filters" links.
+        $this->assertStringContainsString('data-list-target="exportFilteredCompressed"', $html);
+        $this->assertStringContainsString('filtered=1', $html);
+    }
+
+    public function testListFragmentFiltersByType(): void
+    {
+        BookcaseFactory::createOne(['title' => 'A Plain Bookcase']);
+        BookcaseFactory::new()->givebox()->create(['title' => 'A Public Givebox']);
+
+        $html = $this->client
+            ->request('GET', '/list/fragment', ['type' => 'givebox'])
+            ->html();
+        $this->assertResponseIsSuccessful();
+
+        $this->assertStringContainsString('A Public Givebox', $html);
+        $this->assertStringNotContainsString('A Plain Bookcase', $html);
+    }
+
+    public function testListFragmentOsmOnlyAndWithoutModes(): void
+    {
+        BookcaseFactory::createOne(['title' => 'Community Spot Here']);
+        BookcaseFactory::new()->osm('n4242')->create(['title' => 'Imported OSM Spot']);
+
+        $only = $this->client->request('GET', '/list/fragment', ['osm' => 'only'])->html();
+        $this->assertStringContainsString('Imported OSM Spot', $only);
+        $this->assertStringNotContainsString('Community Spot Here', $only);
+
+        $without = $this->client->request('GET', '/list/fragment', ['osm' => 'without'])->html();
+        $this->assertStringContainsString('Community Spot Here', $without);
+        $this->assertStringNotContainsString('Imported OSM Spot', $without);
+    }
+
     public function testListFragmentNewestSortExcludesOsmImports(): void
     {
         BookcaseFactory::createOne(['title' => 'Community Added Spot']);

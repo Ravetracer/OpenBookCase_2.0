@@ -273,6 +273,91 @@ final class BookcaseApiTest extends FunctionalTestCase
         $this->assertTrue($entry['openingTimes'][0]['twentyFourSeven']);
     }
 
+    public function testExportIncludesProvenanceFields(): void
+    {
+        BookcaseFactory::createOne(['title' => 'Community Entry', 'legacyId' => 5150, 'shortCode' => 'Ab12Cd']);
+        BookcaseFactory::new()->osm('n123456')->create(['title' => 'Osm Entry']);
+
+        $this->client->request('GET', '/api/bookcase/export');
+        $this->assertResponseIsSuccessful();
+
+        $data = json_decode($this->captureStream(), true, flags: JSON_THROW_ON_ERROR);
+        $byTitle = [];
+        foreach ($data['bookcases'] as $entry) {
+            $byTitle[$entry['title']] = $entry;
+        }
+
+        // shortCode + shortUrl + legacyId + osmId + source are always present.
+        $this->assertArrayHasKey('shortCode', $byTitle['Community Entry']);
+        $this->assertArrayHasKey('shortUrl', $byTitle['Community Entry']);
+        $this->assertArrayHasKey('legacyId', $byTitle['Community Entry']);
+        $this->assertArrayHasKey('osmId', $byTitle['Community Entry']);
+        $this->assertArrayHasKey('source', $byTitle['Community Entry']);
+
+        // The share code, and its full shortener URL ending in the code.
+        $this->assertSame('Ab12Cd', $byTitle['Community Entry']['shortCode']);
+        $this->assertStringEndsWith('/Ab12Cd', (string) $byTitle['Community Entry']['shortUrl']);
+
+        $this->assertSame(5150, $byTitle['Community Entry']['legacyId']);
+        $this->assertNull($byTitle['Community Entry']['osmId']);
+        $this->assertNull($byTitle['Community Entry']['source']);
+
+        $this->assertSame('n123456', $byTitle['Osm Entry']['osmId']);
+        $this->assertSame('osm', $byTitle['Osm Entry']['source']);
+        $this->assertNull($byTitle['Osm Entry']['legacyId']);
+    }
+
+    public function testFilteredExportReflectsFilters(): void
+    {
+        BookcaseFactory::createOne(['title' => 'Community Only Entry']);
+        BookcaseFactory::new()->osm('n777')->create(['title' => 'Osm Only Entry']);
+
+        // filtered=1 + osm=only mirrors the list view's OSM filter.
+        $this->client->request('GET', '/api/bookcase/export', ['filtered' => 1, 'osm' => 'only']);
+        $this->assertResponseIsSuccessful();
+
+        $data = json_decode($this->captureStream(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame(1, $data['count']);
+        $titles = array_column($data['bookcases'], 'title');
+        $this->assertSame(['Osm Only Entry'], $titles);
+    }
+
+    public function testFilteredExportByTypeAndSearch(): void
+    {
+        BookcaseFactory::createOne(['title' => 'Findable Bookcase']);
+        BookcaseFactory::new()->givebox()->create(['title' => 'Findable Givebox']);
+        BookcaseFactory::createOne(['title' => 'Unrelated Entry']);
+
+        $this->client->request('GET', '/api/bookcase/export', [
+            'filtered' => 1,
+            'q' => 'Findable',
+            'type' => 'givebox',
+        ]);
+        $this->assertResponseIsSuccessful();
+
+        $data = json_decode($this->captureStream(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame(['Findable Givebox'], array_column($data['bookcases'], 'title'));
+    }
+
+    public function testFilteredExportWithDistanceSort(): void
+    {
+        BookcaseFactory::new()->at(52.50, 13.40)->create(['title' => 'Near Export']);
+        BookcaseFactory::new()->at(53.50, 13.40)->create(['title' => 'Far Export']);
+
+        // Distance sort uses a HIDDEN select — confirm it streams via toIterable().
+        $this->client->request('GET', '/api/bookcase/export', [
+            'filtered' => 1,
+            'sort' => 'distance',
+            'dir' => 'asc',
+            'userLat' => '52.50',
+            'userLon' => '13.40',
+        ]);
+        $this->assertResponseIsSuccessful();
+
+        $data = json_decode($this->captureStream(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame(['Near Export', 'Far Export'], array_column($data['bookcases'], 'title'));
+    }
+
     public function testExportGzipReturnsGzippedJson(): void
     {
         BookcaseFactory::createMany(3);

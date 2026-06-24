@@ -166,6 +166,8 @@ list:
   export_compressed: JSON compressé (.json.gz)
   export_plain: JSON non compressé (.json)
   export_recommended: recommandé
+  export_all: Tout
+  export_filtered: Vue actuelle (filtres et tri)
   export_terms_title: Comment utiliser ces données
   export_terms_intro: 'Avant de télécharger, veuillez prendre connaissance des conditions d’utilisation de ces données :'
   export_terms_odbl: 'Toutes les données de ce site sont publiées sous la %odbl%.'
@@ -498,6 +500,10 @@ filter:
   wishlist: Souhaits ouverts
   bookcrossing: Zone officielle BookCrossing
   watching: Suivis uniquement
+  osm: OpenStreetMap
+  osm_with: Inclure les imports OSM
+  osm_only: Uniquement les imports OSM
+  osm_without: Sans les imports OSM
 
 'yes': 'Oui'
 'no': 'Non'
