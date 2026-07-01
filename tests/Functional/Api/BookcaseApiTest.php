@@ -408,6 +408,27 @@ final class BookcaseApiTest extends FunctionalTestCase
     }
 
     /**
+     * Regression: the comment field was editable but never rendered in the detail
+     * view. It must now show when set (and stay hidden when empty).
+     */
+    public function testRetrieveDetailHtmlShowsComment(): void
+    {
+        $bc = BookcaseFactory::createOne(['title' => 'Commented Entry', 'comment' => 'Open behind the church']);
+        $this->client->request('GET', '/api/bookcase/' . $bc->id . '/html');
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('Open behind the church', $this->client->getResponse()->getContent());
+    }
+
+    public function testRetrieveDetailHtmlHidesEmptyComment(): void
+    {
+        $bc = BookcaseFactory::createOne(['title' => 'No Comment Entry', 'comment' => null]);
+        $this->client->request('GET', '/api/bookcase/' . $bc->id . '/html');
+        $this->assertResponseIsSuccessful();
+        // The comment row's <dt> label must not appear when there is no comment.
+        $this->assertStringNotContainsString('whitespace-pre-line', $this->client->getResponse()->getContent());
+    }
+
+    /**
      * Regression: the detail template used to dereference bookcase.address.street
      * without a null guard, so quick-added entries (address = null) 500'd. It must
      * now render cleanly with no address.

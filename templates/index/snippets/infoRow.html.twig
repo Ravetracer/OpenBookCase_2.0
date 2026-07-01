@@ -1,4 +1,4 @@
 <div class="grid grid-cols-1 gap-0.5 border-b border-base-200 py-2 last:border-0 sm:grid-cols-3 sm:gap-2">
   <dt class="font-semibold text-base-content/70 {{ extraClasses|default('') }}">{{ label | trans }}</dt>
-  <dd class="break-words sm:col-span-2">{% if translateFieldValue is defined %}{{ fieldValue | trans({}, 'bookcasetypes') }}{% else %}{{ fieldValue }}{% endif %}</dd>
+  <dd class="break-words sm:col-span-2">{% if href is true %}<a href="{{ fieldValue }}" class="link link-primary" target="_blank">{% endif %}{% if translateFieldValue is defined %}{{ fieldValue | trans({}, 'bookcasetypes') }}{% else %}{{ fieldValue }}{% endif %}{% if href is true %}</a>{% endif %}</dd>
 </div>

@@ -52,9 +52,9 @@
 {% endif %}
 
 <dl class="text-sm">
-  {{ include('index/snippets/infoRow.html.twig', { label: 'bctype', fieldValue: bookcase.entryTypeValue, margin: true, translateFieldValue: true }) }}
-  {{ include('index/snippets/infoRow.html.twig', { label: 'installationType', fieldValue: bookcase.installationType, margin: true }) }}
-  {{ include('index/snippets/infoRow.html.twig', { label: 'form.is_mobile', fieldValue: bookcase.isMobile ? 'mobile'|trans : 'fixed'|trans, margin: true }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'bctype', fieldValue: bookcase.entryTypeValue, translateFieldValue: true }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'installationType', fieldValue: bookcase.installationType }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'form.is_mobile', fieldValue: bookcase.isMobile ? 'mobile'|trans : 'fixed'|trans }) }}
   <div class="grid grid-cols-1 gap-0.5 border-b border-base-200 py-2 sm:grid-cols-3 sm:gap-2">
     <dt class="font-semibold text-base-content/70">
       {{ 'form.is_bookcrossing_zone'|trans }}
@@ -65,15 +65,22 @@
     </dt>
     <dd class="sm:col-span-2">{{ bookcase.isBookcrossingZone ? 'yes'|trans : 'no'|trans }}</dd>
   </div>
-  {{ include('index/snippets/infoRow.html.twig', { label: 'position', fieldValue: bookcase.position.latitude ~ ', ' ~ bookcase.position.longitude, margin: true }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'position', fieldValue: bookcase.position.latitude ~ ', ' ~ bookcase.position.longitude }) }}
   {# Structured address if present, else the imported free-text field (same fallback as the list).
      The address embeddable is null for quick-added entries, so guard every access. #}
   {% set a = bookcase.address %}
   {% set addrStructured = a ? [[a.street, a.houseNumber]|filter(v => v)|join(' '), [a.zipcode, a.city]|filter(v => v)|join(' ')]|filter(v => v)|join(', ') : '' %}
-  {{ include('index/snippets/infoRow.html.twig', { label: 'address.title', fieldValue: addrStructured ?: (a ? a.additionalData : ''), margin: true }) }}
-  {{ include('index/snippets/infoRow.html.twig', { label: 'openingTimes', fieldValue: bookcase.openingTimes.first ? (bookcase.openingTimes.first.twenty_for_seven is same as (true) ? '24 / 7' : bookcase.openingTimes.first.open_time) : '', margin: true }) }}
-  {{ include('index/snippets/infoRow.html.twig', { label: 'caretaker', fieldValue: bookcase.caretakers.first ? bookcase.caretakers.first.name : '', margin: true }) }}
-  {{ include('index/snippets/infoRow.html.twig', { label: 'webpage', fieldValue: bookcase.webpage, margin: true }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'address.title', fieldValue: addrStructured ?: (a ? a.additionalData : '') }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'openingTimes', fieldValue: bookcase.openingTimes.first ? (bookcase.openingTimes.first.twenty_for_seven is same as (true) ? '24 / 7' : bookcase.openingTimes.first.open_time) : '' }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'caretaker', fieldValue: bookcase.caretakers.first ? bookcase.caretakers.first.name : '' }) }}
+  {{ include('index/snippets/infoRow.html.twig', { label: 'webpage', fieldValue: bookcase.webpage, href: true }) }}
+  {# Free-text comment — only shown when set; preserve the author's line breaks. #}
+  {% if bookcase.comment %}
+    <div class="grid grid-cols-1 gap-0.5 border-b border-base-200 py-2 sm:grid-cols-3 sm:gap-2">
+      <dt class="font-semibold text-base-content/70">{{ 'comment'|trans }}</dt>
+      <dd class="whitespace-pre-line break-words sm:col-span-2">{{ bookcase.comment }}</dd>
+    </div>
+  {% endif %}
   {# Accessibility as a traffic-light status indicator + optional description. #}
   <div class="grid grid-cols-1 gap-0.5 border-b border-base-200 py-2 sm:grid-cols-3 sm:gap-2">
     <dt class="font-semibold text-base-content/70">{{ 'accessibility' | trans }}</dt>
