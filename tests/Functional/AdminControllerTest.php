@@ -306,4 +306,163 @@ final class AdminControllerTest extends FunctionalTestCase
         $reloaded = $this->em()->getRepository(User::class)->find($admin->id);
         $this->assertContains('ROLE_ADMIN', $reloaded->roles, 'self-demotion must be blocked');
     }
+
+    // ── Bulk user operations ─────────────────────────────────────────────────
+
+    /** Read the bulk form's CSRF token off the rendered users list. */
+    private function bulkToken(): string
+    {
+        $crawler = $this->client->request('GET', '/admin/users');
+
+        return $this->tokenFor($crawler, '/users/bulk');
+    }
+
+    public function testBulkResendSendsEmailsWithOptionalReason(): void
+    {
+        $this->client->enableProfiler();
+        $this->loginAsAdmin();
+        $a = UserFactory::createOne(['isVerified' => false]);
+        $b = UserFactory::createOne(['isVerified' => false]);
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'resend',
+            'reason' => 'A bug prevented earlier links from working. Here is a fresh one.',
+            'ids' => [(string) $a->id, (string) $b->id],
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+
+        self::assertEmailCount(2);
+        // The admin reason is rendered into the verification e-mail.
+        $body = $this->getMailerMessage(0)->getHtmlBody();
+        self::assertStringContainsString('A bug prevented earlier links from working', (string) $body);
+    }
+
+    public function testBulkResendWithoutReasonOmitsTheNote(): void
+    {
+        $this->client->enableProfiler();
+        $this->loginAsAdmin();
+        $a = UserFactory::createOne(['isVerified' => false]);
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'resend',
+            'ids' => [(string) $a->id],
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+        self::assertEmailCount(1);
+        // No reason intro block when no reason was supplied.
+        $body = (string) $this->getMailerMessage(0)->getHtmlBody();
+        self::assertStringNotContainsString('Note from the OpenBookCase team', $body);
+    }
+
+    public function testBulkSuspendAndUnsuspend(): void
+    {
+        $this->loginAsAdmin();
+        $a = UserFactory::createOne(['isSuspended' => false]);
+        $b = UserFactory::createOne(['isSuspended' => false]);
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'suspend',
+            'ids' => [(string) $a->id, (string) $b->id],
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+
+        $this->em()->clear();
+        $repo = $this->em()->getRepository(User::class);
+        $this->assertTrue($repo->find($a->id)->isSuspended);
+        $this->assertTrue($repo->find($b->id)->isSuspended);
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'unsuspend',
+            'ids' => [(string) $a->id, (string) $b->id],
+        ]);
+        $this->em()->clear();
+        $this->assertFalse($repo->find($a->id)->isSuspended);
+        $this->assertFalse($repo->find($b->id)->isSuspended);
+    }
+
+    public function testBulkDeleteRemovesSelectedAccounts(): void
+    {
+        $this->loginAsAdmin();
+        $a = UserFactory::createOne();
+        $b = UserFactory::createOne();
+        $keep = UserFactory::createOne();
+        [$aId, $bId, $keepId] = [$a->id, $b->id, $keep->id];
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'delete',
+            'ids' => [(string) $aId, (string) $bId],
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+
+        $this->em()->clear();
+        $repo = $this->em()->getRepository(User::class);
+        $this->assertNull($repo->find($aId));
+        $this->assertNull($repo->find($bId));
+        $this->assertNotNull($repo->find($keepId), 'unselected accounts are untouched');
+    }
+
+    public function testBulkDeleteSkipsOwnAccount(): void
+    {
+        $admin = $this->loginAsUser(['roles' => ['ROLE_ADMIN']]);
+        $other = UserFactory::createOne();
+        [$adminId, $otherId] = [$admin->id, $other->id];
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'delete',
+            'ids' => [(string) $adminId, (string) $otherId],
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+
+        $this->em()->clear();
+        $repo = $this->em()->getRepository(User::class);
+        $this->assertNotNull($repo->find($adminId), 'admin must not delete their own account in bulk');
+        $this->assertNull($repo->find($otherId));
+    }
+
+    public function testBulkSuspendSkipsOwnAccount(): void
+    {
+        $admin = $this->loginAsUser(['roles' => ['ROLE_ADMIN']]);
+        $adminId = $admin->id;
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => $this->bulkToken(),
+            'action' => 'suspend',
+            'ids' => [(string) $adminId],
+        ]);
+
+        $this->em()->clear();
+        $this->assertFalse($this->em()->getRepository(User::class)->find($adminId)->isSuspended, 'admin must not suspend themselves in bulk');
+    }
+
+    public function testBulkRejectsInvalidCsrfToken(): void
+    {
+        $this->loginAsAdmin();
+        $a = UserFactory::createOne(['isSuspended' => false]);
+
+        $this->client->request('POST', '/admin/users/bulk', [
+            '_token' => 'bogus',
+            'action' => 'suspend',
+            'ids' => [(string) $a->id],
+        ]);
+        $this->assertResponseRedirects('/admin/users');
+
+        $this->em()->clear();
+        $this->assertFalse($this->em()->getRepository(User::class)->find($a->id)->isSuspended);
+    }
+
+    public function testBulkRequiresAdmin(): void
+    {
+        $this->loginAsUser(); // plain ROLE_USER
+        $this->client->request('POST', '/admin/users/bulk', [
+            'action' => 'delete',
+            'ids' => [],
+        ]);
+        $this->assertResponseStatusCodeSame(403);
+    }
 }

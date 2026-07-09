@@ -311,6 +311,7 @@ email:
   confirm_link: Mijn e-mail bevestigen
   confirm_expires: 'Deze link verloopt over %duration%.'
   confirm_cheers: Groeten!
+  confirm_reason_intro: "Bericht van het OpenBookCase-team:"
 
 # ── Labels van formuliervelden ──
 form:
@@ -701,3 +702,18 @@ lightbox:
 'admin.users.flash_reset_sent': "Wachtwoordherstel-link verstuurd."
 'admin.users.flash_deleted': "Account verwijderd."
 'admin.users.flash_no_self_delete': "Je kunt je eigen account hier niet verwijderen."
+'admin.users.select_all': "Alles selecteren"
+'admin.users.bulk_reason_label': "Reden (optioneel)"
+'admin.users.bulk_reason_placeholder': "Wordt toegevoegd aan de bevestigingsmail, bijv. waarom ze een nieuwe link krijgen"
+'admin.users.bulk_action_resend': "Bevestiging opnieuw sturen"
+'admin.users.bulk_action_suspend': "Schorsen"
+'admin.users.bulk_action_unsuspend': "Opheffen"
+'admin.users.bulk_action_delete': "Verwijderen"
+'admin.users.bulk_none_selected': "Selecteer eerst minstens één account."
+'admin.users.bulk_unknown_action': "Onbekende bulkactie."
+'admin.users.bulk_resent': "Bevestigingslink opnieuw verstuurd naar %count% account(s)."
+'admin.users.bulk_deleted': "%count% account(s) verwijderd."
+'admin.users.bulk_suspended': "%count% account(s) geschorst."
+'admin.users.bulk_unsuspended': "%count% account(s) niet meer geschorst."
+'admin.users.bulk_confirm_delete': "De geselecteerde accounts en hun persoonsgegevens definitief verwijderen? Dit kan niet ongedaan worden gemaakt."
+'admin.users.bulk_confirm_suspend': "De geselecteerde accounts schorsen? Ze kunnen dan niet meer inloggen."

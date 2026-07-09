@@ -311,6 +311,7 @@ email:
   confirm_link: Confirm my Email
   confirm_expires: 'This link will expire in %duration%.'
   confirm_cheers: Cheers!
+  confirm_reason_intro: "Note from the OpenBookCase team:"
 
 # ── Form field labels ──
 form:
@@ -701,3 +702,18 @@ lightbox:
 'admin.users.flash_reset_sent': "Password-reset link sent."
 'admin.users.flash_deleted': "Account deleted."
 'admin.users.flash_no_self_delete': "You cannot delete your own account here."
+'admin.users.select_all': "Select all"
+'admin.users.bulk_reason_label': "Reason (optional)"
+'admin.users.bulk_reason_placeholder': "Added to the verification e-mail, e.g. why they're getting a new link"
+'admin.users.bulk_action_resend': "Re-send verification"
+'admin.users.bulk_action_suspend': "Suspend"
+'admin.users.bulk_action_unsuspend': "Unsuspend"
+'admin.users.bulk_action_delete': "Delete"
+'admin.users.bulk_none_selected': "Select at least one account first."
+'admin.users.bulk_unknown_action': "Unknown bulk action."
+'admin.users.bulk_resent': "Verification link re-sent to %count% account(s)."
+'admin.users.bulk_deleted': "%count% account(s) deleted."
+'admin.users.bulk_suspended': "%count% account(s) suspended."
+'admin.users.bulk_unsuspended': "%count% account(s) unsuspended."
+'admin.users.bulk_confirm_delete': "Permanently delete the selected accounts and their personal data? This cannot be undone."
+'admin.users.bulk_confirm_suspend': "Suspend the selected accounts? They will no longer be able to log in."

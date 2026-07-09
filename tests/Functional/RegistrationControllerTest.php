@@ -79,10 +79,56 @@ final class RegistrationControllerTest extends FunctionalTestCase
     }
 
     /**
-     * The /verify/email link is a SymfonyCasts-signed URL whose signature can't be
-     * forged in a test, so we only assert the route's guard: an unknown/missing id
-     * redirects to the homepage with a failure flash rather than 500ing. The
-     * successful click path is covered indirectly by the email being sent above.
+     * End-to-end: register, then click the actual signed link from the sent
+     * email and assert the account becomes verified. This guards the whole
+     * chain — in particular that the signed URL carries the `id` query
+     * parameter the verify controller needs to resolve the user (its absence
+     * previously left every new account permanently locked).
+     */
+    public function testClickingEmailedVerificationLinkVerifiesTheAccount(): void
+    {
+        $this->client->enableProfiler();
+
+        $crawler = $this->client->request('GET', '/register');
+        $form = $crawler->filter('form')->form();
+        $form['registration_form[username]'] = 'clicker';
+        $form['registration_form[email]'] = 'clicker@example.com';
+        $form['registration_form[plainPassword]'] = 'sup3rsecret';
+        $form['registration_form[agreeTerms]']->tick();
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/');
+
+        // Pull the signed verification URL out of the sent email.
+        $email = $this->getMailerMessage();
+        self::assertNotNull($email);
+        $body = $email->getHtmlBody();
+        self::assertIsString($body);
+        self::assertMatchesRegularExpression('#href="([^"]*/verify/email\?[^"]+)"#', $body);
+        preg_match('#href="([^"]*/verify/email\?[^"]+)"#', $body, $m);
+        $signedUrl = html_entity_decode($m[1]);
+
+        // The link must carry the user id, otherwise the controller can't
+        // resolve the account and verification silently fails.
+        self::assertStringContainsString('id=', $signedUrl, 'verification link must include the user id');
+
+        // Not verified yet.
+        $user = $this->em()->getRepository(User::class)->findOneBy(['email' => 'clicker@example.com']);
+        $this->assertNotNull($user);
+        $this->assertFalse($user->isVerified);
+
+        // Click the link.
+        $this->client->request('GET', $signedUrl);
+        $this->assertResponseRedirects('/');
+
+        // The account is now unlocked.
+        $this->em()->clear();
+        $user = $this->em()->getRepository(User::class)->findOneBy(['email' => 'clicker@example.com']);
+        $this->assertTrue($user->isVerified, 'clicking the emailed link must verify the account');
+    }
+
+    /**
+     * The /verify/email guard: an unknown/missing id redirects to the homepage
+     * with a failure flash rather than 500ing.
      */
     public function testVerifyEmailWithUnknownIdRedirects(): void
     {

@@ -311,6 +311,7 @@ email:
   confirm_link: Meine E-Mail bestätigen
   confirm_expires: 'Dieser Link läuft in %duration% ab.'
   confirm_cheers: Viele Grüße!
+  confirm_reason_intro: "Hinweis vom OpenBookCase-Team:"
 
 # ── Formularfeld-Bezeichnungen ──
 form:
@@ -701,3 +702,18 @@ lightbox:
 'admin.users.flash_reset_sent': "Passwort-Zurücksetzen-Link gesendet."
 'admin.users.flash_deleted': "Konto gelöscht."
 'admin.users.flash_no_self_delete': "Du kannst dein eigenes Konto hier nicht löschen."
+'admin.users.select_all': "Alle auswählen"
+'admin.users.bulk_reason_label': "Grund (optional)"
+'admin.users.bulk_reason_placeholder': "Wird in die Bestätigungs-E-Mail aufgenommen, z. B. warum ein neuer Link kommt"
+'admin.users.bulk_action_resend': "Bestätigung erneut senden"
+'admin.users.bulk_action_suspend': "Sperren"
+'admin.users.bulk_action_unsuspend': "Entsperren"
+'admin.users.bulk_action_delete': "Löschen"
+'admin.users.bulk_none_selected': "Bitte zuerst mindestens ein Konto auswählen."
+'admin.users.bulk_unknown_action': "Unbekannte Sammelaktion."
+'admin.users.bulk_resent': "Bestätigungslink an %count% Konto(en) erneut gesendet."
+'admin.users.bulk_deleted': "%count% Konto(en) gelöscht."
+'admin.users.bulk_suspended': "%count% Konto(en) gesperrt."
+'admin.users.bulk_unsuspended': "%count% Konto(en) entsperrt."
+'admin.users.bulk_confirm_delete': "Die ausgewählten Konten und ihre personenbezogenen Daten endgültig löschen? Das kann nicht rückgängig gemacht werden."
+'admin.users.bulk_confirm_suspend': "Die ausgewählten Konten sperren? Sie können sich dann nicht mehr anmelden."

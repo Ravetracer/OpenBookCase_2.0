@@ -1,5 +1,12 @@
 <h1>{{ 'email.confirm_title'|trans }}</h1>
 
+{% if adminReason is defined and adminReason %}
+<p style="padding:12px 16px;border-left:4px solid #633d0f;background:#f7f0e1;">
+    <strong>{{ 'email.confirm_reason_intro'|trans }}</strong><br>
+    {{ adminReason|nl2br }}
+</p>
+{% endif %}
+
 <p>
     {{ 'email.confirm_body'|trans }} <br><br>
     <a href="{{ signedUrl }}">{{ 'email.confirm_link'|trans }}</a>.

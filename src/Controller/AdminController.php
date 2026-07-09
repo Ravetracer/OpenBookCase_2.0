@@ -93,6 +93,104 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * Bulk operations from the users list: re-send verification (with an
+     * optional reason added to the e-mail), suspend/unsuspend, or delete.
+     * Declared before /users/{user} so the literal path wins.
+     */
+    #[Route('/users/bulk', name: 'users_bulk', methods: ['POST'])]
+    public function bulkUsers(Request $request): RedirectResponse
+    {
+        // Preserve the list's search/page context, but omit empty defaults so
+        // the redirect stays a clean /admin/users when there is nothing to keep.
+        $params = [];
+        if (($q = trim((string) $request->request->get('q', ''))) !== '') {
+            $params['q'] = $q;
+        }
+        if (($page = max(1, (int) $request->request->get('page', 1))) > 1) {
+            $params['page'] = $page;
+        }
+        $back = fn (): RedirectResponse => $this->redirectToRoute('app_admin_users', $params);
+
+        if (!$this->isCsrfTokenValid('admin_users_bulk', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'flash.invalid_token');
+
+            return $back();
+        }
+
+        $ids = array_values(array_filter(
+            (array) $request->request->all('ids'),
+            static fn ($id): bool => \is_string($id) && Ulid::isValid($id),
+        ));
+
+        $users = [];
+        foreach ($ids as $id) {
+            $found = $this->users->find(Ulid::fromString($id));
+            if ($found instanceof User) {
+                $users[] = $found;
+            }
+        }
+
+        if ($users === []) {
+            $this->addFlash('error', 'admin.users.bulk_none_selected');
+
+            return $back();
+        }
+
+        switch ((string) $request->request->get('action')) {
+            case 'resend':
+                $reason = trim((string) $request->request->get('reason'));
+                foreach ($users as $u) {
+                    $this->sendVerification($u, $reason);
+                }
+                $this->addFlash('success', $this->translator->trans('admin.users.bulk_resent', ['%count%' => \count($users)]));
+                break;
+
+            case 'suspend':
+            case 'unsuspend':
+                $suspend = $request->request->get('action') === 'suspend';
+                $affected = 0;
+                $skippedSelf = false;
+                foreach ($users as $u) {
+                    // An admin must not lock themselves out of the admin area.
+                    if ($suspend && $this->isSelf($u)) {
+                        $skippedSelf = true;
+                        continue;
+                    }
+                    $u->isSuspended = $suspend;
+                    ++$affected;
+                }
+                $this->entityManager->flush();
+                $this->addFlash('success', $this->translator->trans($suspend ? 'admin.users.bulk_suspended' : 'admin.users.bulk_unsuspended', ['%count%' => $affected]));
+                if ($skippedSelf) {
+                    $this->addFlash('error', 'admin.users.flash_no_self_suspend');
+                }
+                break;
+
+            case 'delete':
+                $deleted = 0;
+                $skippedSelf = false;
+                foreach ($users as $u) {
+                    if ($this->isSelf($u)) {
+                        $skippedSelf = true;
+                        continue;
+                    }
+                    $this->userDeletion->deleteUser($u->id);
+                    ++$deleted;
+                }
+                $this->addFlash('success', $this->translator->trans('admin.users.bulk_deleted', ['%count%' => $deleted]));
+                if ($skippedSelf) {
+                    $this->addFlash('error', 'admin.users.flash_no_self_delete');
+                }
+                break;
+
+            default:
+                $this->addFlash('error', 'admin.users.bulk_unknown_action');
+        }
+
+        return $back();
+    }
+
     #[Route('/users/{user}', name: 'user', methods: ['GET'])]
     public function user(User $user): Response
     {
@@ -171,15 +269,7 @@ class AdminController extends AbstractController
     public function resendVerification(Request $request, User $user): RedirectResponse
     {
         if ($this->validUserToken($request, 'admin_user_resend', $user)) {
-            $this->emailVerifier->sendEmailConfirmation(
-                'app_verify_email',
-                $user,
-                (new TemplatedEmail())
-                    ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
-                    ->to($user->email)
-                    ->subject($this->translator->trans('email.confirm_subject'))
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
+            $this->sendVerification($user, trim((string) $request->request->get('reason')));
             $this->addFlash('success', 'admin.users.flash_verification_sent');
         }
 
@@ -335,6 +425,25 @@ class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_api_application', ['application' => $application->id]);
+    }
+
+    /**
+     * Send the e-mail verification link to a user, optionally with an admin note
+     * (e.g. explaining why they are receiving a fresh link) rendered in the mail.
+     */
+    private function sendVerification(User $user, string $reason = ''): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
+            ->to($user->email)
+            ->subject($this->translator->trans('email.confirm_subject'))
+            ->htmlTemplate('registration/confirmation_email.html.twig');
+
+        if ($reason !== '') {
+            $email->context(['adminReason' => $reason]);
+        }
+
+        $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user, $email);
     }
 
     private function validToken(Request $request, string $id, ApiApplication $application): bool

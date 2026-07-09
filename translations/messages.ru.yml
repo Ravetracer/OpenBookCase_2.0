@@ -311,6 +311,7 @@ email:
   confirm_link: Подтвердить мою эл. почту
   confirm_expires: 'Эта ссылка истечёт через %duration%.'
   confirm_cheers: С уважением!
+  confirm_reason_intro: "Примечание от команды OpenBookCase:"
 
 # ── Подписи полей форм ──
 form:
@@ -701,3 +702,18 @@ lightbox:
 'admin.users.flash_reset_sent': "Ссылка для сброса пароля отправлена."
 'admin.users.flash_deleted': "Аккаунт удалён."
 'admin.users.flash_no_self_delete': "Вы не можете удалить собственный аккаунт здесь."
+'admin.users.select_all': "Выбрать все"
+'admin.users.bulk_reason_label': "Причина (необязательно)"
+'admin.users.bulk_reason_placeholder': "Будет добавлено в письмо с подтверждением, например почему выслана новая ссылка"
+'admin.users.bulk_action_resend': "Отправить подтверждение повторно"
+'admin.users.bulk_action_suspend': "Заблокировать"
+'admin.users.bulk_action_unsuspend': "Разблокировать"
+'admin.users.bulk_action_delete': "Удалить"
+'admin.users.bulk_none_selected': "Сначала выберите хотя бы один аккаунт."
+'admin.users.bulk_unknown_action': "Неизвестное массовое действие."
+'admin.users.bulk_resent': "Ссылка для подтверждения повторно отправлена: аккаунтов — %count%."
+'admin.users.bulk_deleted': "Удалено аккаунтов: %count%."
+'admin.users.bulk_suspended': "Заблокировано аккаунтов: %count%."
+'admin.users.bulk_unsuspended': "Разблокировано аккаунтов: %count%."
+'admin.users.bulk_confirm_delete': "Навсегда удалить выбранные аккаунты и их персональные данные? Это действие необратимо."
+'admin.users.bulk_confirm_suspend': "Заблокировать выбранные аккаунты? Они больше не смогут войти."

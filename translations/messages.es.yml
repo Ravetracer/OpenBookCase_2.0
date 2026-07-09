@@ -311,6 +311,7 @@ email:
   confirm_link: Confirmar mi correo
   confirm_expires: 'Este enlace caducará en %duration%.'
   confirm_cheers: ¡Saludos!
+  confirm_reason_intro: "Nota del equipo de OpenBookCase:"
 
 # ── Etiquetas de campos de formulario ──
 form:
@@ -701,3 +702,18 @@ lightbox:
 'admin.users.flash_reset_sent': "Enlace de restablecimiento enviado."
 'admin.users.flash_deleted': "Cuenta eliminada."
 'admin.users.flash_no_self_delete': "No puedes eliminar tu propia cuenta aquí."
+'admin.users.select_all': "Seleccionar todo"
+'admin.users.bulk_reason_label': "Motivo (opcional)"
+'admin.users.bulk_reason_placeholder': "Se añade al correo de verificación, p. ej. por qué reciben un enlace nuevo"
+'admin.users.bulk_action_resend': "Reenviar verificación"
+'admin.users.bulk_action_suspend': "Suspender"
+'admin.users.bulk_action_unsuspend': "Reactivar"
+'admin.users.bulk_action_delete': "Eliminar"
+'admin.users.bulk_none_selected': "Selecciona al menos una cuenta primero."
+'admin.users.bulk_unknown_action': "Acción masiva desconocida."
+'admin.users.bulk_resent': "Enlace de verificación reenviado a %count% cuenta(s)."
+'admin.users.bulk_deleted': "%count% cuenta(s) eliminada(s)."
+'admin.users.bulk_suspended': "%count% cuenta(s) suspendida(s)."
+'admin.users.bulk_unsuspended': "%count% cuenta(s) reactivada(s)."
+'admin.users.bulk_confirm_delete': "¿Eliminar permanentemente las cuentas seleccionadas y sus datos personales? Esto no se puede deshacer."
+'admin.users.bulk_confirm_suspend': "¿Suspender las cuentas seleccionadas? Ya no podrán iniciar sesión."

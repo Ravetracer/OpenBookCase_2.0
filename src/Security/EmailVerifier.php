@@ -21,10 +21,17 @@ class EmailVerifier
 
     public function sendEmailConfirmation(string $verifyEmailRouteName, UserInterface $user, TemplatedEmail $email): void
     {
+        // The `id` MUST be included as an extra query parameter so that
+        // RegistrationController::verifyUserEmail() can resolve the user from
+        // the link (the user is not authenticated when clicking it). It also
+        // becomes part of the signed URI. Omitting it makes every verification
+        // link fail: the controller can't find the user and the account stays
+        // locked.
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
             $verifyEmailRouteName,
-            $user->id,
-            $user->email
+            (string) $user->id,
+            $user->email,
+            ['id' => (string) $user->id]
         );
 
         $context = $email->getContext();

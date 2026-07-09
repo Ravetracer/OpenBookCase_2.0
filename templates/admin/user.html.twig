@@ -63,9 +63,13 @@
   <section class="mb-4 rounded-box border border-base-300 p-4">
     <h2 class="mb-1 font-semibold">{{ ui.icon('key', 'size-4') }} {{ 'admin.users.mail_title'|trans }}</h2>
     <p class="mb-2 text-sm text-base-content/70">{{ 'admin.users.mail_help'|trans }}</p>
-    <div class="flex flex-wrap gap-2">
-      <form method="post" action="{{ path('app_admin_user_resend', {user: u.id}) }}">
+    <div class="flex flex-wrap items-end gap-2">
+      <form method="post" action="{{ path('app_admin_user_resend', {user: u.id}) }}" class="flex flex-wrap items-end gap-2">
         <input type="hidden" name="_token" value="{{ csrf_token('admin_user_resend_' ~ u.id) }}">
+        <label class="form-control">
+          <span class="label-text mb-1 text-xs">{{ 'admin.users.bulk_reason_label'|trans }}</span>
+          <input type="text" name="reason" class="input input-bordered input-sm w-64" placeholder="{{ 'admin.users.bulk_reason_placeholder'|trans }}">
+        </label>
         <button class="btn btn-outline btn-sm gap-1">{{ ui.icon('bell', 'size-4') }} {{ 'admin.users.resend_verification'|trans }}</button>
       </form>
       <form method="post" action="{{ path('app_admin_user_reset_link', {user: u.id}) }}">
