@@ -192,7 +192,14 @@
         data-trans-saved="{{ 'js.saved'|trans }}"
         data-trans-rating-failed="{{ 'js.could_not_save_rating'|trans }}"
         data-trans-close="{{ 'close'|trans }}">
-  <div class="modal-box max-w-2xl" data-bookcase-modal-target="body"></div>
+  <div class="modal-box max-w-2xl obc-modal-scroll" {{ stimulus_controller('scroll-affordance') }}>
+    <div class="obc-scroll-viewport" tabindex="0"
+         data-bookcase-modal-target="body"
+         data-scroll-affordance-target="viewport"></div>
+    <div class="obc-scrollbar" aria-hidden="true">
+      <div class="obc-scrollbar-thumb" data-scroll-affordance-target="thumb"></div>
+    </div>
+  </div>
   <form method="dialog" class="modal-backdrop"><button aria-label="{{ 'close'|trans }}">close</button></form>
 </dialog>
 

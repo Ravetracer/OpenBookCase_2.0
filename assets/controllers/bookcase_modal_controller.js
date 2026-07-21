@@ -138,6 +138,9 @@ export default class extends Controller {
 
     async loadDetail(id) {
         await this.loadInto(`/api/bookcase/${id}/html`);
+        // Focus the scroll container (tabindex="0") so cursor/PageUp-Down keys
+        // scroll the detail content right away on short screens.
+        this.bodyTarget.focus();
     }
 
     async loadEdit(id) {

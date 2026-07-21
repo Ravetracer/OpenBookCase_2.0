@@ -64,6 +64,134 @@ body {
     html:not([data-theme]) .logo-dark  { display: inline; }
 }
 
+/* Modal scroll affordance: DaisyUI's .modal-box already scrolls (overflow-y),
+   but the OS overlay scrollbar stays hidden until you scroll — on a short
+   screen there's no hint the detail dialog has more below. Force a persistent,
+   themed native scrollbar and reserve its gutter to avoid layout shift.
+   Keyboard scrolling is enabled by tabindex="0" on the box (template) +
+   focusing it after the detail loads.
+
+   Engine split (important): Chromium 121+ supports the standard `scrollbar-width`
+   property, and once that's set it IGNORES `::-webkit-scrollbar` and draws its
+   own *overlay* (fade-out) bar — which defeats the whole point. So the
+   `::-webkit-scrollbar` styling below (a classic, always-visible, non-overlay
+   bar) must run WITHOUT `scrollbar-width` on Chromium/WebKit, and the standard
+   properties are fenced to Firefox only.
+
+   Firefox detection: NOT `@supports not selector(::-webkit-scrollbar)` — Firefox
+   parses that pseudo-element for web-compat, so the query is a false negative
+   there. Use the Firefox-only `-moz-orient` property instead (unknown to
+   Chromium, so it never trips the kill-switch). Setting `scrollbar-color` also
+   makes Firefox draw its own always-visible bar instead of the GTK overlay one. */
+.modal-box {
+    scrollbar-gutter: stable;
+}
+/* Chromium / WebKit — classic, always-visible bar (no `scrollbar-width` here!). */
+.modal-box::-webkit-scrollbar {
+    width: 0.75rem;
+}
+.modal-box::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 9999px;
+}
+.modal-box::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+}
+/* Firefox only (-moz-orient is Firefox-only) — standard props force an
+   always-visible styled scrollbar in place of the fading GTK overlay one. */
+@supports (-moz-orient: inline) {
+    .modal-box {
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in oklch, var(--color-base-content) 30%, transparent) transparent;
+    }
+}
+
+/* ── Bookcase modal: engine-independent scroll affordance ──────────────────────
+   Firefox (and iOS Safari) can't be CSS-forced to keep a NATIVE scrollbar open
+   when the OS uses overlay scrollbars. So the bookcase detail/edit dialog uses a
+   *custom* affordance that looks identical everywhere: the .modal-box becomes a
+   clipping shell, an inner .obc-scroll-viewport does the scrolling with its
+   native bar hidden, and the `scroll-affordance` Stimulus controller drives a
+   draggable thumb (.obc-scrollbar-thumb) plus soft top/bottom fades. The generic
+   .modal-box native-scrollbar rules above still serve the other modals. */
+.obc-modal-scroll {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* clip fades + custom bar; the inner viewport scrolls */
+    padding: 0; /* padding moves onto the viewport (unlayered → beats DaisyUI) */
+}
+.obc-scroll-viewport {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1.5rem; /* the p-6 .modal-box used to provide */
+    scrollbar-width: none; /* Firefox — hide native bar, custom one replaces it */
+}
+.obc-scroll-viewport::-webkit-scrollbar { /* Chromium / WebKit — hide native bar */
+    width: 0;
+    height: 0;
+}
+
+/* Custom scrollbar track + thumb, overlaid on the viewport's right edge. */
+.obc-scrollbar {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.25rem;
+    bottom: 0.5rem;
+    width: 0.5rem;
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.obc-modal-scroll.is-scrollable .obc-scrollbar {
+    opacity: 1;
+    pointer-events: auto;
+}
+.obc-scrollbar-thumb {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    min-height: 1.5rem;
+    border-radius: 9999px;
+    background-color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    cursor: grab;
+}
+.obc-scrollbar-thumb:hover {
+    background-color: color-mix(in oklch, var(--color-base-content) 45%, transparent);
+}
+.obc-scrollbar-thumb:active {
+    cursor: grabbing;
+    background-color: color-mix(in oklch, var(--color-base-content) 55%, transparent);
+}
+
+/* Soft fades, shown only when there's hidden content in that direction. */
+.obc-modal-scroll::before,
+.obc-modal-scroll::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1.5rem;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.obc-modal-scroll::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--color-base-100), transparent);
+}
+.obc-modal-scroll::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--color-base-100), transparent);
+}
+.obc-modal-scroll.can-scroll-up::before { opacity: 1; }
+.obc-modal-scroll.can-scroll-down::after { opacity: 1; }
+
 /* Leaflet sits below the navbar / dialogs */
 #map {
     height: 100%;
