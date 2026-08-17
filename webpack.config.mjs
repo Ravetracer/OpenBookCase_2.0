@@ -1,4 +1,4 @@
-const Encore = require('@symfony/webpack-encore');
+import Encore from '@symfony/webpack-encore';
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -60,15 +60,19 @@ Encore
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
 
-    // configure Babel
-    // .configureBabel((config) => {
-    //     config.plugins.push('@babel/a-babel-plugin');
-    // })
+    // Babel 8 dropped the preset-env "useBuiltIns"/"corejs" options; core-js
+    // polyfills are now injected on demand by babel-plugin-polyfill-corejs3,
+    // targeting the browsers listed under "browserslist" in package.json.
+    .configureBabel((config) => {
+        config.plugins.push([
+            'babel-plugin-polyfill-corejs3',
+            { method: 'usage-global', version: '3.50' },
+        ]);
+    })
 
-    // enables and configure @babel/preset-env polyfills
-    .configureBabelPresetEnv((config) => {
-        config.useBuiltIns = 'usage';
-        config.corejs = '3.23';
+    // Encore 7 no longer bundles a CSS minifier; use cssnano for production CSS.
+    .configureCssMinimizerPlugin((options, MinimizerPlugin) => {
+        options.minify = MinimizerPlugin.cssnanoMinify;
     })
 
     // enables Tailwind CSS v4 / DaisyUI via PostCSS
@@ -88,4 +92,4 @@ Encore
     //.autoProvidejQuery()
 ;
 
-module.exports = Encore.getWebpackConfig();
+export default await Encore.getWebpackConfig();

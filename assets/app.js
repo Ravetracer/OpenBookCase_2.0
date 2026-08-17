@@ -13,5 +13,5 @@ import './styles/app.css';
 import './styles/leaflet.css';
 import './styles/MarkerCluster.css';
 import './styles/MarkerCluster.Default.css';
-import './js/leaflet';
-import './js/leaflet.markercluster';
+import './js/leaflet.js';
+import './js/leaflet.markercluster.js';
