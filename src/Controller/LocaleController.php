@@ -51,12 +51,23 @@ class LocaleController extends AbstractController
     /**
      * Redirect back to the page the user came from, but only if it's on this
      * host (avoid an open redirect); otherwise the homepage.
+     *
+     * The host is compared exactly after parsing — a prefix check (`str_starts_with`)
+     * is unsafe because an attacker-controlled host such as `example.com.evil.tld`
+     * begins with the site origin as a string and would sail through.
      */
     private function safeRedirectTarget(Request $request): string
     {
-        $referer = $request->headers->get('referer');
-        if ($referer !== null && str_starts_with($referer, $request->getSchemeAndHttpHost())) {
-            return $referer;
+        $referer = (string) $request->headers->get('referer', '');
+        if ($referer !== '') {
+            $parts = parse_url($referer);
+            if (
+                isset($parts['host'])
+                && strcasecmp($parts['host'], $request->getHost()) === 0
+                && (!isset($parts['scheme']) || strcasecmp($parts['scheme'], $request->getScheme()) === 0)
+            ) {
+                return $referer;
+            }
         }
 
         return $this->generateUrl('app_index');

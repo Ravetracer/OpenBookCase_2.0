@@ -19,6 +19,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ImageController extends AbstractController
 {
     private const MAX_IMAGES = 5;
+    private const MAX_BYTES = 8 * 1024 * 1024; // 8 MiB per upload
     private const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
     public function __construct(
@@ -44,10 +45,26 @@ class ImageController extends AbstractController
         if (!$file) {
             return new JsonResponse(['error' => $this->translator->trans('flash.no_file')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+        // Reject a broken/incomplete upload (e.g. exceeded the PHP/multipart limit)
+        // before touching it further.
+        if (!$file->isValid()) {
+            return new JsonResponse(['error' => $this->translator->trans('flash.no_file')], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
         if ($author === '') {
             return new JsonResponse(['error' => $this->translator->trans('flash.author_required')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+        if ($file->getSize() > self::MAX_BYTES) {
+            return new JsonResponse(
+                ['error' => $this->translator->trans('flash.image_too_large', ['%mb%' => (int) (self::MAX_BYTES / 1024 / 1024)])],
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+            );
+        }
+        // Content-sniffed MIME (not the client-supplied one) must be an allowed type,
+        // and the bytes must actually decode as an image of matching dimensions.
         if (!in_array($file->getMimeType(), self::ALLOWED_MIME, true)) {
+            return new JsonResponse(['error' => $this->translator->trans('flash.invalid_image_type')], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        if (@getimagesize($file->getPathname()) === false) {
             return new JsonResponse(['error' => $this->translator->trans('flash.invalid_image_type')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 

@@ -263,6 +263,8 @@ flash:
   auth_required: Authentication required.
   invalid_token: Invalid security token. Please reload the page.
   invalid_email: Please enter a valid e-mail address.
+  email_taken: "Another account already uses that e-mail address."
+  email_changed_verify: "E-mail changed. Check your inbox to verify the new address before your next login."
   unknown_channel: Unknown notification channel.
   unknown_language: Unknown language.
   rating_range: Rating must be between 1 and 5.
@@ -278,6 +280,7 @@ flash:
   check_email: 'Almost there! We''ve sent a verification link to your email address. Please click it to activate your account before logging in.'
   verify_failed: The verification link is invalid or has expired.
   max_images: 'A maximum of %count% images per entry is allowed.'
+  image_too_large: "The image is too large (max %mb% MB)."
   no_file: No file uploaded.
   author_required: Author name is required.
   invalid_image_type: Only JPEG, PNG, WebP or GIF images are allowed.
@@ -476,7 +479,7 @@ reset:
   email_expiry: "This link is valid for one hour."
   email_ignore: "If you didn't request this, you can safely ignore this e-mail — your password won't change."
   invalid_or_expired: "This reset link is invalid or has expired. Please request a new one."
-  password_too_short: "The password must be at least 6 characters."
+  password_too_short: "The password must be at least 8 characters."
   password_mismatch: "The passwords don't match."
   success: "Your password has been changed. You can now sign in."
 

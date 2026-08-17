@@ -52,4 +52,28 @@ final class LocaleControllerTest extends FunctionalTestCase
 
         $this->assertResponseRedirects('http://localhost/list');
     }
+
+    /**
+     * A host that merely *starts with* the site origin (e.g. localhost.evil.tld)
+     * must NOT be treated as same-origin — otherwise it is an open redirect.
+     */
+    #[DataProvider('maliciousRefererProvider')]
+    public function testSwitchRejectsCrossHostReferer(string $referer): void
+    {
+        $this->client->request('GET', '/language/de', [], [], ['HTTP_REFERER' => $referer]);
+
+        // Falls back to the homepage, never the attacker URL.
+        $this->assertResponseRedirects('/');
+    }
+
+    /** @return array<string, array{string}> */
+    public static function maliciousRefererProvider(): array
+    {
+        return [
+            'suffix host' => ['http://localhost.evil.example/pwned'],
+            'other host' => ['https://evil.example/'],
+            'userinfo trick' => ['http://localhost@evil.example/'],
+            'scheme mismatch' => ['ftp://localhost/'],
+        ];
+    }
 }

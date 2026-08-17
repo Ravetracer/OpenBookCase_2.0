@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 
 class RegistrationFormType extends AbstractType
 {
@@ -40,10 +41,14 @@ class RegistrationFormType extends AbstractType
                 'constraints' => [
                     new NotBlank(message: 'Please enter a password'),
                     new Length(
-                        min: 6,
+                        min: 8,
                         minMessage: 'Your password should be at least {{ limit }} characters',
                         max: 4096,
                     ),
+                    // Reject passwords known from public breach corpora (HIBP
+                    // k-anonymity range API). Disabled in the test env via
+                    // framework.validation.not_compromised_password.
+                    new NotCompromisedPassword(message: 'This password has appeared in a data breach; please choose a different one.'),
                 ],
             ])
         ;

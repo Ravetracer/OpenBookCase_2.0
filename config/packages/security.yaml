@@ -32,6 +32,10 @@ security:
             provider: app_user_provider
             user_checker: App\Security\UserChecker
             custom_authenticator: App\Security\AppAuthenticator
+            # Brute-force / credential-stuffing protection: cap failed logins per
+            # IP+username (and a wider per-IP ceiling). Requires symfony/rate-limiter.
+            login_throttling:
+                max_attempts: 5          # per minute, per IP + username
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 2592000 # 30 days, in seconds

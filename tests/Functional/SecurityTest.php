@@ -84,6 +84,34 @@ final class SecurityTest extends FunctionalTestCase
         $this->assertNull($token, 'wrong password must not authenticate');
     }
 
+    public function testLoginThrottlingBlocksAfterTooManyFailures(): void
+    {
+        UserFactory::createOne([
+            'username' => 'throttle',
+            'email' => 'throttle@example.com',
+        ]);
+
+        // Five failed attempts exhaust the per-username/IP limit (max_attempts: 5).
+        // A same-host Referer makes the stateless CSRF check pass (as a browser would).
+        for ($i = 0; $i < 5; ++$i) {
+            $this->client->request('POST', '/login', [
+                'username' => 'throttle',
+                'password' => 'wrong-password',
+                '_csrf_token' => 'csrf-token',
+            ], [], ['HTTP_REFERER' => 'http://localhost/']);
+        }
+
+        // Now even the CORRECT password is refused while the throttle is engaged.
+        $this->client->request('POST', '/login', [
+            'username' => 'throttle',
+            'password' => UserFactory::PLAIN_PASSWORD,
+            '_csrf_token' => 'csrf-token',
+        ], [], ['HTTP_REFERER' => 'http://localhost/']);
+
+        $token = static::getContainer()->get('security.token_storage')->getToken();
+        $this->assertNull($token, 'login must be throttled after too many failed attempts');
+    }
+
     public function testLogoutDeauthenticates(): void
     {
         $user = UserFactory::createOne();

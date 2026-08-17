@@ -6,13 +6,16 @@ use App\Entity\User;
 
 use Doctrine\ORM\EntityManagerInterface;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -29,6 +32,9 @@ class ResetPasswordController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
+        private readonly LoggerInterface $logger,
+        #[Target('password_reset')]
+        private readonly RateLimiterFactoryInterface $resetLimiter,
     ) {
     }
 
@@ -44,6 +50,13 @@ class ResetPasswordController extends AbstractController
                 $this->addFlash('reset_error', $this->translator->trans('flash.invalid_token'));
 
                 return $this->redirectToRoute('app_forgot_password');
+            }
+
+            // Throttle per client IP to curb address-enumeration probing and
+            // reset-mail flooding. Over the limit still shows the neutral screen,
+            // so the throttle itself can't be used as an oracle.
+            if (!$this->resetLimiter->create($request->getClientIp() ?? 'unknown')->consume(1)->isAccepted()) {
+                return $this->render('security/forgot_password.html.twig', ['sent' => true]);
             }
 
             $email = trim((string) $request->request->get('email'));
@@ -65,12 +78,19 @@ class ResetPasswordController extends AbstractController
                     UrlGeneratorInterface::ABSOLUTE_URL,
                 );
 
-                $mailer->send((new TemplatedEmail())
-                    ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
-                    ->to($user->email)
-                    ->subject($this->translator->trans('reset.email_subject'))
-                    ->htmlTemplate('security/reset_email.html.twig')
-                    ->context(['resetUrl' => $resetUrl, 'username' => $user->getUserIdentifier()]));
+                // A mailer failure must NEVER surface as a 500 here: a different
+                // response for a known vs. unknown address is an enumeration oracle.
+                // Swallow + log, and always render the same neutral screen below.
+                try {
+                    $mailer->send((new TemplatedEmail())
+                        ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
+                        ->to($user->email)
+                        ->subject($this->translator->trans('reset.email_subject'))
+                        ->htmlTemplate('security/reset_email.html.twig')
+                        ->context(['resetUrl' => $resetUrl, 'username' => $user->getUserIdentifier()]));
+                } catch (\Throwable $e) {
+                    $this->logger->error('Password reset e-mail could not be sent.', ['exception' => $e]);
+                }
             }
 
             return $this->render('security/forgot_password.html.twig', ['sent' => true]);
@@ -108,7 +128,7 @@ class ResetPasswordController extends AbstractController
             $password = (string) $request->request->get('password');
             $repeat = (string) $request->request->get('password_repeat');
 
-            if (mb_strlen($password) < 6) {
+            if (mb_strlen($password) < 8) {
                 $this->addFlash('reset_error', $this->translator->trans('reset.password_too_short'));
 
                 return $this->render('security/reset_password.html.twig', ['token' => $token]);

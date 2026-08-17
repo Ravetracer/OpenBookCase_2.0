@@ -263,6 +263,8 @@ flash:
   auth_required: Anmeldung erforderlich.
   invalid_token: Ungültiges Sicherheitstoken. Bitte lade die Seite neu.
   invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
+  email_taken: "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet."
+  email_changed_verify: "E-Mail-Adresse geändert. Bitte bestätige die neue Adresse über den Link in deinem Postfach vor der nächsten Anmeldung."
   unknown_channel: Unbekannter Benachrichtigungskanal.
   unknown_language: Unbekannte Sprache.
   rating_range: Die Bewertung muss zwischen 1 und 5 liegen.
@@ -278,6 +280,7 @@ flash:
   check_email: 'Fast geschafft! Wir haben dir einen Bestätigungslink an deine E-Mail-Adresse gesendet. Bitte klicke ihn an, um dein Konto zu aktivieren, bevor du dich anmeldest.'
   verify_failed: Der Bestätigungslink ist ungültig oder abgelaufen.
   max_images: 'Pro Eintrag sind maximal %count% Bilder erlaubt.'
+  image_too_large: "Das Bild ist zu groß (max. %mb% MB)."
   no_file: Keine Datei hochgeladen.
   author_required: Der Name des Urhebers ist erforderlich.
   invalid_image_type: Nur JPEG-, PNG-, WebP- oder GIF-Bilder sind erlaubt.
@@ -476,7 +479,7 @@ reset:
   email_expiry: "Dieser Link ist eine Stunde gültig."
   email_ignore: "Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren – dein Passwort wird nicht geändert."
   invalid_or_expired: "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an."
-  password_too_short: "Das Passwort muss mindestens 6 Zeichen lang sein."
+  password_too_short: "Das Passwort muss mindestens 8 Zeichen lang sein."
   password_mismatch: "Die Passwörter stimmen nicht überein."
   success: "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden."
 

@@ -54,7 +54,8 @@ final class ProfileControllerTest extends FunctionalTestCase
 
     public function testEmailUpdateValid(): void
     {
-        $user = $this->loginAsUser(['email' => 'old@example.com']);
+        $this->client->enableProfiler();
+        $user = $this->loginAsUser(['email' => 'old@example.com', 'isVerified' => true]);
         $id = (string) $user->id;
 
         $this->client->request('POST', '/profile/email', [
@@ -64,10 +65,52 @@ final class ProfileControllerTest extends FunctionalTestCase
         $this->assertResponseIsSuccessful();
         $this->assertSame('success', $this->json()['status']);
         $this->assertSame('new@example.com', $this->json()['email']);
+        // A changed address triggers re-verification + a confirmation mail.
+        $this->assertTrue($this->json()['verificationSent']);
+        self::assertEmailCount(1);
 
         $this->em()->clear();
         $reloaded = $this->em()->getRepository(User::class)->find($id);
         $this->assertSame('new@example.com', $reloaded->email);
+        $this->assertFalse($reloaded->isVerified, 'a changed address must be re-verified');
+    }
+
+    public function testEmailUnchangedKeepsVerifiedAndSendsNoMail(): void
+    {
+        $this->client->enableProfiler();
+        $user = $this->loginAsUser(['email' => 'same@example.com', 'isVerified' => true]);
+        $id = (string) $user->id;
+
+        // Same address (different case) → idempotent success, no re-verification.
+        $this->client->request('POST', '/profile/email', [
+            '_token' => $this->csrf('profile_email'),
+            'email' => 'SAME@example.com',
+        ]);
+        $this->assertResponseIsSuccessful();
+        self::assertEmailCount(0);
+
+        $this->em()->clear();
+        $this->assertTrue($this->em()->getRepository(User::class)->find($id)->isVerified);
+    }
+
+    public function testEmailAlreadyTakenByAnotherAccountRejected(): void
+    {
+        // A second account already owns the target address.
+        UserFactory::createOne(['username' => 'other', 'email' => 'taken@example.com']);
+        $user = $this->loginAsUser(['email' => 'mine@example.com', 'isVerified' => true]);
+        $id = (string) $user->id;
+
+        $this->client->request('POST', '/profile/email', [
+            '_token' => $this->csrf('profile_email'),
+            'email' => 'taken@example.com',
+        ]);
+        $this->assertResponseStatusCodeSame(409);
+
+        // Unchanged — no hijack, still verified.
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($id);
+        $this->assertSame('mine@example.com', $reloaded->email);
+        $this->assertTrue($reloaded->isVerified);
     }
 
     public function testEmailUpdateInvalidCsrfRejected(): void

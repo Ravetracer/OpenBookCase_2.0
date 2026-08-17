@@ -5,6 +5,9 @@ namespace App\Tests\Functional;
 use App\Entity\User;
 use App\Tests\Factory\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\RawMessage;
 
 final class ResetPasswordControllerTest extends FunctionalTestCase
 {
@@ -56,6 +59,51 @@ final class ResetPasswordControllerTest extends FunctionalTestCase
 
         $this->assertResponseIsSuccessful();
         self::assertEmailCount(0);
+    }
+
+    /**
+     * A failing mail transport must never turn a known-address request into a 500:
+     * a different response for a known vs. unknown address is an enumeration oracle.
+     */
+    public function testForgotPasswordSwallowsMailerFailure(): void
+    {
+        UserFactory::createOne(['email' => 'boom@example.com']);
+
+        $throwing = new class implements MailerInterface {
+            public function send(RawMessage $message, ?Envelope $envelope = null): void
+            {
+                throw new \RuntimeException('mail transport down');
+            }
+        };
+        // The autowiring alias resolves to the concrete `mailer.mailer` at compile
+        // time, so overriding that service is enough for the controller to receive it.
+        static::getContainer()->set('mailer.mailer', $throwing);
+
+        $crawler = $this->client->request('GET', '/forgot-password');
+        $form = $crawler->filter('form')->form();
+        $form['email'] = 'boom@example.com';
+        $this->client->submit($form);
+
+        // Same neutral 200 screen despite the transport failure.
+        $this->assertResponseIsSuccessful();
+    }
+
+    /**
+     * Beyond the per-IP limit the endpoint keeps returning the same neutral screen
+     * (never a distinguishable error), so the throttle can't be used as an oracle.
+     */
+    public function testForgotPasswordRateLimitStaysNeutral(): void
+    {
+        UserFactory::createOne(['email' => 'flood@example.com']);
+
+        // Limit is 5 / 15 min; a 6th and 7th request are throttled but still 200.
+        for ($i = 0; $i < 7; ++$i) {
+            $crawler = $this->client->request('GET', '/forgot-password');
+            $form = $crawler->filter('form')->form();
+            $form['email'] = 'flood@example.com';
+            $this->client->submit($form);
+            $this->assertResponseIsSuccessful();
+        }
     }
 
     public function testForgotPasswordInvalidCsrfRedirects(): void

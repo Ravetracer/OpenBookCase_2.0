@@ -263,6 +263,8 @@ flash:
   auth_required: Autenticación requerida.
   invalid_token: Token de seguridad no válido. Vuelve a cargar la página.
   invalid_email: Introduce una dirección de correo válida.
+  email_taken: "Otra cuenta ya usa esa dirección de correo."
+  email_changed_verify: "Correo cambiado. Revisa tu bandeja de entrada para verificar la nueva dirección antes de tu próximo inicio de sesión."
   unknown_channel: Canal de notificación desconocido.
   unknown_language: Idioma desconocido.
   rating_range: La valoración debe estar entre 1 y 5.
@@ -278,6 +280,7 @@ flash:
   check_email: '¡Casi listo! Hemos enviado un enlace de verificación a tu dirección de correo. Haz clic en él para activar tu cuenta antes de iniciar sesión.'
   verify_failed: El enlace de verificación no es válido o ha caducado.
   max_images: 'Se permiten como máximo %count% imágenes por entrada.'
+  image_too_large: "La imagen es demasiado grande (máx. %mb% MB)."
   no_file: No se ha subido ningún archivo.
   author_required: El nombre del autor es obligatorio.
   invalid_image_type: Solo se permiten imágenes JPEG, PNG, WebP o GIF.
@@ -476,7 +479,7 @@ reset:
   email_expiry: "Este enlace es válido durante una hora."
   email_ignore: "Si no lo solicitaste, puedes ignorar este correo: tu contraseña no cambiará."
   invalid_or_expired: "Este enlace no es válido o ha caducado. Solicita uno nuevo."
-  password_too_short: "La contraseña debe tener al menos 6 caracteres."
+  password_too_short: "La contraseña debe tener al menos 8 caracteres."
   password_mismatch: "Las contraseñas no coinciden."
   success: "Tu contraseña se ha cambiado. Ya puedes iniciar sesión."
 

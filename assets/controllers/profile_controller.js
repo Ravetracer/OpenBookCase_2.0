@@ -92,7 +92,9 @@ export default class extends Controller {
             });
             const json = await response.json().catch(() => ({}));
             if (response.ok) {
-                status.textContent = this.t('transSaved', 'Saved');
+                // A changed address triggers re-verification; show the server's
+                // "check your inbox" note when present, else a plain "Saved".
+                status.textContent = json.message || this.t('transSaved', 'Saved');
                 status.classList.add('text-success');
             } else {
                 status.textContent = json.error || this.t('transCouldNotSave', 'Could not save.');

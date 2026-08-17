@@ -12,6 +12,13 @@ framework:
             limit: 60
             interval: '10 minutes'
             cache_pool: 'rate_limiter.cache'
+        # Public "forgot password" requests, keyed by client IP — curbs address
+        # enumeration and reset-mail flooding (ResetPasswordController::request).
+        password_reset:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
+            cache_pool: 'rate_limiter.cache'
     cache:
         pools:
             # Dedicated, persistent store for limiter state (survives between requests).

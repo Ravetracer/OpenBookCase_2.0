@@ -7,6 +7,16 @@
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>
+
+    # Static files (incl. user-uploaded images) are served directly by Apache and
+    # never pass through Symfony, so the app's SecurityHeadersSubscriber can't add
+    # headers to them. Stop the browser from MIME-sniffing an upload into something
+    # executable, and don't advertise the PHP version on any response.
+    <FilesMatch "\.(png|jpe?g|gif|webp|svg|ico|css|js|mjs|woff2?|json|webmanifest|map)$">
+        Header set X-Content-Type-Options "nosniff"
+    </FilesMatch>
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
 </IfModule>
 
 # Use the front controller as index file. It serves as a fallback solution when

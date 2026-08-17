@@ -263,6 +263,8 @@ flash:
   auth_required: Authentification requise.
   invalid_token: Jeton de sécurité invalide. Veuillez recharger la page.
   invalid_email: Veuillez saisir une adresse e-mail valide.
+  email_taken: "Cette adresse e-mail est déjà utilisée par un autre compte."
+  email_changed_verify: "Adresse e-mail modifiée. Vérifiez votre boîte de réception pour confirmer la nouvelle adresse avant votre prochaine connexion."
   unknown_channel: Canal de notification inconnu.
   unknown_language: Langue inconnue.
   rating_range: L'évaluation doit être comprise entre 1 et 5.
@@ -278,6 +280,7 @@ flash:
   check_email: 'Presque terminé ! Nous avons envoyé un lien de vérification à votre adresse e-mail. Veuillez cliquer dessus pour activer votre compte avant de vous connecter.'
   verify_failed: Le lien de vérification est invalide ou a expiré.
   max_images: "Un maximum de %count% images par entrée est autorisé."
+  image_too_large: "Limage est trop volumineuse (max %mb% Mo)."
   no_file: Aucun fichier téléversé.
   author_required: "Le nom de l'auteur est requis."
   invalid_image_type: Seules les images JPEG, PNG, WebP ou GIF sont autorisées.
@@ -476,7 +479,7 @@ reset:
   email_expiry: "Ce lien est valable une heure."
   email_ignore: "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail — votre mot de passe ne changera pas."
   invalid_or_expired: "Ce lien est invalide ou a expiré. Veuillez en demander un nouveau."
-  password_too_short: "Le mot de passe doit comporter au moins 6 caractères."
+  password_too_short: "Le mot de passe doit comporter au moins 8 caractères."
   password_mismatch: "Les mots de passe ne correspondent pas."
   success: "Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter."
 

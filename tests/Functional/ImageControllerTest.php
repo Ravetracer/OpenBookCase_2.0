@@ -141,6 +141,48 @@ final class ImageControllerTest extends FunctionalTestCase
         $this->assertResponseStatusCodeSame(422);
     }
 
+    public function testUploadRejectsNonImageContent(): void
+    {
+        $this->loginAsUser();
+        $bc = BookcaseFactory::createOne();
+
+        // A text file masquerading as a PNG: the content-sniffed MIME is text/plain,
+        // so the allow-list rejects it regardless of the .png name / declared type.
+        $tmp = tempnam(sys_get_temp_dir(), 'obc_test_') . '.png';
+        file_put_contents($tmp, "this is definitely not an image");
+        $this->cleanup[] = $tmp;
+
+        $this->client->request(
+            'POST',
+            '/api/bookcase/' . $bc->id . '/image',
+            ['author' => 'Trickster'],
+            ['imageFile' => new UploadedFile($tmp, 'evil.png', 'image/png', null, true)],
+        );
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testUploadRejectsOversizedFile(): void
+    {
+        $this->loginAsUser();
+        $bc = BookcaseFactory::createOne();
+
+        // Just over the 8 MiB cap — rejected before any decoding happens.
+        $tmp = tempnam(sys_get_temp_dir(), 'obc_test_') . '.jpg';
+        $im = imagecreatetruecolor(10, 10);
+        imagejpeg($im, $tmp);
+        imagedestroy($im);
+        file_put_contents($tmp, str_repeat("\0", 8 * 1024 * 1024 + 1024), FILE_APPEND);
+        $this->cleanup[] = $tmp;
+
+        $this->client->request(
+            'POST',
+            '/api/bookcase/' . $bc->id . '/image',
+            ['author' => 'Big'],
+            ['imageFile' => new UploadedFile($tmp, 'huge.jpg', 'image/jpeg', null, true)],
+        );
+        $this->assertResponseStatusCodeSame(422);
+    }
+
     // ---------------------------------------------------------------------
     // POST /api/bookcase/{id}/image/{image}/alt
     // ---------------------------------------------------------------------

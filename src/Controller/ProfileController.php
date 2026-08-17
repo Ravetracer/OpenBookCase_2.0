@@ -8,14 +8,18 @@ use App\Enums\NotificationChannel;
 use App\EventSubscriber\LocaleSubscriber;
 use App\Repository\ApiApplicationRepository;
 use App\Repository\MessageRepository;
+use App\Repository\UserRepository;
 use App\Repository\WishlistItemRepository;
+use App\Security\EmailVerifier;
 use App\Service\UserDeletionService;
 
 use Doctrine\ORM\EntityManagerInterface;
 
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Cookie;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +41,8 @@ class ProfileController extends AbstractController
         private readonly ApiApplicationRepository $apiApplications,
         private readonly MessageRepository $messages,
         private readonly UserDeletionService $userDeletion,
+        private readonly UserRepository $users,
+        private readonly EmailVerifier $emailVerifier,
     ) {
     }
 
@@ -98,10 +104,37 @@ class ProfileController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.invalid_email')], Response::HTTP_BAD_REQUEST);
         }
 
+        // Unchanged address (case-insensitive) → accept idempotently, no re-verification.
+        if (strcasecmp($email, (string) $user->email) === 0) {
+            return new JsonResponse(['status' => 'success', 'email' => $email], Response::HTTP_OK);
+        }
+
+        // Reject an address already registered to another account — a duplicate
+        // would break login-by-email and misdirect password-reset links.
+        $existing = $this->users->loadUserByIdentifier($email);
+        if ($existing instanceof User && (string) $existing->id !== (string) $user->id) {
+            return new JsonResponse(['error' => $this->translator->trans('flash.email_taken')], Response::HTTP_CONFLICT);
+        }
+
         $user->email = $email;
+        // A changed address has not been proven yet: require re-verification
+        // (login is blocked by UserChecker until the new link is clicked).
+        $user->isVerified = false;
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'success', 'email' => $email], Response::HTTP_OK);
+        // E-mail a fresh verification link to the new address.
+        $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user, (new TemplatedEmail())
+            ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
+            ->to($user->email)
+            ->subject($this->translator->trans('email.confirm_subject'))
+            ->htmlTemplate('registration/confirmation_email.html.twig'));
+
+        return new JsonResponse([
+            'status' => 'success',
+            'email' => $email,
+            'verificationSent' => true,
+            'message' => $this->translator->trans('flash.email_changed_verify'),
+        ], Response::HTTP_OK);
     }
 
     #[Route('/notifications', name: 'notifications', methods: ['POST'])]

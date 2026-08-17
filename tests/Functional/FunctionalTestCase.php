@@ -20,12 +20,19 @@ abstract class FunctionalTestCase extends WebTestCase
     {
         $this->client = static::createClient();
 
-        // The API rate limiter persists its state in a filesystem cache pool (so it
-        // survives the kernel reboot the client does between requests). Clear it per
-        // test so limiter counts never leak across tests or earlier suite runs.
-        $pool = static::getContainer()->get('rate_limiter.cache');
-        if ($pool instanceof \Psr\Cache\CacheItemPoolInterface) {
-            $pool->clear();
+        // Rate limiters persist their state in filesystem cache pools (so they
+        // survive the kernel reboot the client does between requests). Clear them
+        // per test so limiter counts never leak across tests or earlier suite runs:
+        //  - rate_limiter.cache : API + password-reset limiters (this project)
+        //  - cache.rate_limiter : Symfony login-throttling storage
+        $container = static::getContainer();
+        foreach (['rate_limiter.cache', 'cache.rate_limiter'] as $poolId) {
+            if ($container->has($poolId)) {
+                $pool = $container->get($poolId);
+                if ($pool instanceof \Psr\Cache\CacheItemPoolInterface) {
+                    $pool->clear();
+                }
+            }
         }
     }
 
