@@ -4,7 +4,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.4.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "^3.0",
@@ -52,7 +52,7 @@
         "symfonycasts/verify-email-bundle": "^1",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0",
-        "vich/uploader-bundle": "^2.4"
+        "vich/uploader-bundle": "^3.0"
     },
     "config": {
         "allow-plugins": {
