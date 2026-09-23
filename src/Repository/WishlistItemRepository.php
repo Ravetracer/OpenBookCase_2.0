@@ -7,6 +7,7 @@ use App\Entity\WishlistItem;
 use App\Enums\WishlistItemStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<WishlistItem>
@@ -55,7 +56,7 @@ class WishlistItemRepository extends ServiceEntityRepository
             ->leftJoin('wi.droppedBy', 'dropper')
             ->where('wi.bookcase = :bookcase')
             ->setParameter('bookcase', $bookcase->id, 'ulid')
-            ->orderBy('wi.id', 'DESC')
+            ->orderBy('wi.id', SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }
@@ -73,7 +74,7 @@ class WishlistItemRepository extends ServiceEntityRepository
             ->leftJoin('wi.bookcase', 'bookcase')
             ->where('wi.user = :user')
             ->setParameter('user', $user->id, 'ulid')
-            ->orderBy('wi.id', 'DESC')
+            ->orderBy('wi.id', SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }

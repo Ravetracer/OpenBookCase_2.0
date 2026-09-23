@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enums\ApiApplicationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<ApiApplication>
@@ -40,7 +41,7 @@ class ApiApplicationRepository extends ServiceEntityRepository
     public function findAllNewestFirst(): array
     {
         return $this->createQueryBuilder('a')
-            ->orderBy('a.createdAt', 'DESC')
+            ->orderBy('a.createdAt', SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }
@@ -51,7 +52,7 @@ class ApiApplicationRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('a')
             ->andWhere('a.applicant = :user')
             ->setParameter('user', $user->id, 'ulid')
-            ->orderBy('a.createdAt', 'DESC')
+            ->orderBy('a.createdAt', SortDirection::Descending)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();

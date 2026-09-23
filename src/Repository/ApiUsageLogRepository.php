@@ -7,6 +7,7 @@ use App\Entity\ApiUsageLog;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<ApiUsageLog>
@@ -40,7 +41,7 @@ class ApiUsageLogRepository extends ServiceEntityRepository
     public function findFilteredPaginated(array $filters, int $page, int $perPage): array
     {
         return $this->filteredQuery($filters)
-            ->orderBy('l.createdAt', 'DESC')
+            ->orderBy('l.createdAt', SortDirection::Descending)
             ->setFirstResult(max(0, ($page - 1) * $perPage))
             ->setMaxResults($perPage)
             ->getQuery()
@@ -74,7 +75,7 @@ class ApiUsageLogRepository extends ServiceEntityRepository
         $q = $filters['q'] ?? null;
         if (is_string($q) && trim($q) !== '') {
             $qb->andWhere('l.path LIKE :q OR l.routeName LIKE :q')
-                ->setParameter('q', '%' . trim($q) . '%');
+                ->setParameter('q', '%' . mb_substr(trim($q), 0, 200) . '%');
         }
 
         return $qb;

@@ -1,3 +1,4 @@
 bookcase.title_no_url: "Ссылки в названии запрещены — указывайте веб-ссылки в поле «Веб-сайт» или «Комментарий»."
+bookcase.webpage_unsafe_scheme: "Разрешены только веб-адреса (http/https), ссылки на e-mail (mailto:) или телефон (tel:)."
 position.latitude_out_of_range: "Широта должна быть в диапазоне от -90 до 90."
 position.longitude_out_of_range: "Долгота должна быть в диапазоне от -180 до 180."

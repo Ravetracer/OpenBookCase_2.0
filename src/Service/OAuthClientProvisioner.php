@@ -3,8 +3,6 @@
 namespace App\Service;
 
 use App\Entity\ApiApplication;
-use App\Enums\ApiClientType;
-
 use Doctrine\ORM\EntityManagerInterface;
 use League\Bundle\OAuth2ServerBundle\Manager\ClientManagerInterface;
 use League\Bundle\OAuth2ServerBundle\Model\AbstractClient;
@@ -13,6 +11,8 @@ use League\Bundle\OAuth2ServerBundle\Service\CredentialsRevokerInterface;
 use League\Bundle\OAuth2ServerBundle\ValueObject\Grant;
 use League\Bundle\OAuth2ServerBundle\ValueObject\RedirectUri;
 use League\Bundle\OAuth2ServerBundle\ValueObject\Scope;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
 /**
  * Turns an approved ApiApplication into a real OAuth2 client (and tears it down on
@@ -28,6 +28,8 @@ class OAuthClientProvisioner
         private readonly ClientManagerInterface $clientManager,
         private readonly CredentialsRevokerInterface $credentialsRevoker,
         private readonly EntityManagerInterface $entityManager,
+        #[Autowire(service: 'league.oauth2_server.password_hasher')]
+        private readonly PasswordHasherInterface $secretHasher,
     ) {
     }
 
@@ -41,7 +43,12 @@ class OAuthClientProvisioner
         $identifier = 'obc_' . bin2hex(random_bytes(16));
         $secret = $application->clientType->usesSecret() ? bin2hex(random_bytes(24)) : null;
 
-        $client = new Client($application->appName ?? 'OpenBookCase client', $identifier, $secret);
+        // Only a hash of the secret is stored (like the bundle's own create-client command).
+        $client = new Client(
+            $application->appName ?? 'OpenBookCase client',
+            $identifier,
+            $secret !== null ? $this->secretHasher->hash($secret) : null,
+        );
         $client->setActive(true);
         $client->setGrants(new Grant('authorization_code'), new Grant('refresh_token'));
         $client->setRedirectUris(...array_map(

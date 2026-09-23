@@ -4,9 +4,9 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Bookcase;
 use App\Entity\Caretaker;
-use App\Entity\Embeddables\Address;
-
-use Doctrine\ORM\EntityManagerInterface;
+use App\Http\ApiProblem;
+use App\Service\ApiInput;
+use App\Service\CaretakerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +28,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class CaretakerApiController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private readonly ApiInput $input,
+        private readonly CaretakerService $caretakers,
     ) {
     }
 
@@ -37,7 +38,7 @@ class CaretakerApiController extends AbstractController
     {
         $items = [];
         foreach ($bookcase->caretakers as $caretaker) {
-            $items[] = $this->toArray($caretaker);
+            $items[] = $this->caretakers->toArray($caretaker);
         }
 
         return new JsonResponse(['caretakers' => $items]);
@@ -47,29 +48,20 @@ class CaretakerApiController extends AbstractController
     #[IsGranted('ROLE_OAUTH2_BOOKCASES.WRITE')]
     public function add(Request $request, Bookcase $bookcase): JsonResponse
     {
-        $data = $this->jsonBody($request);
-
-        $name = $this->nullableString($data['name'] ?? null);
-        $contact = $this->nullableString($data['contact'] ?? null);
-        if ($name === null && $contact === null) {
-            return new JsonResponse(
-                ['error' => 'A caretaker needs at least a "name" or "contact".'],
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-            );
-        }
+        $data = $this->input->jsonBody($request);
 
         $caretaker = new Caretaker();
-        $caretaker->name = $name;
-        $caretaker->contact = $contact;
-        if (isset($data['address']) && is_array($data['address'])) {
-            $this->applyAddress($caretaker, $data['address']);
+        $caretaker->name = $this->input->string($data['name'] ?? null);
+        $caretaker->contact = $this->input->string($data['contact'] ?? null);
+        if ($caretaker->name === null && $caretaker->contact === null) {
+            return new ApiProblem('A caretaker needs at least a "name" or "contact".', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        $bookcase->addCaretaker($caretaker);
 
-        $this->entityManager->persist($caretaker);
-        $this->entityManager->flush();
+        if ($violations = $this->caretakers->create($bookcase, $caretaker, $data['address'] ?? null)) {
+            return new ApiProblem('Validation failed.', Response::HTTP_UNPROCESSABLE_ENTITY, $violations);
+        }
 
-        return new JsonResponse($this->toArray($caretaker), Response::HTTP_CREATED);
+        return new JsonResponse($this->caretakers->toArray($caretaker), Response::HTTP_CREATED);
     }
 
     #[Route('/{caretaker}', name: 'update', methods: ['PATCH'])]
@@ -77,23 +69,22 @@ class CaretakerApiController extends AbstractController
     public function update(Request $request, Bookcase $bookcase, Caretaker $caretaker): JsonResponse
     {
         if (!$bookcase->caretakers->contains($caretaker)) {
-            return new JsonResponse(['error' => 'Caretaker not found on this bookcase.'], Response::HTTP_NOT_FOUND);
+            return new ApiProblem('Caretaker not found on this bookcase.', Response::HTTP_NOT_FOUND);
         }
 
-        $data = $this->jsonBody($request);
+        $data = $this->input->jsonBody($request);
         if (array_key_exists('name', $data)) {
-            $caretaker->name = $this->nullableString($data['name']);
+            $caretaker->name = $this->input->string($data['name']);
         }
         if (array_key_exists('contact', $data)) {
-            $caretaker->contact = $this->nullableString($data['contact']);
-        }
-        if (isset($data['address']) && is_array($data['address'])) {
-            $this->applyAddress($caretaker, $data['address']);
+            $caretaker->contact = $this->input->string($data['contact']);
         }
 
-        $this->entityManager->flush();
+        if ($violations = $this->caretakers->update($caretaker, $data['address'] ?? null)) {
+            return new ApiProblem('Validation failed.', Response::HTTP_UNPROCESSABLE_ENTITY, $violations);
+        }
 
-        return new JsonResponse($this->toArray($caretaker));
+        return new JsonResponse($this->caretakers->toArray($caretaker));
     }
 
     #[Route('/{caretaker}', name: 'delete', methods: ['DELETE'])]
@@ -101,73 +92,11 @@ class CaretakerApiController extends AbstractController
     public function delete(Bookcase $bookcase, Caretaker $caretaker): JsonResponse
     {
         if (!$bookcase->caretakers->contains($caretaker)) {
-            return new JsonResponse(['error' => 'Caretaker not found on this bookcase.'], Response::HTTP_NOT_FOUND);
+            return new ApiProblem('Caretaker not found on this bookcase.', Response::HTTP_NOT_FOUND);
         }
 
-        // Is this the caretaker's only bookcase? The inverse `bookcases` collection
-        // still reflects the (un-flushed) DB state, so check it BEFORE detaching:
-        // if there are no *other* bookcases, the caretaker is about to be orphaned.
-        $hasOtherBookcases = !$caretaker->bookcases
-            ->filter(static fn (Bookcase $b): bool => $b->id?->equals($bookcase->id) !== true)
-            ->isEmpty();
-
-        $bookcase->removeCaretaker($caretaker);
-        // A caretaker that no longer looks after any bookcase is orphaned data —
-        // remove it rather than leave a dangling record.
-        if (!$hasOtherBookcases) {
-            $this->entityManager->remove($caretaker);
-        }
-        $this->entityManager->flush();
+        $this->caretakers->detach($bookcase, $caretaker);
 
         return new JsonResponse(['status' => 'deleted']);
-    }
-
-    /** @return array<string, mixed> */
-    private function toArray(Caretaker $caretaker): array
-    {
-        $address = $caretaker->address;
-
-        return [
-            'id' => (string) $caretaker->id,
-            'name' => $caretaker->name,
-            'contact' => $caretaker->contact,
-            'address' => [
-                'street' => $address?->street,
-                'houseNumber' => $address?->houseNumber,
-                'zipcode' => $address?->zipcode,
-                'city' => $address?->city,
-                'additionalData' => $address?->additionalData,
-            ],
-        ];
-    }
-
-    /** @param array<string, mixed> $address */
-    private function applyAddress(Caretaker $caretaker, array $address): void
-    {
-        $caretaker->address ??= new Address();
-        foreach (['street', 'houseNumber', 'zipcode', 'city', 'additionalData'] as $field) {
-            if (array_key_exists($field, $address)) {
-                $caretaker->address->{$field} = $this->nullableString($address[$field]);
-            }
-        }
-    }
-
-    /** @return array<string, mixed> */
-    private function jsonBody(Request $request): array
-    {
-        try {
-            $data = $request->toArray();
-        } catch (\Throwable) {
-            return [];
-        }
-
-        return is_array($data) ? $data : [];
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        $value = is_string($value) ? trim($value) : $value;
-
-        return ($value === null || $value === '') ? null : (string) $value;
     }
 }

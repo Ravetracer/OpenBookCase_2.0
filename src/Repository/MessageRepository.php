@@ -7,6 +7,7 @@ use App\Entity\Message;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<Message>
@@ -60,7 +61,7 @@ class MessageRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('m')
             ->andWhere('m.recipient = :user')
             ->setParameter('user', $user->id, 'ulid')
-            ->orderBy('m.createdAt', 'ASC')
+            ->orderBy('m.createdAt', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -75,7 +76,7 @@ class MessageRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('m')
             ->andWhere('m.apiApplication = :app')
             ->setParameter('app', $application->id, 'ulid')
-            ->orderBy('m.createdAt', 'ASC')
+            ->orderBy('m.createdAt', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }

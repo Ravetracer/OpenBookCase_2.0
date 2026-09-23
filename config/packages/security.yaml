@@ -27,6 +27,8 @@ security:
             stateless: true
             security: true
             oauth2: true
+            # Suspended / unverified users' bearer tokens are rejected too, not just their logins.
+            user_checker: App\Security\UserChecker
         main:
             lazy: true
             provider: app_user_provider

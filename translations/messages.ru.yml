@@ -284,6 +284,8 @@ flash:
   no_file: Файл не загружен.
   author_required: Необходимо указать имя автора.
   invalid_image_type: Разрешены только изображения JPEG, PNG, WebP или GIF.
+  image_dimensions_too_large: "Размеры изображения слишком велики (максимум 40 мегапикселей)."
+  text_too_long: "Текст слишком длинный (максимум %max% символов)."
   invalid_direction: 'Неверное направление. Используйте «cw» или «ccw».'
   invalid_position: 'Недопустимые координаты.'
 

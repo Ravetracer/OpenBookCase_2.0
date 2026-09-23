@@ -43,6 +43,16 @@ final class OAuthFlowTest extends FunctionalTestCase
         $this->assertResponseRedirects();
     }
 
+    /** Regression: the client secret used to be stored in plaintext. */
+    public function testClientSecretIsStoredHashed(): void
+    {
+        [$clientId, $secret] = $this->provisionClient(ApiClientType::Confidential);
+
+        $client = static::getContainer()->get(\League\Bundle\OAuth2ServerBundle\Manager\ClientManagerInterface::class)->find($clientId);
+        $this->assertNotSame($secret, $client->getSecret());
+        $this->assertTrue(password_verify($secret, (string) $client->getSecret()));
+    }
+
     public function testTokenEndpointRejectsEmptyRequest(): void
     {
         $this->client->request('POST', '/oauth/token');
@@ -58,6 +68,33 @@ final class OAuthFlowTest extends FunctionalTestCase
         $this->assertResponseIsSuccessful();
         // The consent form carries the approve/deny buttons.
         $this->assertGreaterThan(0, $crawler->filter('button[name="consent_action"]')->count());
+    }
+
+    /**
+     * Regression: the app name is chosen by the (untrusted) API applicant and was
+     * injected into the consent intro via a |raw translation parameter (stored XSS).
+     */
+    public function testConsentScreenEscapesApplicantControlledAppName(): void
+    {
+        $payload = '<img src=x onerror=alert(1)>';
+        $app = ApiApplicationFactory::createOne([
+            'appName' => $payload,
+            'clientType' => ApiClientType::Confidential,
+            'redirectUris' => [self::REDIRECT],
+            'requestedScopes' => ['bookcases.write'],
+        ]);
+        static::getContainer()->get(OAuthClientProvisioner::class)->provision($app);
+        $this->loginAsUser(['username' => '<b>evil</b>']);
+
+        $crawler = $this->client->request('GET', '/oauth/authorize', $this->authorizeParams($app->oauthClientId));
+        $this->assertResponseIsSuccessful();
+
+        $html = $this->client->getResponse()->getContent();
+        $this->assertStringNotContainsString($payload, $html);
+        $this->assertStringNotContainsString('<b>evil</b>', $html);
+        $this->assertSame(0, $crawler->filter('img[onerror]')->count());
+        // The name is still shown, just as text.
+        $this->assertStringContainsString('&lt;img src=x onerror=alert(1)&gt;', $html);
     }
 
     public function testAuthorizationCodeFlowIssuesAccessToken(): void

@@ -4,15 +4,13 @@ namespace App\Controller;
 
 use App\Config\Locales;
 use App\Entity\User;
-use App\EventSubscriber\LocaleSubscriber;
-
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\LocaleService;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
  * Switches the UI language. For logged-in users the choice is saved on the
@@ -23,53 +21,20 @@ use Symfony\Component\Routing\Attribute\Route;
 class LocaleController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private readonly LocaleService $localeService,
     ) {
     }
 
     #[Route('/language/{locale}', name: 'app_language_switch', methods: ['GET'])]
-    public function switch(string $locale, Request $request): RedirectResponse
+    public function switch(string $locale, Request $request, #[CurrentUser] ?User $user): RedirectResponse
     {
         if (!Locales::isSupported($locale)) {
             throw $this->createNotFoundException();
         }
 
-        $user = $this->getUser();
-        if ($user instanceof User) {
-            $user->language = $locale;
-            $this->entityManager->flush();
-        }
-
-        $response = new RedirectResponse($this->safeRedirectTarget($request));
-        $response->headers->setCookie(
-            Cookie::create(LocaleSubscriber::COOKIE, $locale, strtotime('+1 year'), '/', null, false, false),
-        );
+        $response = new RedirectResponse($this->localeService->safeRedirectTarget($request));
+        $response->headers->setCookie($this->localeService->remember($user, $locale));
 
         return $response;
-    }
-
-    /**
-     * Redirect back to the page the user came from, but only if it's on this
-     * host (avoid an open redirect); otherwise the homepage.
-     *
-     * The host is compared exactly after parsing — a prefix check (`str_starts_with`)
-     * is unsafe because an attacker-controlled host such as `example.com.evil.tld`
-     * begins with the site origin as a string and would sail through.
-     */
-    private function safeRedirectTarget(Request $request): string
-    {
-        $referer = (string) $request->headers->get('referer', '');
-        if ($referer !== '') {
-            $parts = parse_url($referer);
-            if (
-                isset($parts['host'])
-                && strcasecmp($parts['host'], $request->getHost()) === 0
-                && (!isset($parts['scheme']) || strcasecmp($parts['scheme'], $request->getScheme()) === 0)
-            ) {
-                return $referer;
-            }
-        }
-
-        return $this->generateUrl('app_index');
     }
 }

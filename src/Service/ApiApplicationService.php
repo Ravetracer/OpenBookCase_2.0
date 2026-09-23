@@ -9,10 +9,15 @@ use App\Entity\User;
 use App\Enums\ApiApplicationStatus;
 use App\Enums\ApiClientType;
 use App\Enums\MessageType;
+use App\Repository\ApiApplicationRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -27,14 +32,95 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ApiApplicationService
 {
+    /**
+     * Redirect-URI schemes that can never be a legitimate OAuth callback and would
+     * turn the authorization redirect into script execution or local-file access.
+     * Everything else stays allowed: https, http (localhost development) and custom
+     * app schemes such as `com.example.app:/callback` (PKCE mobile clients).
+     */
+    private const FORBIDDEN_REDIRECT_SCHEMES = ['javascript', 'data', 'vbscript', 'file'];
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageService $messageService,
         private readonly UserRepository $userRepository,
         private readonly MessageRepository $messageRepository,
+        private readonly ApiApplicationRepository $applicationRepository,
         private readonly TranslatorInterface $translator,
         private readonly OAuthClientProvisioner $clientProvisioner,
+        private readonly ValidatorInterface $validator,
     ) {
+    }
+
+    /**
+     * Validate the applicant's form input and file the application. Only one live
+     * application at a time; a denied/revoked one may be re-applied.
+     *
+     * @throws HttpException status + translation key of the error to show
+     */
+    public function submit(User $user, InputBag $input): ApiApplication
+    {
+        $existing = $this->applicationRepository->findLatestForUser($user);
+        if ($existing !== null && $existing->status->isOpen()) {
+            throw new HttpException(Response::HTTP_CONFLICT, 'flash.api_already_pending');
+        }
+        if ($existing !== null && $existing->status === ApiApplicationStatus::Approved) {
+            throw new HttpException(Response::HTTP_CONFLICT, 'flash.api_already_approved');
+        }
+
+        $clientType = ApiClientType::tryFrom((string) $input->get('clientType'));
+        if ($clientType === null) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'flash.api_invalid_client_type');
+        }
+
+        $redirectUris = array_values(array_filter(array_map(
+            'trim',
+            preg_split('/\r\n|\r|\n/', (string) $input->get('redirectUris')) ?: [],
+        )));
+        $scopes = array_values(array_intersect($input->all('scopes'), ApiApplication::AVAILABLE_SCOPES));
+
+        // Validate the entity's constraints (appName/useCase) before persisting.
+        $draft = new ApiApplication();
+        $draft->applicant = $user;
+        $draft->appName = trim((string) $input->get('appName'));
+        $draft->useCase = trim((string) $input->get('useCase'));
+        $draft->clientType = $clientType;
+        $draft->redirectUris = $redirectUris;
+        $draft->requestedScopes = $scopes;
+
+        if (count($this->validator->validate($draft)) > 0 || !$this->redirectUrisAreSafe($redirectUris)) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'flash.api_invalid_application');
+        }
+
+        return $this->apply($user, $draft->appName, $draft->useCase, $clientType, $redirectUris, $scopes);
+    }
+
+    /**
+     * The applicant replies in their application's thread: only the applicant,
+     * only while the application is still open, and never with an empty body.
+     *
+     * @throws HttpException status + translation key of the error to show
+     */
+    public function replyAsApplicant(ApiApplication $application, User $user, string $body): Message
+    {
+        $this->assertApplicant($application, $user);
+        if (!$application->status->isOpen()) {
+            throw new HttpException(Response::HTTP_CONFLICT, 'flash.api_reply_closed');
+        }
+        if ($body === '') {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'flash.api_reply_empty');
+        }
+
+        return $this->postMessage($application, $user, $body);
+    }
+
+    /**
+     * @throws HttpException when the user is not the applicant
+     */
+    public function acknowledgeSecretAsApplicant(ApiApplication $application, User $user): void
+    {
+        $this->assertApplicant($application, $user);
+        $this->acknowledgeSecret($application);
     }
 
     /**
@@ -163,6 +249,32 @@ class ApiApplicationService
     {
         $application->oauthPlainSecret = null;
         $this->entityManager->flush();
+    }
+
+    /**
+     * @param string[] $redirectUris
+     */
+    public function redirectUrisAreSafe(array $redirectUris): bool
+    {
+        foreach ($redirectUris as $uri) {
+            // Browsers ignore control characters and whitespace inside a scheme
+            // ("java\tscript:"), so strip them before comparing.
+            $normalised = strtolower((string) preg_replace('/[\x00-\x20\x7f]+/', '', $uri));
+            if (preg_match('/^([a-z][a-z0-9+.-]*):/', $normalised, $m) === 1
+                && in_array($m[1], self::FORBIDDEN_REDIRECT_SCHEMES, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** @throws HttpException 403 when the user did not file the application */
+    private function assertApplicant(ApiApplication $application, User $user): void
+    {
+        if ($application->applicant?->id != $user->id) {
+            throw new HttpException(Response::HTTP_FORBIDDEN, 'flash.api_reply_forbidden');
+        }
     }
 
     private function decide(

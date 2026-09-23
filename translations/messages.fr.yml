@@ -280,10 +280,12 @@ flash:
   check_email: 'Presque terminé ! Nous avons envoyé un lien de vérification à votre adresse e-mail. Veuillez cliquer dessus pour activer votre compte avant de vous connecter.'
   verify_failed: Le lien de vérification est invalide ou a expiré.
   max_images: "Un maximum de %count% images par entrée est autorisé."
-  image_too_large: "Limage est trop volumineuse (max %mb% Mo)."
+  image_too_large: "L’image est trop volumineuse (max %mb% Mo)."
   no_file: Aucun fichier téléversé.
   author_required: "Le nom de l'auteur est requis."
   invalid_image_type: Seules les images JPEG, PNG, WebP ou GIF sont autorisées.
+  image_dimensions_too_large: "Les dimensions de l’image sont trop grandes (max 40 mégapixels)."
+  text_too_long: "Le texte est trop long (max %max% caractères)."
   invalid_direction: 'Direction invalide. Utilisez « cw » ou « ccw ».'
   invalid_position: 'Coordonnées invalides.'
 

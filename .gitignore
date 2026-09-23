@@ -27,7 +27,8 @@ yarn-error.log
 
 ###> project local/dev artifacts ###
 /.idea/
-/public/images/
+/public/images/*
+!/public/images/.htaccess
 *.js.map
 # Personal deployment notes — kept local, never published
 /docs/

@@ -47,7 +47,6 @@ final class ImageControllerTest extends FunctionalTestCase
         $tmp = tempnam(sys_get_temp_dir(), 'obc_test_') . '.jpg';
         $im = imagecreatetruecolor(10, 10);
         imagejpeg($im, $tmp);
-        imagedestroy($im);
         $this->cleanup[] = $tmp;
 
         return new UploadedFile($tmp, 'test.jpg', 'image/jpeg', null, true);
@@ -170,7 +169,6 @@ final class ImageControllerTest extends FunctionalTestCase
         $tmp = tempnam(sys_get_temp_dir(), 'obc_test_') . '.jpg';
         $im = imagecreatetruecolor(10, 10);
         imagejpeg($im, $tmp);
-        imagedestroy($im);
         file_put_contents($tmp, str_repeat("\0", 8 * 1024 * 1024 + 1024), FILE_APPEND);
         $this->cleanup[] = $tmp;
 

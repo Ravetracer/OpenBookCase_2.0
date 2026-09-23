@@ -123,7 +123,6 @@ final class ApiV1EngagementTest extends OAuthApiTestCase
         $tmp = tempnam(sys_get_temp_dir(), 'obc_api_') . '.jpg';
         $im = imagecreatetruecolor(10, 10);
         imagejpeg($im, $tmp);
-        imagedestroy($im);
         $this->cleanup[] = $tmp;
 
         return new UploadedFile($tmp, 'test.jpg', 'image/jpeg', null, true);

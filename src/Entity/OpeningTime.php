@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\OpeningTimeRepository;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
@@ -21,6 +22,7 @@ class OpeningTime
     public ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     #[Groups(['bookcase'])]
     public ?string $open_time = null;
 

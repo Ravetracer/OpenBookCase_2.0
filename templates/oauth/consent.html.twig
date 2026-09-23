@@ -10,7 +10,7 @@
       <h1 class="card-title flex items-center gap-2">{{ ui.icon('key') }} {{ 'oauth.consent_title'|trans }}</h1>
 
       <p class="text-base-content/80">
-        {{ 'oauth.consent_intro'|trans({'%app%': client.name, '%user%': app.user.userIdentifier})|raw }}
+        {{ 'oauth.consent_intro'|trans({'%app%': client.name|e, '%user%': app.user.userIdentifier|e})|raw }}
       </p>
 
       <div class="mt-2">

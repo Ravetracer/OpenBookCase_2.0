@@ -284,6 +284,8 @@ flash:
   no_file: Geen bestand geüpload.
   author_required: Naam van de auteur is verplicht.
   invalid_image_type: Alleen JPEG-, PNG-, WebP- of GIF-afbeeldingen zijn toegestaan.
+  image_dimensions_too_large: "De afmetingen van de afbeelding zijn te groot (max. 40 megapixel)."
+  text_too_long: "De tekst is te lang (max. %max% tekens)."
   invalid_direction: 'Ongeldige richting. Gebruik "cw" of "ccw".'
   invalid_position: 'Ongeldige coördinaten.'
 

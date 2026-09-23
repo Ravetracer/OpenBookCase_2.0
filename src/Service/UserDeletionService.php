@@ -10,6 +10,8 @@ use App\Entity\WatchlistItem;
 use App\Entity\WishlistItem;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Uid\Ulid;
 
 /**
@@ -28,6 +30,7 @@ class UserDeletionService
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {
     }
 
@@ -79,5 +82,14 @@ class UserDeletionService
         $this->entityManager->flush();
 
         return true;
+    }
+
+    /** The logged-in user deletes their own account and is logged out. */
+    public function deleteOwnAccount(User $user, SessionInterface $session): void
+    {
+        $this->deleteUser($user->id);
+
+        $this->tokenStorage->setToken(null);
+        $session->invalidate();
     }
 }

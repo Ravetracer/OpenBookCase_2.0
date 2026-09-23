@@ -284,6 +284,8 @@ flash:
   no_file: Keine Datei hochgeladen.
   author_required: Der Name des Urhebers ist erforderlich.
   invalid_image_type: Nur JPEG-, PNG-, WebP- oder GIF-Bilder sind erlaubt.
+  image_dimensions_too_large: "Die Bildabmessungen sind zu groß (max. 40 Megapixel)."
+  text_too_long: "Der Text ist zu lang (max. %max% Zeichen)."
   invalid_direction: 'Ungültige Richtung. Verwende „cw" oder „ccw".'
   invalid_position: 'Ungültige Koordinaten.'
 

@@ -4,13 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Bookcase;
 use App\Entity\Image;
+use App\Entity\User;
 use App\Service\ImageService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -18,76 +19,38 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[IsGranted('ROLE_USER')]
 class ImageController extends AbstractController
 {
-    private const MAX_IMAGES = 5;
-    private const MAX_BYTES = 8 * 1024 * 1024; // 8 MiB per upload
-    private const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
         private readonly ImageService $imageService,
         private readonly TranslatorInterface $translator,
     ) {
     }
 
     #[Route('', name: 'upload', methods: ['POST'])]
-    public function upload(Bookcase $bookcase, Request $request): JsonResponse
+    public function upload(Bookcase $bookcase, Request $request, #[CurrentUser] User $user): JsonResponse
     {
-        if ($bookcase->images->count() >= self::MAX_IMAGES) {
+        $result = 'flash.max_images';
+        if (!$this->imageService->isFull($bookcase)) {
+            $file = $request->files->get('imageFile');
+            $author = trim((string) $request->request->get('author', ''));
+            $altText = trim((string) $request->request->get('altText', ''));
+            $result = match (true) {
+                !$file => 'flash.no_file',
+                $author === '' => 'flash.author_required',
+                default => $this->imageService->upload($bookcase, $user, $file, $author, $altText),
+            };
+        }
+        if (is_string($result)) {
             return new JsonResponse(
-                ['error' => $this->translator->trans('flash.max_images', ['%count%' => self::MAX_IMAGES])],
+                ['error' => $this->translator->trans($result, ImageService::ERROR_PARAMS)],
                 Response::HTTP_UNPROCESSABLE_ENTITY,
             );
         }
-
-        $file = $request->files->get('imageFile');
-        $author = trim($request->request->get('author', ''));
-
-        if (!$file) {
-            return new JsonResponse(['error' => $this->translator->trans('flash.no_file')], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-        // Reject a broken/incomplete upload (e.g. exceeded the PHP/multipart limit)
-        // before touching it further.
-        if (!$file->isValid()) {
-            return new JsonResponse(['error' => $this->translator->trans('flash.no_file')], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-        if ($author === '') {
-            return new JsonResponse(['error' => $this->translator->trans('flash.author_required')], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-        if ($file->getSize() > self::MAX_BYTES) {
-            return new JsonResponse(
-                ['error' => $this->translator->trans('flash.image_too_large', ['%mb%' => (int) (self::MAX_BYTES / 1024 / 1024)])],
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-            );
-        }
-        // Content-sniffed MIME (not the client-supplied one) must be an allowed type,
-        // and the bytes must actually decode as an image of matching dimensions.
-        if (!in_array($file->getMimeType(), self::ALLOWED_MIME, true)) {
-            return new JsonResponse(['error' => $this->translator->trans('flash.invalid_image_type')], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-        if (@getimagesize($file->getPathname()) === false) {
-            return new JsonResponse(['error' => $this->translator->trans('flash.invalid_image_type')], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        $altText = trim($request->request->get('altText', ''));
-
-        $image = new Image();
-        $image->bookcase = $bookcase;
-        $image->uploadedBy = $this->getUser();
-        $image->author = $author;
-        $image->altText = $altText !== '' ? $altText : null;
-        $image->setImageFile($file);
-
-        $this->entityManager->persist($image);
-        $this->entityManager->flush(); // VichUploader writes the file and sets filename/imageSize here
-
-        $this->imageService->processUpload($image);
-        $this->entityManager->flush(); // persist filenameThumbnail
 
         return new JsonResponse([
-            'id' => (string) $image->id,
-            'filename' => $image->filename,
-            'author' => $image->author,
-            'altText' => $image->altText,
+            'id' => (string) $result->id,
+            'filename' => $result->filename,
+            'author' => $result->author,
+            'altText' => $result->altText,
         ], Response::HTTP_CREATED);
     }
 
@@ -99,9 +62,13 @@ class ImageController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $altText = trim($request->request->get('altText', ''));
-        $image->altText = $altText !== '' ? $altText : null;
-        $this->entityManager->flush();
+        $altText = trim((string) $request->request->get('altText', ''));
+        if ($error = $this->imageService->updateAltText($image, $altText)) {
+            return new JsonResponse(
+                ['error' => $this->translator->trans($error, ImageService::ERROR_PARAMS)],
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+            );
+        }
 
         return new JsonResponse(['success' => true, 'altText' => $image->altText]);
     }
@@ -119,7 +86,6 @@ class ImageController extends AbstractController
         }
 
         $this->imageService->rotate($image, $direction === 'cw');
-        $this->entityManager->flush();
 
         return new JsonResponse(['success' => true]);
     }
@@ -131,8 +97,7 @@ class ImageController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $this->entityManager->remove($image);
-        $this->entityManager->flush();
+        $this->imageService->delete($image);
 
         return new JsonResponse(['success' => true]);
     }

@@ -2,11 +2,15 @@
 
 namespace App\Security;
 
+use App\Entity\User;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
@@ -15,8 +19,28 @@ class EmailVerifier
     public function __construct(
         private VerifyEmailHelperInterface $verifyEmailHelper,
         private MailerInterface $mailer,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private TranslatorInterface $translator,
     ) {
+    }
+
+    /**
+     * E-mail the standard verification link to the user's current address,
+     * optionally with an admin note (e.g. why a fresh link is being sent).
+     */
+    public function sendVerification(User $user, string $adminReason = ''): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
+            ->to($user->email)
+            ->subject($this->translator->trans('email.confirm_subject'))
+            ->htmlTemplate('registration/confirmation_email.html.twig');
+
+        if ($adminReason !== '') {
+            $email->context(['adminReason' => $adminReason]);
+        }
+
+        $this->sendEmailConfirmation('app_verify_email', $user, $email);
     }
 
     public function sendEmailConfirmation(string $verifyEmailRouteName, UserInterface $user, TemplatedEmail $email): void
@@ -49,7 +73,7 @@ class EmailVerifier
      */
     public function handleEmailConfirmation(Request $request, UserInterface $user): void
     {
-        $this->verifyEmailHelper->validateEmailConfirmation($request->getUri(), $user->id, $user->email);
+        $this->verifyEmailHelper->validateEmailConfirmationFromRequest($request, $user->id, $user->email);
 
         $user->isVerified = true;
 

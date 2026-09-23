@@ -13,6 +13,8 @@ use Twig\TwigFunction;
  */
 class AppExtension extends AbstractExtension
 {
+    private const SAFE_SCHEMES = ['http', 'https', 'mailto', 'tel'];
+
     public function __construct(
         private readonly BookcaseRepository $bookcaseRepository,
     ) {
@@ -43,7 +45,7 @@ class AppExtension extends AbstractExtension
      * instead of being resolved relative to the current page.
      *
      * A value that already carries a scheme (`https://…`, `http://…`, `mailto:…`,
-     * `tel:…`) is left untouched; a scheme-less value such as
+     * `tel:…`) is left untouched, any other scheme yields null (no link); a scheme-less value such as
      * `www.walding.at/Buecherinsel` gets an `https://` prefix.
      */
     public function externalUrl(?string $url): ?string
@@ -57,9 +59,11 @@ class AppExtension extends AbstractExtension
             return $trimmed;
         }
 
-        // Already has a URI scheme (e.g. "https://", "mailto:", "tel:").
-        if (preg_match('#^[a-z][a-z0-9+.\-]*:#i', $trimmed) === 1) {
-            return $trimmed;
+        // Already has a URI scheme: keep only safe ones. Anything else (javascript:,
+        // data:, vbscript:, …) is user-supplied script → no link at all (stored XSS).
+        // A dot before the colon means host:port ("www.x.at:8080"), not a scheme.
+        if (preg_match('#^([a-z][a-z0-9+\-]*):#i', $trimmed, $m) === 1) {
+            return in_array(strtolower($m[1]), self::SAFE_SCHEMES, true) ? $trimmed : null;
         }
 
         // Protocol-relative "//host/path".

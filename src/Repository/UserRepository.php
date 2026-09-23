@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -86,7 +87,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findFilteredPaginated(string $q, int $page, int $perPage): array
     {
         return $this->filteredQueryBuilder($q)
-            ->orderBy('u.id', 'DESC')
+            ->orderBy('u.id', SortDirection::Descending)
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
             ->getQuery()
@@ -99,7 +100,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $q = trim($q);
         if ($q !== '') {
             $qb->andWhere('LOWER(u.username) LIKE :q OR LOWER(u.email) LIKE :q')
-                ->setParameter('q', '%' . mb_strtolower($q) . '%');
+                ->setParameter('q', '%' . mb_strtolower(mb_substr($q, 0, 200)) . '%');
         }
 
         return $qb;

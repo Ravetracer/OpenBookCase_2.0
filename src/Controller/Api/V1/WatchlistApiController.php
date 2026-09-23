@@ -4,13 +4,11 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Bookcase;
 use App\Entity\User;
-use App\Entity\WatchlistItem;
-use App\Repository\WatchlistItemRepository;
-
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\WatchlistService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
@@ -23,39 +21,22 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class WatchlistApiController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly WatchlistItemRepository $watchlistItems,
+        private readonly WatchlistService $watchlistService,
     ) {
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
-    public function add(Bookcase $bookcase): JsonResponse
+    public function add(Bookcase $bookcase, #[CurrentUser] User $user): JsonResponse
     {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($this->watchlistItems->findOneByUserAndBookcase($user, $bookcase) === null) {
-            $item = new WatchlistItem();
-            $item->user = $user;
-            $item->bookcase = $bookcase;
-            $this->entityManager->persist($item);
-            $this->entityManager->flush();
-        }
+        $this->watchlistService->watch($bookcase, $user);
 
         return new JsonResponse(['watching' => true]);
     }
 
     #[Route('', name: 'remove', methods: ['DELETE'])]
-    public function remove(Bookcase $bookcase): JsonResponse
+    public function remove(Bookcase $bookcase, #[CurrentUser] User $user): JsonResponse
     {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        $item = $this->watchlistItems->findOneByUserAndBookcase($user, $bookcase);
-        if ($item !== null) {
-            $this->entityManager->remove($item);
-            $this->entityManager->flush();
-        }
+        $this->watchlistService->unwatch($bookcase, $user);
 
         return new JsonResponse(['watching' => false]);
     }

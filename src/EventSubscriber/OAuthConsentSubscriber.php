@@ -42,6 +42,14 @@ final class OAuthConsentSubscriber implements EventSubscriberInterface
             return;
         }
 
+        // A revoked (deactivated) client gets neither a consent screen nor a code.
+        // No redirect back to it either — just a plain refusal.
+        if (!$event->getClient()->isActive()) {
+            $event->setResponse(new Response('This application is no longer authorised.', Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
         if ($request->isMethod('POST') && $request->request->has('consent_action')) {
             $tokenValid = $this->csrfTokenManager->isTokenValid(
                 new CsrfToken('oauth_consent', (string) $request->request->get('_token')),

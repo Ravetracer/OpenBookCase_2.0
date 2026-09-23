@@ -2,47 +2,31 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Config\Locales;
+use App\Entity\User;
 use App\Enums\NotificationChannel;
-use App\EventSubscriber\LocaleSubscriber;
-use App\Repository\ApiApplicationRepository;
-use App\Repository\MessageRepository;
-use App\Repository\UserRepository;
 use App\Repository\WishlistItemRepository;
-use App\Security\EmailVerifier;
+use App\Service\LocaleService;
+use App\Service\UserAccountService;
 use App\Service\UserDeletionService;
 
-use Doctrine\ORM\EntityManagerInterface;
-
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\HttpFoundation\Cookie;
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/profile', name: 'app_profile_')]
 class ProfileController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ValidatorInterface $validator,
-        private readonly TokenStorageInterface $tokenStorage,
+        private readonly UserAccountService $accounts,
+        private readonly UserDeletionService $userDeletion,
+        private readonly LocaleService $localeService,
         private readonly WishlistItemRepository $wishlistItemRepository,
         private readonly TranslatorInterface $translator,
-        private readonly ApiApplicationRepository $apiApplications,
-        private readonly MessageRepository $messages,
-        private readonly UserDeletionService $userDeletion,
-        private readonly UserRepository $users,
-        private readonly EmailVerifier $emailVerifier,
     ) {
     }
 
@@ -50,20 +34,9 @@ class ProfileController extends AbstractController
      * Profile modal body. Rendered inline via render(controller()) in base.html.twig,
      * so it always reflects the current user without a separate fetch.
      */
-    public function modal(): Response
+    public function modal(#[CurrentUser] ?User $user): Response
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
-
-        $apiApplication = $user instanceof User ? $this->apiApplications->findLatestForUser($user) : null;
-
-        return $this->render('profile/_modal.html.twig', [
-            'user' => $user,
-            'wishlistItems' => $user instanceof User ? $this->wishlistItemRepository->findForUser($user) : [],
-            'apiApplication' => $apiApplication,
-            'apiThread' => $apiApplication !== null ? $this->messages->findThreadForApplication($apiApplication) : [],
-            'apiScopes' => \App\Entity\ApiApplication::AVAILABLE_SCOPES,
-        ]);
+        return $this->render('profile/_modal.html.twig', $this->accounts->profileModalView($user));
     }
 
     /**
@@ -72,11 +45,9 @@ class ProfileController extends AbstractController
      * from a bookcase's wishlist modal shows up in the profile without a reload.
      */
     #[Route('/wishlist', name: 'wishlist', methods: ['GET'])]
-    public function wishlist(): Response
+    public function wishlist(#[CurrentUser] ?User $user): Response
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
-        if (!$user instanceof User) {
+        if ($user === null) {
             return new Response('', Response::HTTP_UNAUTHORIZED);
         }
 
@@ -86,10 +57,8 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/email', name: 'email', methods: ['POST'])]
-    public function updateEmail(Request $request): JsonResponse
+    public function updateEmail(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
         if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
@@ -99,49 +68,23 @@ class ProfileController extends AbstractController
         }
 
         $email = trim((string) $request->request->get('email'));
-        $violations = $this->validator->validate($email, [new Assert\NotBlank(), new Assert\Email()]);
-        if (count($violations) > 0) {
-            return new JsonResponse(['error' => $this->translator->trans('flash.invalid_email')], Response::HTTP_BAD_REQUEST);
-        }
 
-        // Unchanged address (case-insensitive) → accept idempotently, no re-verification.
-        if (strcasecmp($email, (string) $user->email) === 0) {
-            return new JsonResponse(['status' => 'success', 'email' => $email], Response::HTTP_OK);
-        }
-
-        // Reject an address already registered to another account — a duplicate
-        // would break login-by-email and misdirect password-reset links.
-        $existing = $this->users->loadUserByIdentifier($email);
-        if ($existing instanceof User && (string) $existing->id !== (string) $user->id) {
-            return new JsonResponse(['error' => $this->translator->trans('flash.email_taken')], Response::HTTP_CONFLICT);
-        }
-
-        $user->email = $email;
-        // A changed address has not been proven yet: require re-verification
-        // (login is blocked by UserChecker until the new link is clicked).
-        $user->isVerified = false;
-        $this->entityManager->flush();
-
-        // E-mail a fresh verification link to the new address.
-        $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user, (new TemplatedEmail())
-            ->from(new Address('info@openbookcase.de', 'OpenBookCase'))
-            ->to($user->email)
-            ->subject($this->translator->trans('email.confirm_subject'))
-            ->htmlTemplate('registration/confirmation_email.html.twig'));
-
-        return new JsonResponse([
-            'status' => 'success',
-            'email' => $email,
-            'verificationSent' => true,
-            'message' => $this->translator->trans('flash.email_changed_verify'),
-        ], Response::HTTP_OK);
+        return match ($this->accounts->changeOwnEmail($user, $email)) {
+            UserAccountService::EMAIL_INVALID => new JsonResponse(['error' => $this->translator->trans('flash.invalid_email')], Response::HTTP_BAD_REQUEST),
+            UserAccountService::EMAIL_TAKEN => new JsonResponse(['error' => $this->translator->trans('flash.email_taken')], Response::HTTP_CONFLICT),
+            UserAccountService::EMAIL_UNCHANGED => new JsonResponse(['status' => 'success', 'email' => $email], Response::HTTP_OK),
+            default => new JsonResponse([
+                'status' => 'success',
+                'email' => $email,
+                'verificationSent' => true,
+                'message' => $this->translator->trans('flash.email_changed_verify'),
+            ], Response::HTTP_OK),
+        };
     }
 
     #[Route('/notifications', name: 'notifications', methods: ['POST'])]
-    public function updateNotifications(Request $request): JsonResponse
+    public function updateNotifications(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
         if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
@@ -155,17 +98,14 @@ class ProfileController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.unknown_channel')], Response::HTTP_BAD_REQUEST);
         }
 
-        $user->notificationChannel = $channel;
-        $this->entityManager->flush();
+        $this->accounts->setNotificationChannel($user, $channel);
 
         return new JsonResponse(['status' => 'success', 'channel' => $channel->value], Response::HTTP_OK);
     }
 
     #[Route('/language', name: 'language', methods: ['POST'])]
-    public function updateLanguage(Request $request): JsonResponse
+    public function updateLanguage(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
         if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
@@ -179,23 +119,16 @@ class ProfileController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.unknown_language')], Response::HTTP_BAD_REQUEST);
         }
 
-        $user->language = $locale;
-        $this->entityManager->flush();
-
-        // Mirror the choice into the cookie so it survives even if the user later logs out.
+        // The cookie mirrors the choice so it survives even if the user later logs out.
         $response = new JsonResponse(['status' => 'success', 'locale' => $locale], Response::HTTP_OK);
-        $response->headers->setCookie(
-            Cookie::create(LocaleSubscriber::COOKIE, $locale, strtotime('+1 year'), '/', null, false, false),
-        );
+        $response->headers->setCookie($this->localeService->remember($user, $locale));
 
         return $response;
     }
 
     #[Route('/home', name: 'home', methods: ['POST'])]
-    public function updateHome(Request $request): JsonResponse
+    public function updateHome(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
         if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
@@ -204,42 +137,15 @@ class ProfileController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.invalid_token')], Response::HTTP_BAD_REQUEST);
         }
 
-        // Remove the home position entirely: clear the coordinates and disable it.
         if ($request->request->getBoolean('clear')) {
-            $user->homeLatitude = null;
-            $user->homeLongitude = null;
-            $user->homeZoom = null;
-            $user->homeLabel = null;
-            $user->useHomeLocation = false;
-            $this->entityManager->flush();
+            $this->accounts->clearHome($user);
 
             return new JsonResponse(['status' => 'success', 'cleared' => true], Response::HTTP_OK);
         }
 
-        // Optional user-chosen name (e.g. "Home", "Office"); empty → no label.
-        $label = trim((string) $request->request->get('label'));
-        $user->homeLabel = $label !== '' ? mb_substr($label, 0, 50) : null;
-
-        $enabled = $request->request->getBoolean('enabled');
-
-        // Coordinates are required whenever the feature is enabled; otherwise the
-        // map would have nowhere to centre. Disabling keeps the stored values.
-        if ($enabled || $request->request->has('latitude')) {
-            $lat = (float) $request->request->get('latitude');
-            $lon = (float) $request->request->get('longitude');
-            $zoom = (int) $request->request->get('zoom');
-
-            if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
-                return new JsonResponse(['error' => $this->translator->trans('flash.invalid_position')], Response::HTTP_BAD_REQUEST);
-            }
-
-            $user->homeLatitude = $lat;
-            $user->homeLongitude = $lon;
-            $user->homeZoom = max(1, min(19, $zoom ?: 13));
+        if (!$this->accounts->updateHome($user, $request->request)) {
+            return new JsonResponse(['error' => $this->translator->trans('flash.invalid_position')], Response::HTTP_BAD_REQUEST);
         }
-
-        $user->useHomeLocation = $enabled;
-        $this->entityManager->flush();
 
         return new JsonResponse([
             'status' => 'success',
@@ -252,11 +158,9 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/delete', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request): JsonResponse
+    public function delete(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        /** @var User|null $current */
-        $current = $this->getUser();
-        if ($current === null) {
+        if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -264,12 +168,7 @@ class ProfileController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.invalid_token')], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->userDeletion->deleteUser($current->id);
-
-        // Log the (now deleted) user out.
-        $this->tokenStorage->setToken(null);
-        $session = $request->getSession();
-        $session->invalidate();
+        $this->userDeletion->deleteOwnAccount($user, $request->getSession());
 
         return new JsonResponse(['status' => 'success', 'redirect' => $this->generateUrl('app_index')], Response::HTTP_OK);
     }

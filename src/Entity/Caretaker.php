@@ -8,6 +8,7 @@ use App\Repository\CaretakerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use JMS\Serializer\Annotation\Groups;
 
@@ -25,10 +26,12 @@ class Caretaker
     public ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     #[Groups(['caretaker'])]
     public ?string $name = null;
 
     #[ORM\Column(length: 512, nullable: true)]
+    #[Assert\Length(max: 512)]
     #[Groups(['caretaker'])]
     public ?string $contact = null;
 

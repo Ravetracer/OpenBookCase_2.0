@@ -4,16 +4,16 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Bookcase;
 use App\Entity\User;
-use App\Entity\WishlistItem;
-use App\Enums\WishlistItemStatus;
+use App\Http\ApiProblem;
 use App\Repository\WishlistItemRepository;
-
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\ApiInput;
+use App\Service\WishlistService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
@@ -25,69 +25,47 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class WishlistApiController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private readonly ApiInput $input,
         private readonly WishlistItemRepository $wishlistItems,
+        private readonly WishlistService $wishlistService,
     ) {
     }
 
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(Bookcase $bookcase): JsonResponse
     {
-        $items = [];
-        foreach ($this->wishlistItems->findForBookcase($bookcase) as $item) {
-            $items[] = [
-                'id' => (string) $item->id,
-                'title' => $item->title,
-                'author' => $item->author,
-                'isbn' => $item->isbn,
-                'misc' => $item->misc,
-                'status' => $item->status->value,
-            ];
-        }
+        $items = array_map($this->wishlistService->toApiArray(...), $this->wishlistItems->findForBookcase($bookcase));
 
         return new JsonResponse(['items' => $items]);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
     #[IsGranted('ROLE_OAUTH2_WISHLIST.WRITE')]
-    public function add(Request $request, Bookcase $bookcase): JsonResponse
+    public function add(Request $request, Bookcase $bookcase, #[CurrentUser] User $user): JsonResponse
     {
-        try {
-            $data = $request->toArray();
-        } catch (\Throwable) {
-            $data = [];
+        $data = $this->input->jsonBody($request);
+
+        $title = $this->input->string($data['title'] ?? null);
+        if ($title === null) {
+            return new ApiProblem('A "title" is required.', Response::HTTP_BAD_REQUEST);
         }
 
-        $title = trim((string) ($data['title'] ?? ''));
-        if ($title === '') {
-            return new JsonResponse(['error' => 'A "title" is required.'], Response::HTTP_BAD_REQUEST);
+        $item = $this->wishlistService->newItem(
+            $bookcase,
+            $user,
+            $title,
+            $this->input->string($data['author'] ?? null),
+            $this->input->string($data['isbn'] ?? null),
+            $this->input->string($data['misc'] ?? null),
+        );
+        if ($violations = $this->wishlistService->store($item)) {
+            return new ApiProblem('Validation failed.', Response::HTTP_UNPROCESSABLE_ENTITY, $violations);
         }
-
-        /** @var User $user */
-        $user = $this->getUser();
-
-        $item = new WishlistItem();
-        $item->bookcase = $bookcase;
-        $item->user = $user;
-        $item->status = WishlistItemStatus::Open;
-        $item->title = $title;
-        $item->author = $this->nullableString($data['author'] ?? null);
-        $item->isbn = $this->nullableString($data['isbn'] ?? null);
-        $item->misc = $this->nullableString($data['misc'] ?? null);
-
-        $this->entityManager->persist($item);
-        $this->entityManager->flush();
+        $this->wishlistService->notifyWatchersOfNewWish($item);
 
         return new JsonResponse([
             'id' => (string) $item->id,
             'openCount' => $this->wishlistItems->countOpen($bookcase),
         ], Response::HTTP_CREATED);
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        $value = is_string($value) ? trim($value) : $value;
-
-        return ($value === null || $value === '') ? null : (string) $value;
     }
 }

@@ -20,13 +20,20 @@ final class BinaryUlidType extends AbstractUidType
 {
     public const NAME = 'ulid';
 
-    protected function getUidClass(): string
+    // AbstractUidType builds its "invalid value" error with getName(); without it a
+    // malformed id in a route (e.g. /api/bookcase/..) is a fatal 500 instead of a 404.
+    public function getName(): string
     {
-        return Ulid::class;
+        return self::NAME;
     }
 
     public function getBindingType(): ParameterType
     {
         return ParameterType::BINARY;
+    }
+
+    protected function getUidClass(): string
+    {
+        return Ulid::class;
     }
 }

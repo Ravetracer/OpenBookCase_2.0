@@ -38,5 +38,11 @@ final class AppExtensionTest extends KernelTestCase
         yield 'surrounding whitespace trimmed'   => ['  www.example.org  ', 'https://www.example.org'];
         yield 'empty string stays empty'         => ['', ''];
         yield 'null stays null'                  => [null, null];
+        yield 'host:port is not a scheme'        => ['www.example.org:8080/x', 'https://www.example.org:8080/x'];
+        // Regression (stored XSS): script schemes must never become a link.
+        yield 'javascript dropped'               => ['javascript:alert(1)', null];
+        yield 'mixed-case javascript dropped'    => ['JaVaScRiPt:alert(1)', null];
+        yield 'data dropped'                     => ['data:text/html,<script>alert(1)</script>', null];
+        yield 'vbscript dropped'                 => ['vbscript:msgbox(1)', null];
     }
 }

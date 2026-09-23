@@ -23,6 +23,10 @@ league_oauth2_server:
 
         # Rotate refresh tokens: each refresh invalidates the previous one.
         revoke_refresh_tokens: true
+    # Client secrets are stored hashed. After deploying this on a server that still has
+    # plaintext secrets, run once: php bin/console league:oauth2-server:rehash-client-secrets
+    client:
+        allow_plaintext_secrets: false
     resource_server:
         public_key: '%env(resolve:OAUTH_PUBLIC_KEY)%'
     scopes:

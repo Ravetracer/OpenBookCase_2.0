@@ -8,6 +8,7 @@ use App\Repository\MessageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[Route('/messages', name: 'app_message_')]
 class MessageController extends AbstractController
@@ -22,10 +23,9 @@ class MessageController extends AbstractController
      * render(controller(...)) in navigation.html.twig so the count reflects the
      * current user on every page load (the legacy, push-free approach).
      */
-    public function navIcon(): Response
+    public function navIcon(#[CurrentUser] ?User $user): Response
     {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
+        if ($user === null) {
             return new Response('');
         }
 
@@ -39,10 +39,8 @@ class MessageController extends AbstractController
      * as a side effect of opening.
      */
     #[Route('', name: 'inbox', methods: ['GET'])]
-    public function inbox(): Response
+    public function inbox(#[CurrentUser] ?User $user): Response
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
         if ($user === null) {
             return new Response('', Response::HTTP_UNAUTHORIZED);
         }

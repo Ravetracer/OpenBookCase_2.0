@@ -1,3 +1,4 @@
 bookcase.title_no_url: "Links are not allowed in the title — put website links in the website or comment field instead."
+bookcase.webpage_unsafe_scheme: "Only web addresses (http/https), e-mail (mailto:) or phone (tel:) links are allowed."
 position.latitude_out_of_range: "Latitude must be between -90 and 90."
 position.longitude_out_of_range: "Longitude must be between -180 and 180."

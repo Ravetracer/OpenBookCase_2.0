@@ -107,6 +107,11 @@ final class ApiTelemetrySubscriber implements EventSubscriberInterface
     /** @param array<string, mixed> $data */
     private function persistLog(array $data): void
     {
+        // The response is already sent. Detach everything first so this flush writes
+        // ONLY the log row — never entity changes a controller made and then rejected
+        // (e.g. a PATCH that failed validation must not be persisted here).
+        $this->entityManager->clear();
+
         $log = new ApiUsageLog();
         $log->oauthClientId = $data['clientId'];
         $log->apiApplication = $this->applications->findOneBy(['oauthClientId' => $data['clientId']]);

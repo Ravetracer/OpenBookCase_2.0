@@ -46,6 +46,13 @@ class LocaleSubscriber implements EventSubscriberInterface
         $this->translator->setLocale($locale);
     }
 
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            KernelEvents::REQUEST => [['onKernelRequest', 6]],
+        ];
+    }
+
     private function resolve(?string $cookie, ?string $preferred): string
     {
         $user = $this->security->getUser();
@@ -58,12 +65,5 @@ class LocaleSubscriber implements EventSubscriberInterface
         }
 
         return Locales::isSupported($preferred) ? $preferred : Locales::DEFAULT;
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::REQUEST => [['onKernelRequest', 6]],
-        ];
     }
 }

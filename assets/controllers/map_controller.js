@@ -316,7 +316,8 @@ export default class extends Controller {
 
         // Popup label: the user's custom name (e.g. "Office") if set, else the
         // generic "Home" label. Bound as a function so it reflects label edits.
-        this.homeMarker.bindPopup(() => this.homecustomlabelValue || this.homelabelValue);
+        // Returned as a text node: Leaflet renders string content as HTML.
+        this.homeMarker.bindPopup(() => document.createTextNode(this.homecustomlabelValue || this.homelabelValue));
     }
 
     removeHomeMarker() {

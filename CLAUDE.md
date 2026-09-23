@@ -9,7 +9,9 @@ A crowdsourced web app for searching and finding public bookcases and give-boxes
 ## Code Style
 
 - Symfony 8.1 coding conventions
-- PHP 8.1+ features (Enums, Attributes, ULID, named arguments)
+- PHP 8.4+ features (Enums, Attributes, ULID, named arguments)
+- **Thin controllers:** a controller holds ONLY public, route-bound actions (read request → call service → build response). No private/protected helpers and no business logic in controllers — that lives in `src/Service/` (one service per controller/domain). Use Symfony's attributes: `#[CurrentUser]` instead of `$this->getUser()`, `#[IsCsrfTokenValid]` for plain CSRF guards (a failure → flash `flash.invalid_token` + redirect back, via `InvalidCsrfTokenListener`); keep a manual check only where a test-covered response shape (400 JSON, specific redirect) requires it.
+- **Method order in every class:** public → protected → private. No unused injections/properties/imports.
 - Twig templates + Stimulus 3 controllers (server-rendered HTML fragments fetched via `fetch()`)
 - HTML5 / CSS3 / **Tailwind CSS v4 + DaisyUI 5** (Bootstrap and all legacy jQuery were fully removed in the 2024 frontend rebuild)
 - Inline SVG icons (Heroicons) via `templates/components/icon.html.twig` — no icon fonts
@@ -22,7 +24,7 @@ A crowdsourced web app for searching and finding public bookcases and give-boxes
 ```bash
 # Install dependencies
 composer install
-npm install
+npm install          # .npmrc enforces a 7-day release cooldown (min-release-age) + install-links (no devDeps of the vendor-linked ux-translator)
 
 # Build frontend assets
 npm run dev          # development build (watch mode)
@@ -51,24 +53,25 @@ php -d pcov.enabled=1 -d xdebug.mode=off vendor/bin/phpunit --coverage-text   # 
 
 | Piece | Choice |
 |---|---|
-| Runner | PHPUnit 11 (`vendor/bin/phpunit`; config `phpunit.xml.dist`) |
+| Runner | PHPUnit 13 (`vendor/bin/phpunit`; config `phpunit.xml.dist`) |
 | DB isolation | **dama/doctrine-test-bundle** — wraps every test in a transaction that is rolled back (fast, no per-test rebuild) |
-| Fixtures | **zenstruck/foundry** — factories in `tests/Factory/`; auto-creates the schema once per run |
-| Test DB | dedicated SQLite from `.env.test` (`var/test.db`), `MAILER_DSN=null://null` |
-| Coverage | **pcov** (installed); ~70% lines / 252 tests at last count |
+| Fixtures | **zenstruck/foundry** — factories in `tests/Factory/` |
+| Test DB | dedicated SQLite per `TEST_TOKEN` from `.env.test` (`var/test${TEST_TOKEN}.db`, i.e. `var/test.db` by default); `tests/bootstrap.php` runs `doctrine:schema:create` for a missing/empty file. `MAILER_DSN=null://null` |
+| Coverage | **pcov** (installed); 1511 tests at last count |
 
 Three suites, each its own directory:
 - `tests/Unit/` — no DB/kernel. Pure logic: enums, value objects, `ShortCodeGenerator`, `TwentyFourSevenDetector`, `BinaryUlidType`, `Locales`, `LocaleSubscriber`, entity helpers.
 - `tests/Integration/` — `KernelTestCase` + DB. Repositories (incl. all custom finders), services (`MessageService` per channel), security, ULID persistence, and CLI **commands** under `tests/Integration/Command/`.
 - `tests/Functional/` — `WebTestCase` (HTTP). Every controller; extend `App\Tests\Functional\FunctionalTestCase` (gives `$this->client`, `loginAsUser()`, `json()`).
+  - `tests/Functional/Security/` — the **negative / hostile-input suite** (~960 tests): XSS escaping of every user-editable field in every view (`XssAssertions` trait), SQL/DQL-injection + malformed input (must never 500), access control + IDOR + mass assignment + open redirects + CSRF coverage + OAuth abuse (`SecurityTestTrait` with whole-DB snapshots to prove "nothing changed"), and upload attacks. **Every new endpoint/field must get its hostile cases here too**, not just happy paths.
 
 ### Conventions / gotchas
 
-- **Schema is created via schema-create, NOT migrations** — this project's migrations can't build an empty DB (see Legacy Migration / `app:dev:db-init`). Foundry's reset mode handles this; don't point tests at the migration path.
+- **Schema is created via schema-create, NOT migrations** — this project's migrations can't build an empty DB (see Legacy Migration / `app:dev:db-init`). `tests/bootstrap.php` does it for a fresh DB file; it does **not** rebuild an existing file after entity changes — delete `var/test*.db` then.
 - **ULID gotcha applies in tests too** — `BinaryUlidTypeTest` guards the BLOB binding; keep id-based lookups working.
 - Foundry `createOne()` / `createMany()` return **real entities** (no `->_real()`).
 - Use PHPUnit 11 **`#[DataProvider]` attributes**, never `@dataProvider` docblocks (they deprecate).
-- **Parallel/isolated runs:** prefix with `TEST_TOKEN=<n>` to get a per-process DB (`doctrine.yaml` appends the suffix) — used when fanning test writing out across agents.
+- **Parallel/isolated runs:** prefix with `TEST_TOKEN=<n>` to get a per-process DB file `var/test<n>.db` (via `.env.test`; doctrine's `dbname_suffix` does NOT apply to SQLite file paths). Parallel runs still share `var/cache/test` incl. the filesystem rate-limiter pools that `FunctionalTestCase::setUp` clears — so the two rate-limit/throttle tests can flake while another run is active; they're green in a solo run.
 - Commands that issue `PRAGMA` / their own transactions (e.g. `app:import-osm`) are incompatible with DAMA's wrapping transaction — mark those test classes `#[DAMA\DoctrineTestBundle\PHPUnit\SkipDatabaseRollback]` and clean their tables manually in `setUp`/`tearDown`.
 - Mailer: assert sent mail in a `WebTestCase` via `$client->enableProfiler()` + the `MailerAssertionsTrait` helpers (`assertEmailCount`, `getMailerMessage`).
 - All of the above is dev-only: production runs `composer install --no-dev`, so dama/foundry aren't installed and their bundles stay gated to `dev`/`test` in `config/bundles.php`.
@@ -79,15 +82,15 @@ Three suites, each its own directory:
 
 | Layer | Technology |
 |---|---|
-| Framework | Symfony 8.0 |
-| PHP | >=8.1 |
+| Framework | Symfony 8.1 |
+| PHP | >=8.4.1 (Symfony 8 minimum) |
 | Database | SQLite (dev) / configurable via DATABASE_URL |
 | ORM | Doctrine ORM 3.x with ULID PKs |
 | Templates | Twig 3 |
 | Frontend JS | Stimulus 3 |
 | Styling | Tailwind CSS v4 + DaisyUI 5 + @tailwindcss/typography (via Webpack Encore PostCSS) |
-| Asset Build | Webpack Encore 5 (+ `@tailwindcss/postcss` postcss-loader) |
-| File Uploads | VichUploaderBundle 2.x |
+| Asset Build | Webpack Encore 7 (+ `@tailwindcss/postcss` postcss-loader) |
+| File Uploads | VichUploaderBundle 3.x |
 | Serialization | JMS Serializer Bundle 5.x |
 | Auth | Symfony Security + SymfonyCasts VerifyEmail |
 | Maps | Leaflet.js 1.9 + MarkerCluster |
@@ -98,8 +101,12 @@ Three suites, each its own directory:
 ```
 src/
 ├── Command/              # CLI commands (ImportOsmCommand, GenerateShortCodesCommand, FixHtmlEntitiesCommand, SendSystemMessageCommand)
-├── Controller/           # HTTP controllers (Bookcase, Image, Index, Profile, Registration, Security)
+├── Controller/           # Thin HTTP controllers (route actions only); Api/V1/* = public OAuth API
 ├── Doctrine/Type/        # BinaryUlidType (custom ulid type — see Key Decisions)
+├── Doctrine/             # UserSuspensionListener (revokes OAuth credentials when a user gets suspended)
+├── EventListener/        # SuspendedUserLogoutListener, InvalidCsrfTokenListener, UploadPathGuardListener
+├── EventSubscriber/      # Locale, security headers, API CSRF/rate limit/telemetry, ApiExceptionSubscriber (v1 JSON errors), OAuth consent
+├── Http/                 # ApiProblem — the documented /api/v1 error response ({"error"}, + violations)
 ├── Entity/               # Doctrine entities (ULID PKs)
 │   └── Embeddables/      # Embedded value objects (no own table)
 ├── Enums/                # PHP 8.1 backed enums
@@ -107,7 +114,7 @@ src/
 │   └── subForms/         # Nested form components
 ├── Repository/           # Doctrine repositories
 ├── Security/             # AppAuthenticator, EmailVerifier
-└── Service/              # ImageService (orient/scaleDown/rotate via Intervention)
+└── Service/              # All business logic: Bookcase/BookcaseMarker/BookcaseExport/BookcaseList, BookcaseApiMapper + ApiInput (typed v1 input), Rating, Watchlist, Wishlist, Image, Caretaker, OpeningTime, UserAccount/UserAdmin/UserDeletion, Registration, PasswordReset, Locale, ApiApplication, ApiProfile, Message, ShortCodeGenerator, OAuthClientProvisioner
 
 templates/
 ├── base.html.twig        # layout + permanent <dialog> modals (login, register, photo, profile)
@@ -289,7 +296,7 @@ All entities use ULID (not UUID v4), generated via `UlidGenerator`.
 `Bookcase.title` carries `#[Assert\Regex(pattern: '/https?:\/\/|www\./i', match: false, message: 'bookcase.title_no_url')]` (message in the `validators` domain, 6 locales) — so neither the quick-add nor the full edit form can submit a link in the title. Links belong in **webpage / comment / caretaker** fields only. The matching OSM-importer guard (above) keeps re-imports from re-adding such spam.
 
 ### Ratings (per-user, graphical)
-- One `Rating` per user per bookcase; `BookcaseController::rate` (`POST .../rating`) **upserts** (find existing by bookcase+user, else create).
+- One `Rating` per user per bookcase; `RatingService::upsert` (web `POST .../rating` + v1 `PUT .../rating`) **upserts** (find existing by bookcase+user, else create).
 - Detail view shows the **average** as a read-only DaisyUI multicolor `mask-heart` rating (rounded; 0 ratings → all grey). Logged-in users get a **"Rate" dropdown** popover with editable hearts that saves instantly and updates the average live. Rating is NOT in the edit dialog.
 - `templates/components/rating.html.twig` macro `hearts(selected, editable)` renders both modes.
 
@@ -307,7 +314,7 @@ All entities use ULID (not UUID v4), generated via `UlidGenerator`.
 ### List view (`/list`) — search, sort, distance
 - **Address fallback:** imported entries have empty structured address fields; the real address sits in `Address.additionalData`. Both the list and the detail dialog build the structured line and fall back to `additionalData` when it's empty.
 - Live (AJAX) over server-rendered fragments: `/list` renders the shell + initial `_list_table` (works without JS / direct `?q=&sort=` URLs); the `list` controller fetches `/list/fragment` and swaps the table. Repo methods `countFiltered` + `findFilteredPaginated` (in `BookcaseRepository`) do the free-text search (title + every address field) and sort.
-- **Distance sort** is portable: ordered in SQL by an **equirectangular planar approximation** (only `+ - *`, with `cos(userLat)` precomputed in PHP and passed as a param — no DB trig, so it works on SQLite/MySQL/Postgres) via a `HIDDEN` DQL select; the per-row km shown is an accurate **Haversine** computed in PHP for the visible page only (`IndexController::haversineKm`). Slight tie-order differences between the two are accepted.
+- **Distance sort** is portable: ordered in SQL by an **equirectangular planar approximation** (only `+ - *`, with `cos(userLat)` precomputed in PHP and passed as a param — no DB trig, so it works on SQLite/MySQL/Postgres) via a `HIDDEN` DQL select; the per-row km shown is an accurate **Haversine** computed in PHP for the visible page only (`BookcaseListService::haversineKm`). Slight tie-order differences between the two are accepted.
 
 ### Adding & repositioning entries (login-gated)
 - Creating and moving entries require **`ROLE_USER`** (mirrors photo upload). Entry points (navbar button, map right-click/long-press, geolocation "add here") only render for logged-in users; the navbar button works globally via `/?add=1` (intercepted on the map page, auto-opens elsewhere).
@@ -332,8 +339,10 @@ All entities use ULID (not UUID v4), generated via `UlidGenerator`.
 ### File Uploads
 VichUploaderBundle manages image uploads:
 - URI prefix: `/images`, storage: `public/images/`
-- Namer: `PropertyNamer` using `Bookcase::uniqueFileName` → `bookcase_{id}_{ulid}`
-- Auto-delete on entity update/remove
+- Namer: `PropertyNamer` using `Image::uniqueFileName` → in practice `bookcase__{ulid}.{ext}` (the image id is still empty when the name is generated)
+- Auto-delete on entity update/remove; `UploadPathGuardListener` cancels a delete if the stored filename contains a path
+- **Upload flow (web + v1 share `ImageService::upload()`):** text-length check → `prepareUpload()` — content-sniffed MIME (jpeg/png/webp/gif), ≤ 8 MiB, **≤ 40 megapixels** (decompression-bomb guard: GD allocates outside `memory_limit`), then decode + orient + downscale + **re-encode in PHP's temp dir** — only then persist, so appended payloads (PHP after a GIF header) and EXIF/GPS never reach `public/images`. `rotate()` uses `basename()` of the stored name.
+- `public/images/.htaccess` (committed; the rest of the dir is gitignored) denies script/HTML/SVG files and disables PHP there — defence in depth.
 - **Image paths in Twig:** use bare `/images/{{ image.filename }}` — never `asset()` (see `feedback-image-asset-paths` memory).
 - `ImageService` uses Intervention Image v4: `decodePath()` (not `read()`), `orient()`, `scaleDown()`, `rotate()`, `save()`.
 - **Alt text (accessibility):** `Image.altText` (nullable) is the screen-reader description. Set on upload (optional `altText` field) and editable per-image in the photo manager (saved on blur → `POST .../image/{image}/alt`). Rendered as the `<img alt>` — detail view falls back to the bookcase title when empty.
@@ -356,6 +365,12 @@ Default is SQLite (`var/data.db`) for easy local development. Change `DATABASE_U
 - Password hashing: auto (bcrypt/argon2 via Symfony)
 - **Password reset** (`ResetPasswordController`, self-contained — no external bundle): `POST /forgot-password` looks up the user by e-mail and, if found, stores a one-time **sha256-hashed** token (`User.resetTokenHash`) + 1h expiry (`resetTokenExpiresAt`, migration `Version20260613090602`) and e-mails the raw token as a `/reset-password/{token}` link; the form always shows the same "check your inbox" screen (no account enumeration). `/reset-password/{token}` validates the hash + expiry, lets the user set a new password (≥6, confirmed), then **clears the token** (one-time use), sets `isVerified=true`, and migrates a legacy account (`legacyUser=false`, `legacyMigrated=true`). CSRF on both forms (`forgot_password` / `reset_password`); "Forgot your password?" link in the login modal; success toast on the map page. Copy under the `reset:` translation group (6 locales). **Note:** `MAILER_DSN=null://null` in dev discards all mail — set a real DSN to actually deliver verification/reset e-mails.
 - No role-based access control currently enforced in `security.yaml` (access_control is commented out)
+- **Suspension is immediate:** `SuspendedUserLogoutListener` logs out a session user whose refreshed account is suspended (request continues anonymously → 401/login); the `api` firewall has `user_checker: App\Security\UserChecker`, and `UserSuspensionListener` (Doctrine preUpdate) revokes the user's OAuth access/refresh tokens when `isSuspended` flips to true.
+- **OAuth client secrets are stored hashed** (`client.allow_plaintext_secrets: false`; `OAuthClientProvisioner` hashes via `league.oauth2_server.password_hasher`, the raw secret is only shown once). Any server that still has plaintext secrets needs `php bin/console league:oauth2-server:rehash-client-secrets` once, right after deploying.
+- **Revoked OAuth clients** get a 403 at `/oauth/authorize` (`OAuthConsentSubscriber`) — no consent screen, no code. Redirect URIs with `javascript:`/`data:`/`vbscript:`/`file:` are rejected at apply time (custom app schemes for PKCE stay allowed).
+- **Output escaping:** never pass user data into a `|trans(...)|raw` parameter without `|e` (the consent page did — stored XSS). User-supplied links go through the `external_url` filter, which only keeps http/https/mailto/tel (anything else → no link); `Bookcase.webpage` additionally rejects other schemes at validation (`bookcase.webpage_unsafe_scheme`). In JS, build DOM with `textContent` — Leaflet `bindPopup`/`setContent` render strings as HTML.
+- **/api/v1 input** goes through `ApiInput` (`string()`/`coordinate()` 400 on arrays/objects/non-finite numbers instead of PHP-casting them to "Array"/0), errors are `ApiProblem`; `ApiExceptionSubscriber` renders thrown HTTP exceptions as `{"error"}` (400 keeps its message, others get the plain status text so the entity resolver doesn't leak class names). `ApiTelemetrySubscriber` clears the EntityManager before writing its log row, so a rejected (never-flushed) change can't be persisted by the telemetry flush.
+- String columns carry explicit `#[Assert\Length(max: <column length>)]` (validation `auto_mapping` was tried and rejected: it also infers NotNull, which breaks registration/quick-add). LIKE search terms are capped at 200 chars (SQLite "pattern too complex").
 
 ### Analytics (Matomo)
 Self-hosted Matomo (`https://openbookcase.de/piwik/`, site id 1) is loaded from `base.html.twig`, **gated to `{% if app.environment == 'prod' %}`** so dev/test never pollute the stats. It runs **cookieless** (`_paq.push(['disableCookies'])`) with server-side IP masking, which is why the privacy policy treats it as legitimate-interest (no consent gate) and the cookie modal stays accurate (it sets no cookies). The privacy policy's "Webanalyse … Matomo" section documents it.

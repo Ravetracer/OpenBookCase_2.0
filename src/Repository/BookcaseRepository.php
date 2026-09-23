@@ -7,9 +7,9 @@ use App\Enums\AccessibilityLevel;
 use App\Enums\WishlistItemStatus;
 use App\Model\BookcaseFilter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 use Symfony\Component\Uid\Ulid;
 
 /**
@@ -114,7 +114,7 @@ class BookcaseRepository extends ServiceEntityRepository
         // query is array-hydrated and grouped by bc.id (no fetched collections),
         // so LIMIT applies to grouped rows directly — safe to paginate.
         if ($limit !== null) {
-            $qb->orderBy('bc.id', 'ASC')
+            $qb->orderBy('bc.id', SortDirection::Ascending)
                 ->setFirstResult(max(0, $offset))
                 ->setMaxResults($limit);
         }
@@ -164,7 +164,7 @@ class BookcaseRepository extends ServiceEntityRepository
     public function iterateForExport(): iterable
     {
         return $this->createQueryBuilder('bc')
-            ->orderBy('bc.title', 'ASC')
+            ->orderBy('bc.title', SortDirection::Ascending)
             ->getQuery()
             ->toIterable();
     }
@@ -272,8 +272,8 @@ class BookcaseRepository extends ServiceEntityRepository
                 'bc.position.longitude AS longitude',
             )
             ->where('LOWER(bc.title) LIKE :term')
-            ->setParameter('term', '%' . mb_strtolower($term) . '%')
-            ->orderBy('bc.title', 'ASC')
+            ->setParameter('term', '%' . mb_strtolower(mb_substr($term, 0, 200)) . '%')
+            ->orderBy('bc.title', SortDirection::Ascending)
             ->setMaxResults($limit)
             ->getQuery()
             ->getArrayResult();
@@ -302,6 +302,7 @@ class BookcaseRepository extends ServiceEntityRepository
             return;
         }
 
+        // Term capped at 200 chars: SQLite rejects over-long LIKE patterns ("pattern too complex").
         $qb->andWhere(
             '(LOWER(bc.title) LIKE :q'
             . ' OR LOWER(bc.address.street) LIKE :q'
@@ -309,7 +310,7 @@ class BookcaseRepository extends ServiceEntityRepository
             . ' OR LOWER(bc.address.zipcode) LIKE :q'
             . ' OR LOWER(bc.address.city) LIKE :q'
             . ' OR LOWER(bc.address.additionalData) LIKE :q)'
-        )->setParameter('q', '%' . mb_strtolower($q) . '%');
+        )->setParameter('q', '%' . mb_strtolower(mb_substr($q, 0, 200)) . '%');
     }
 
     /**
@@ -439,7 +440,7 @@ class BookcaseRepository extends ServiceEntityRepository
         ?float $uLon,
         ?float $cosLat,
     ): void {
-        $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
+        $direction = strtolower($dir) === 'desc' ? SortDirection::Descending : SortDirection::Ascending;
 
         if ($sortKey === 'distance' && $uLat !== null && $uLon !== null && $cosLat !== null) {
             $qb->addSelect(
@@ -450,13 +451,13 @@ class BookcaseRepository extends ServiceEntityRepository
                 ->setParameter('uLat', $uLat)
                 ->setParameter('uLon', $uLon)
                 ->setParameter('cosLat', $cosLat)
-                ->orderBy('dist', $dir);
+                ->orderBy('dist', $direction);
         } else {
             $column = self::SORT_COLUMNS[$sortKey] ?? self::SORT_COLUMNS['title'];
-            $qb->orderBy($column, $dir);
+            $qb->orderBy($column, $direction);
         }
 
-        $qb->addOrderBy('bc.id', 'ASC');
+        $qb->addOrderBy('bc.id', SortDirection::Ascending);
     }
 
     /** Count entries matching the list-view search + filter set (for pagination). */

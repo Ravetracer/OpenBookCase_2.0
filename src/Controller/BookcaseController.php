@@ -3,41 +3,23 @@
 namespace App\Controller;
 
 use App\Entity\Bookcase;
-use App\Entity\Caretaker;
-use App\Entity\DeletedBookcase;
-use App\Entity\OpeningTime;
-use App\Entity\Rating;
 use App\Entity\User;
-use App\Entity\WatchlistItem;
-use App\Enums\AccessibilityLevel;
-use App\Enums\ActiveStatus;
-use App\Enums\EntryType;
-use App\Enums\MapSymbol;
-use App\Enums\MessageType;
 use App\Form\BookcaseCreateType;
 use App\Form\BookcaseType;
-use App\Model\BookcaseFilter;
 use App\Repository\BookcaseRepository;
-use App\Repository\RatingRepository;
-use App\Repository\WatchlistItemRepository;
 use App\Repository\WishlistItemRepository;
-use App\Service\MessageService;
-use App\Service\ShortCodeGenerator;
-
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-
-use Doctrine\ORM\EntityManagerInterface;
-
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\SerializerInterface;
-
-use Psr\Log\LoggerInterface;
+use App\Service\BookcaseExportService;
+use App\Service\BookcaseMarkerService;
+use App\Service\BookcaseService;
+use App\Service\RatingService;
+use App\Service\WatchlistService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -50,95 +32,15 @@ class BookcaseController extends AbstractController
     private const MAP_PAGE_MAX = 5000;
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
         private readonly BookcaseRepository $bookcaseRepository,
-        private readonly RatingRepository $ratingRepository,
-        private readonly WatchlistItemRepository $watchlistItemRepository,
         private readonly WishlistItemRepository $wishlistItemRepository,
-        private readonly MessageService $messageService,
-        private readonly SerializerInterface $serializer,
+        private readonly BookcaseService $bookcaseService,
+        private readonly BookcaseMarkerService $markerService,
+        private readonly BookcaseExportService $exportService,
+        private readonly RatingService $ratingService,
+        private readonly WatchlistService $watchlistService,
         private readonly TranslatorInterface $translator,
-        private readonly LoggerInterface $logger,
-        private readonly ShortCodeGenerator $shortCodeGenerator,
-        #[Autowire('%env(SHORTENER_BASE_URL)%')]
-        private readonly string $shortenerBaseUrl = 'https://obc.onl',
     ) {
-    }
-
-    private function isWatching(Bookcase $bookcase): bool
-    {
-        $user = $this->getUser();
-
-        return $user instanceof User
-            && $this->watchlistItemRepository->findOneByUserAndBookcase($user, $bookcase) !== null;
-    }
-
-    /**
-     * A flat, human-readable snapshot of the bookcase's content, keyed by the
-     * field label shown to watchers. Two snapshots taken around a save are
-     * diffed to describe exactly what changed.
-     *
-     * @return array<string, string>
-     */
-    private function bookcaseSnapshot(Bookcase $bookcase): array
-    {
-        $address = $bookcase->address;
-        $accessibility = $bookcase->accessibility;
-        $active = $bookcase->active;
-
-        $openingTimes = array_map(
-            static fn (OpeningTime $ot) => ($ot->twenty_for_seven ? '24/7' : (string) $ot->open_time),
-            $bookcase->openingTimes->toArray(),
-        );
-        $caretakers = array_map(
-            static fn (Caretaker $c) => trim($c->name . ' / ' . $c->contact),
-            $bookcase->caretakers->toArray(),
-        );
-
-        return [
-            'Title' => (string) $bookcase->title,
-            'Type' => $bookcase->entryType->value,
-            'Map symbol' => $bookcase->mapSymbol->value,
-            'Position' => $bookcase->position?->latitude . ', ' . $bookcase->position?->longitude,
-            'Address' => trim(implode(' ', array_filter([
-                $address?->street, $address?->houseNumber, $address?->zipcode, $address?->city, $address?->additionalData,
-            ]))),
-            'Webpage' => (string) $bookcase->webpage,
-            'Mobility' => $bookcase->isMobile ? 'mobile' : 'fixed',
-            'Installation type' => (string) $bookcase->installationType,
-            'Digital media allowed' => $bookcase->digitalMediaAllowed ? 'yes' : 'no',
-            'Accessibility' => trim(((string) ($accessibility?->level?->value ?? '')) . ' ' . ($accessibility?->description ?? '')),
-            'Status' => ($active?->status->value ?? '') . ' ' . ($active?->statusDescription ?? ''),
-            'Comment' => (string) $bookcase->comment,
-            'Opening times' => implode(' | ', $openingTimes),
-            'Caretakers' => implode(' | ', $caretakers),
-        ];
-    }
-
-    /**
-     * @return array{count: int, average: float, rounded: int}
-     */
-    private function ratingStats(Bookcase $bookcase): array
-    {
-        $values = array_map(static fn (Rating $r) => (int) $r->value, $bookcase->ratings->toArray());
-        $count = count($values);
-        $average = $count > 0 ? array_sum($values) / $count : 0.0;
-
-        return [
-            'count' => $count,
-            'average' => $average,
-            'rounded' => (int) round($average),
-        ];
-    }
-
-    private function currentUserRating(Bookcase $bookcase): int
-    {
-        $user = $this->getUser();
-        if ($user === null) {
-            return 0;
-        }
-
-        return $this->ratingRepository->findOneBy(['bookcase' => $bookcase, 'user' => $user])?->value ?? 0;
     }
 
     #[Route('/', name: 'retrieve')]
@@ -159,13 +61,7 @@ class BookcaseController extends AbstractController
         $limit = max(1, min(self::MAP_PAGE_MAX, (int) $request->query->get('limit', self::MAP_PAGE_DEFAULT)));
         $offset = max(0, (int) $request->query->get('offset', 0));
 
-        $total = $this->bookcaseRepository->countByBoundingBox(
-            (float) $latMin,
-            (float) $latMax,
-            (float) $lonMin,
-            (float) $lonMax,
-        );
-
+        $total = $this->bookcaseRepository->countByBoundingBox((float) $latMin, (float) $latMax, (float) $lonMin, (float) $lonMax);
         $rows = $this->bookcaseRepository->findByBoundingBoxLight(
             (float) $latMin,
             (float) $latMax,
@@ -175,183 +71,27 @@ class BookcaseController extends AbstractController
             $offset,
         );
 
-        // Build the marker payload directly (same shape the map consumes) instead of
-        // hydrating full entities + JMS — keeps the wide-bbox response fast.
-        $markers = [];
-        foreach ($rows as $row) {
-            $mapSymbol = $row['mapSymbol'];
-            $entryType = $row['entryType'];
-            $activeStatus = $row['activeStatus'];
-
-            // Resolve the accessibility level (enum or raw int from array hydration)
-            // to the marker colour the map uses, or null when it isn't set.
-            $level = $row['accessibilityLevel'];
-            if ($level !== null && !$level instanceof AccessibilityLevel) {
-                $level = AccessibilityLevel::tryFrom((int) $level);
-            }
-
-            $markers[] = [
-                'id' => (string) $row['id'],
-                'title' => $row['title'],
-                'position' => [
-                    'latitude' => $row['latitude'],
-                    'longitude' => $row['longitude'],
-                ],
-                'entryType' => $entryType instanceof EntryType ? $entryType->value : $entryType,
-                'mapSymbol' => $mapSymbol instanceof MapSymbol ? $mapSymbol->value : $mapSymbol,
-                'status' => $activeStatus instanceof ActiveStatus ? $activeStatus->value : $activeStatus,
-                'statusDescription' => $row['statusDescription'],
-                'accessibility' => $level instanceof AccessibilityLevel ? $level->markerColor() : null,
-                'isMobile' => (bool) $row['isMobile'],
-                'isBookcrossingZone' => (bool) $row['isBookcrossingZone'],
-                // Provenance marker so the map's OSM filter can include/exclude imports.
-                'source' => $row['source'],
-                'ratingCount' => (int) $row['ratingCount'],
-                'ratingAverage' => $row['ratingAverage'] !== null ? round((float) $row['ratingAverage'], 1) : null,
-                'openWishlistCount' => (int) $row['openWishlistCount'],
-            ];
-        }
-
+        // Marker payload built from light array rows (no entity hydration / JMS)
+        // — keeps the wide-bbox response fast.
         return new JsonResponse([
             'total' => $total,
             'offset' => $offset,
             'limit' => $limit,
-            'markers' => $markers,
+            'markers' => array_map($this->markerService->fromRow(...), $rows),
         ], Response::HTTP_OK);
     }
 
     /**
-     * Open-data dump of every entry as a downloadable JSON file. Location and contact
-     * data only — images and per-user ratings are intentionally excluded. Declared
-     * before `/{bookcase}` so the literal path wins over the placeholder route.
-     *
-     * The dataset is large (tens of thousands of rows), so this **streams** the JSON
-     * one entry at a time and clears the EM in batches instead of building the whole
-     * payload in memory — the old build-everything approach hit the PHP memory limit
-     * and returned HTTP 500. Pass `?gzip=1` for an on-the-fly gzip-compressed download
-     * (`.json.gz`), which is far smaller over the wire.
+     * Open-data dump of every entry as a downloadable, streamed JSON file (see
+     * {@see BookcaseExportService}). `?gzip=1` → `.json.gz`. Declared before
+     * `/{bookcase}` so the literal path wins over the placeholder route.
      */
     #[Route('/export', name: 'export', methods: ['GET'])]
-    public function export(Request $request): Response
+    public function export(Request $request, #[CurrentUser] ?User $user): Response
     {
         $compress = $request->query->getBoolean('gzip');
 
-        // Children are resolved once in two small bulk queries, then looked up per
-        // row — lazy-loading them per entity would be 100k+ queries.
-        $caretakerMap = $this->bookcaseRepository->exportCaretakerMap();
-        $openingMap = $this->bookcaseRepository->exportOpeningTimeMap();
-
-        // "Export with current filters & sorting" (filtered=1) mirrors the list
-        // view's search/filter/sort; otherwise the dump is the full data set.
-        $filtered = $request->query->getBoolean('filtered');
-        if ($filtered) {
-            $filter = BookcaseFilter::fromRequest($request);
-            $q = trim((string) $request->query->get('q', '')) ?: null;
-            $sort = (string) $request->query->get('sort', 'title');
-            $dir = (string) $request->query->get('dir', 'asc');
-            $uLat = is_numeric($request->query->get('userLat')) ? (float) $request->query->get('userLat') : null;
-            $uLon = is_numeric($request->query->get('userLon')) ? (float) $request->query->get('userLon') : null;
-            $cosLat = $uLat !== null ? cos(deg2rad($uLat)) : null;
-
-            $user = $this->getUser();
-            $watcherId = $user instanceof User && $user->id !== null ? (string) $user->id : null;
-
-            $count = $this->bookcaseRepository->countFiltered($q, $filter, $watcherId);
-            $rows = fn () => $this->bookcaseRepository->iterateFilteredForExport(
-                $q, $sort, $dir, $uLat, $uLon, $cosLat, $filter, $watcherId,
-            );
-        } else {
-            $count = $this->bookcaseRepository->count([]);
-            $rows = fn () => $this->bookcaseRepository->iterateForExport();
-        }
-
-        $em = $this->entityManager;
-        $shortBase = rtrim($this->shortenerBaseUrl, '/');
-
-        $jsonFlags = JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
-
-        $callback = function () use ($rows, $em, $caretakerMap, $openingMap, $count, $compress, $jsonFlags, $shortBase): void {
-            // Incremental gzip: compress chunk-by-chunk so neither the JSON nor its
-            // compressed form is ever fully held in memory.
-            $deflate = $compress ? deflate_init(ZLIB_ENCODING_GZIP, ['level' => 6]) : null;
-            $emit = static function (string $chunk) use ($deflate): void {
-                echo $deflate !== null ? deflate_add($deflate, $chunk, ZLIB_NO_FLUSH) : $chunk;
-            };
-
-            $emit('{' . "\n" . '  "count": ' . $count . ',' . "\n" . '  "bookcases": [');
-
-            $first = true;
-            $i = 0;
-            foreach ($rows() as $bc) {
-                $key = (string) $bc->id;
-                $entry = [
-                    'id' => $key,
-                    // Short share code + its full obc.onl link (null when an entry
-                    // somehow has no code).
-                    'shortCode' => $bc->shortCode,
-                    'shortUrl' => $bc->shortCode !== null ? $shortBase . '/' . $bc->shortCode : null,
-                    // Legacy numeric id (from the old system) so consumers can match
-                    // entries against their own data; null for entries added since.
-                    'legacyId' => $bc->legacyId,
-                    // Stable OpenStreetMap element ref ("{n|w|r}{id}") for imported
-                    // entries; null when not sourced from OSM.
-                    'osmId' => $bc->osmId,
-                    // Provenance: 'osm' for OpenStreetMap imports, null otherwise — so
-                    // consumers know whether an entry comes from OSM.
-                    'source' => $bc->source,
-                    'title' => $bc->title,
-                    'type' => $bc->entryType->value,
-                    'status' => $bc->active?->status->value,
-                    'statusDescription' => $bc->active?->statusDescription,
-                    'position' => [
-                        'latitude' => $bc->position?->latitude,
-                        'longitude' => $bc->position?->longitude,
-                    ],
-                    'address' => [
-                        'street' => $bc->address?->street,
-                        'houseNumber' => $bc->address?->houseNumber,
-                        'zipcode' => $bc->address?->zipcode,
-                        'city' => $bc->address?->city,
-                        'additionalData' => $bc->address?->additionalData,
-                    ],
-                    'webpage' => $bc->webpage,
-                    'isMobile' => $bc->isMobile,
-                    'installationType' => $bc->installationType,
-                    'digitalMediaAllowed' => $bc->digitalMediaAllowed,
-                    'accessibility' => [
-                        'level' => $bc->accessibility?->level?->value,
-                        'description' => $bc->accessibility?->description,
-                    ],
-                    'comment' => $bc->comment,
-                    'openingTimes' => $openingMap[$key] ?? [],
-                    'caretakers' => $caretakerMap[$key] ?? [],
-                ];
-
-                $emit(($first ? '' : ',') . "\n" . json_encode($entry, $jsonFlags));
-                $first = false;
-
-                // Free hydrated entities and push bytes to the client in batches so
-                // memory stays flat across the whole dump.
-                if ((++$i % 500) === 0) {
-                    $em->clear();
-                    if ($deflate !== null) {
-                        echo deflate_add($deflate, '', ZLIB_SYNC_FLUSH);
-                    }
-                    // flush() (SAPI-level) only — NOT ob_flush(), which would empty
-                    // any wrapping output buffer (e.g. the test harness capturing this).
-                    flush();
-                }
-            }
-
-            $emit("\n" . '  ]' . "\n" . '}' . "\n");
-
-            if ($deflate !== null) {
-                echo deflate_add($deflate, '', ZLIB_FINISH);
-            }
-            flush();
-        };
-
-        $response = new StreamedResponse($callback);
+        $response = new StreamedResponse($this->exportService->streamCallback($request, $user));
         $filename = $compress ? 'openbookcase-export.json.gz' : 'openbookcase-export.json';
         $response->headers->set('Content-Type', $compress ? 'application/gzip' : 'application/json; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
@@ -375,17 +115,12 @@ class BookcaseController extends AbstractController
             return new JsonResponse([], Response::HTTP_OK);
         }
 
-        $results = [];
-        foreach ($this->bookcaseRepository->searchByTitle($term) as $row) {
-            $results[] = [
-                'id' => (string) $row['id'],
-                'title' => $row['title'],
-                'latitude' => (float) $row['latitude'],
-                'longitude' => (float) $row['longitude'],
-            ];
-        }
-
-        return new JsonResponse($results, Response::HTTP_OK);
+        return new JsonResponse(array_map(static fn (array $row) => [
+            'id' => (string) $row['id'],
+            'title' => $row['title'],
+            'latitude' => (float) $row['latitude'],
+            'longitude' => (float) $row['longitude'],
+        ], $this->bookcaseRepository->searchByTitle($term)), Response::HTTP_OK);
     }
 
     /**
@@ -428,25 +163,9 @@ class BookcaseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $bookcase->shortCode = $this->shortCodeGenerator->unique();
-            $this->entityManager->persist($bookcase);
-            $this->entityManager->flush();
+            $this->bookcaseService->create($bookcase);
 
-            return new JsonResponse([
-                'status' => 'success',
-                'id' => (string) $bookcase->id,
-                'title' => $bookcase->title,
-                'latitude' => $bookcase->position?->latitude,
-                'longitude' => $bookcase->position?->longitude,
-                'entryType' => $bookcase->entryType->value,
-                'mapSymbol' => $bookcase->mapSymbol->value,
-                // Filter-relevant fields, so the live-added marker matches the
-                // bbox payload shape and isn't dropped by the active map filters.
-                'markerStatus' => $bookcase->active?->status->value,
-                'accessibility' => $bookcase->accessibility?->level?->markerColor(),
-                'isMobile' => $bookcase->isMobile,
-                'isBookcrossingZone' => $bookcase->isBookcrossingZone,
-            ], Response::HTTP_CREATED);
+            return new JsonResponse($this->markerService->created($bookcase), Response::HTTP_CREATED);
         }
 
         return new JsonResponse(['status' => 'error', 'errors' => (string) $form->getErrors(true, false)], Response::HTTP_BAD_REQUEST);
@@ -461,11 +180,7 @@ class BookcaseController extends AbstractController
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse(
-            $this->serializer->serialize($bc, 'json', SerializationContext::create()->setGroups(['bookcase', 'bookcase_detail', 'caretaker', 'address', 'images'])),
-            Response::HTTP_OK,
-            json: true,
-        );
+        return new JsonResponse($this->bookcaseService->detailJson($bc), Response::HTTP_OK, json: true);
     }
 
     /**
@@ -476,9 +191,10 @@ class BookcaseController extends AbstractController
      */
     #[Route('/{bookcase}', name: 'delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_USER')]
-    public function deleteBookcase(Request $request, Bookcase $bookcase): JsonResponse
+    public function deleteBookcase(Request $request, Bookcase $bookcase, #[CurrentUser] ?User $user): JsonResponse
     {
-        $reason = trim((string) (($request->toArray()['reason'] ?? null) ?: ''));
+        $reason = $request->toArray()['reason'] ?? null;
+        $reason = is_string($reason) ? trim($reason) : ''; // non-strings ({"a":1}, [..]) are no reason
 
         if ($reason === '') {
             return new JsonResponse(
@@ -487,62 +203,13 @@ class BookcaseController extends AbstractController
             );
         }
 
-        $user = $this->getUser();
-
-        $backup = new DeletedBookcase();
-        $backup->originalId = (string) $bookcase->id;
-        $backup->title = $bookcase->title;
-        $backup->reason = $reason;
-        $backup->deletedBy = $user instanceof User ? $user->getUserIdentifier() : null;
-        $backup->payload = json_decode(
-            $this->serializer->serialize(
-                $bookcase,
-                'json',
-                SerializationContext::create()->setGroups(['bookcase', 'bookcase_detail', 'caretaker', 'address', 'images']),
-            ),
-            true,
-        ) ?? [];
-
-        $this->entityManager->persist($backup);
-        $this->entityManager->remove($bookcase);
-        $this->entityManager->flush();
+        $this->bookcaseService->archiveAndDelete($bookcase, $reason, $user);
 
         return new JsonResponse(['status' => 'deleted'], Response::HTTP_OK);
     }
 
-    /**
-     * Marker payload for a single entity — same shape the map's bbox endpoint
-     * emits — so the front-end can refresh/drop a marker after a create or save
-     * without a full reload.
-     *
-     * @return array<string, mixed>
-     */
-    private function markerPayloadFromEntity(Bookcase $bookcase): array
-    {
-        $stats = $this->ratingStats($bookcase);
-
-        return [
-            'id' => (string) $bookcase->id,
-            'title' => $bookcase->title,
-            'position' => [
-                'latitude' => $bookcase->position?->latitude,
-                'longitude' => $bookcase->position?->longitude,
-            ],
-            'entryType' => $bookcase->entryType->value,
-            'mapSymbol' => $bookcase->mapSymbol->value,
-            'status' => $bookcase->active?->status->value,
-            'statusDescription' => $bookcase->active?->statusDescription,
-            'accessibility' => $bookcase->accessibility?->level?->markerColor(),
-            'isMobile' => $bookcase->isMobile,
-            'isBookcrossingZone' => $bookcase->isBookcrossingZone,
-            'ratingCount' => $stats['count'],
-            'ratingAverage' => $stats['count'] > 0 ? round($stats['average'], 1) : null,
-            'openWishlistCount' => $this->wishlistItemRepository->countOpen($bookcase),
-        ];
-    }
-
     #[Route('/{bookcase}/html', name: 'retrieve_single_html')]
-    public function retrieveBookcaseDetailsHTML(string $bookcase): Response
+    public function retrieveBookcaseDetailsHTML(string $bookcase, #[CurrentUser] ?User $user): Response
     {
         $bc = $this->bookcaseRepository->findOneWithRelations($bookcase);
 
@@ -555,9 +222,9 @@ class BookcaseController extends AbstractController
         return $this->render('index/bookcase_detail.html.twig', [
             'bookcase' => $bc,
             'form' => $form->createView(),
-            'rating' => $this->ratingStats($bc),
-            'userRating' => $this->currentUserRating($bc),
-            'isWatching' => $this->isWatching($bc),
+            'rating' => $this->ratingService->stats($bc),
+            'userRating' => $this->ratingService->userValue($bc, $user),
+            'isWatching' => $this->watchlistService->isWatching($bc, $user),
             'wishlistOpenCount' => $this->wishlistItemRepository->countOpen($bc),
         ]);
     }
@@ -595,26 +262,19 @@ class BookcaseController extends AbstractController
 
     #[Route('/{bookcase}/save', name: 'save_bookcase', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function saveBookCase(Request $request, Bookcase $bookcase): JsonResponse
+    public function saveBookCase(Request $request, Bookcase $bookcase, #[CurrentUser] ?User $user): JsonResponse
     {
         // Snapshot the current content before the form mutates the entity in place.
-        $before = $this->bookcaseSnapshot($bookcase);
+        $before = $this->bookcaseService->snapshot($bookcase);
 
         $form = $this->createForm(BookcaseType::class, $bookcase);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // The user has reviewed/confirmed the entry, so its title is no longer a
-            // provisional auto-generated one (clears the OSM "help name this" prompt).
-            $bookcase->titleProvisional = false;
-
-            $this->entityManager->persist($bookcase);
-            $this->entityManager->flush();
-
-            $this->notifyWatchersOfChange($bookcase, $before);
+            $this->bookcaseService->saveEdited($bookcase, $before, $user);
 
             return new JsonResponse(
-                ['status' => 'success', 'marker' => $this->markerPayloadFromEntity($bookcase)],
+                ['status' => 'success', 'marker' => $this->markerService->fromEntity($bookcase)],
                 Response::HTTP_OK,
             );
         }
@@ -622,106 +282,33 @@ class BookcaseController extends AbstractController
         return new JsonResponse(['status' => 'error', 'errors' => (string) $form->getErrors(true, false)], Response::HTTP_BAD_REQUEST);
     }
 
-    /**
-     * Diff the before/after snapshot and message every watcher (except the
-     * editor) about what changed, with a deep link to the entry.
-     *
-     * @param array<string, string> $before
-     */
-    private function notifyWatchersOfChange(Bookcase $bookcase, array $before): void
-    {
-        $after = $this->bookcaseSnapshot($bookcase);
-
-        $changed = [];
-        foreach ($after as $label => $value) {
-            if (($before[$label] ?? null) !== $value) {
-                $changed[] = $label;
-            }
-        }
-
-        if ($changed === []) {
-            return;
-        }
-
-        $editor = $this->getUser();
-        $editorId = $editor instanceof User && $editor->id !== null ? (string) $editor->id : null;
-
-        $recipients = array_filter(
-            $this->watchlistItemRepository->findWatcherUsersOf($bookcase),
-            static fn (User $u) => $editorId === null || (string) $u->id !== $editorId,
-        );
-
-        if ($recipients === []) {
-            return;
-        }
-
-        $editorName = $editor instanceof User ? $editor->getUserIdentifier() : 'Someone';
-        $title = (string) $bookcase->title;
-        $fields = implode(', ', $changed);
-
-        // Translate per recipient so each watcher reads it in their own language.
-        foreach ($recipients as $recipient) {
-            $loc = $recipient instanceof User ? $recipient->language : null;
-            $this->messageService->notify(
-                $recipient,
-                $this->translator->trans(
-                    'notify.bookcase_changed_body',
-                    ['%user%' => $editorName, '%title%' => $title, '%fields%' => $fields],
-                    'messages',
-                    \App\Config\Locales::isSupported($loc) ? $loc : \App\Config\Locales::DEFAULT,
-                ),
-                MessageType::BookcaseChanged,
-                $this->translator->trans(
-                    'notify.bookcase_changed_subject',
-                    ['%title%' => $title],
-                    'messages',
-                    \App\Config\Locales::isSupported($loc) ? $loc : \App\Config\Locales::DEFAULT,
-                ),
-                $bookcase,
-            );
-        }
-    }
-
     #[Route('/{bookcase}/watch', name: 'watch_add', methods: ['POST'])]
-    public function addWatch(Bookcase $bookcase): JsonResponse
+    public function addWatch(Bookcase $bookcase, #[CurrentUser] ?User $user): JsonResponse
     {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
+        if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
 
-        if ($this->watchlistItemRepository->findOneByUserAndBookcase($user, $bookcase) === null) {
-            $item = new WatchlistItem();
-            $item->user = $user;
-            $item->bookcase = $bookcase;
-            $this->entityManager->persist($item);
-            $this->entityManager->flush();
-        }
+        $this->watchlistService->watch($bookcase, $user);
 
         return new JsonResponse(['status' => 'success', 'watching' => true], Response::HTTP_OK);
     }
 
     #[Route('/{bookcase}/watch', name: 'watch_remove', methods: ['DELETE'])]
-    public function removeWatch(Bookcase $bookcase): JsonResponse
+    public function removeWatch(Bookcase $bookcase, #[CurrentUser] ?User $user): JsonResponse
     {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
+        if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
 
-        $item = $this->watchlistItemRepository->findOneByUserAndBookcase($user, $bookcase);
-        if ($item !== null) {
-            $this->entityManager->remove($item);
-            $this->entityManager->flush();
-        }
+        $this->watchlistService->unwatch($bookcase, $user);
 
         return new JsonResponse(['status' => 'success', 'watching' => false], Response::HTTP_OK);
     }
 
     #[Route('/{bookcase}/rating', name: 'rate', methods: ['POST'])]
-    public function rate(Request $request, Bookcase $bookcase): JsonResponse
+    public function rate(Request $request, Bookcase $bookcase, #[CurrentUser] ?User $user): JsonResponse
     {
-        $user = $this->getUser();
         if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
@@ -731,25 +318,8 @@ class BookcaseController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.rating_range')], Response::HTTP_BAD_REQUEST);
         }
 
-        // One rating per user per bookcase: update the existing one or create it.
-        $existing = $this->ratingRepository->findOneBy(['bookcase' => $bookcase, 'user' => $user]);
-        $rating = $existing ?? new Rating();
-        $rating->bookcase = $bookcase;
-        $rating->user = $user;
-        $rating->value = $value;
-
-        $this->entityManager->persist($rating);
-        $this->entityManager->flush();
-
-        // Keep the in-memory ratings collection in sync. If it was already
-        // initialized (empty) earlier in the request, a brand-new rating wouldn't
-        // show up in it — so ratingStats() would report a stale count/average on
-        // the very first rating. addRating() is a no-op when it's already present.
-        if ($existing === null) {
-            $bookcase->addRating($rating);
-        }
-
-        $stats = $this->ratingStats($bookcase);
+        $this->ratingService->upsert($bookcase, $user, $value);
+        $stats = $this->ratingService->stats($bookcase);
 
         return new JsonResponse([
             'status' => 'success',
@@ -766,10 +336,9 @@ class BookcaseController extends AbstractController
      * save form — but still notifies watchers, since location is a key field.
      */
     #[Route('/{bookcase}/position', name: 'move', methods: ['POST'])]
-    public function move(Request $request, Bookcase $bookcase): JsonResponse
+    public function move(Request $request, Bookcase $bookcase, #[CurrentUser] ?User $user): JsonResponse
     {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
+        if ($user === null) {
             return new JsonResponse(['error' => $this->translator->trans('flash.auth_required')], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -781,13 +350,7 @@ class BookcaseController extends AbstractController
             return new JsonResponse(['error' => $this->translator->trans('flash.invalid_position')], Response::HTTP_BAD_REQUEST);
         }
 
-        $before = $this->bookcaseSnapshot($bookcase);
-
-        $bookcase->position->latitude = (float) $lat;
-        $bookcase->position->longitude = (float) $lon;
-        $this->entityManager->flush();
-
-        $this->notifyWatchersOfChange($bookcase, $before);
+        $this->bookcaseService->move($bookcase, (float) $lat, (float) $lon, $user);
 
         return new JsonResponse([
             'status' => 'success',

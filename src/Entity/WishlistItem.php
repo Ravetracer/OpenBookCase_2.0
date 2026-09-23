@@ -7,6 +7,7 @@ use App\Repository\WishlistItemRepository;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
@@ -23,14 +24,17 @@ class WishlistItem
     public ?Ulid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     #[Groups(['wishlist'])]
     public ?string $title = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     #[Groups(['wishlist'])]
     public ?string $isbn = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     #[Groups(['wishlist'])]
     public ?string $author = null;
 

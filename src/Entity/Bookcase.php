@@ -40,6 +40,7 @@ class Bookcase
     public ?string $shortCode = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Length(max: 255)]
     #[Assert\NotBlank]
     #[Assert\NotNull]
     // No links in the title — those belong in the website/comment fields (anti-spam).
@@ -53,6 +54,9 @@ class Bookcase
     public ?Position $position = null;
 
     #[ORM\Column(length: 1024, nullable: true)]
+    #[Assert\Length(max: 1024)]
+    // Only web/mail/phone links (or scheme-less "www.…"); never javascript:/data:/… (XSS).
+    #[Assert\Regex(pattern: '/^\s*+(?:(?:https?|mailto|tel):|(?![a-z][a-z0-9+\-]*:))/i', message: 'bookcase.webpage_unsafe_scheme')]
     #[Serializer\Groups(['bookcase_detail'])]
     public ?string $webpage = null;
 
@@ -77,6 +81,7 @@ class Bookcase
     public EntryType $entryType = EntryType::Bookcase;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     #[Serializer\Groups(['bookcase_detail'])]
     public ?string $installationType = null;
 
