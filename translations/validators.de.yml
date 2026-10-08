@@ -2,3 +2,4 @@ bookcase.title_no_url: "Links sind im Titel nicht erlaubt – trage Web-Links bi
 bookcase.webpage_unsafe_scheme: "Nur Webadressen (http/https), E-Mail- (mailto:) oder Telefon-Links (tel:) sind erlaubt."
 position.latitude_out_of_range: "Der Breitengrad muss zwischen -90 und 90 liegen."
 position.longitude_out_of_range: "Der Längengrad muss zwischen -180 und 180 liegen."
+user.email_undeliverable: "An diese E-Mail-Adresse kann keine Post zugestellt werden (die Domain existiert nicht oder nimmt keine E-Mails an). Bitte prüfe sie auf Tippfehler oder verwende eine andere Adresse."

@@ -770,4 +770,76 @@ final class MalformedInputTest extends FunctionalTestCase
         $this->client->request('POST', '/language/de');
         $this->assertSame(405, $this->httpStatus());
     }
+
+    // ---------------------------------------------------------------------
+    // Registration e-mail (syntax + deliverable-domain check)
+    // ---------------------------------------------------------------------
+
+    public static function badRegistrationEmails(): iterable
+    {
+        yield 'NUL byte in domain' => ["nul@evil\0.de"];
+        yield 'undeliverable domain' => ['reader@nowhere.invalid'];
+        yield 'label > 63 chars' => ['reader@' . str_repeat('a', 64) . '.de'];
+        yield 'huge address' => [str_repeat('a', 5000) . '@example.org'];
+        yield 'address literal' => ['reader@[127.0.0.1]'];
+        yield 'many @' => ['a@b@c@@example.org'];
+        yield 'injection in domain' => ["reader@example.org'; DROP TABLE user;--"];
+        yield 'header injection' => ["reader@example.org\r\nBcc: victim@example.org"];
+    }
+
+    #[DataProvider('badRegistrationEmails')]
+    public function testRegistrationRejectsBadEmailsWithoutAccountOrMail(string $email): void
+    {
+        $this->client->enableProfiler();
+        $crawler = $this->client->request('GET', '/register');
+        $form = $crawler->filter('form')->form();
+
+        $this->client->request('POST', '/register', [
+            'registration_form' => [
+                'username' => 'hostile_signup',
+                'email' => $email,
+                'plainPassword' => 'sup3rsecret',
+                'agreeTerms' => '1',
+                '_token' => $form['registration_form[_token]']->getValue(),
+            ],
+        ]);
+
+        $this->assertSame(200, $this->httpStatus(), 'form must be re-rendered with an error, not a 500/redirect');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'hostile_signup']));
+    }
+
+    public function testRegistrationRejectsOversizedUsername(): void
+    {
+        $crawler = $this->client->request('GET', '/register');
+        $form = $crawler->filter('form')->form();
+        $form['registration_form[username]'] = str_repeat('u', 181);
+        $form['registration_form[email]'] = 'longname@example.org';
+        $form['registration_form[plainPassword]'] = 'sup3rsecret';
+        $form['registration_form[agreeTerms]']->tick();
+
+        $this->client->submit($form);
+
+        $this->assertSame(200, $this->httpStatus(), 'over-long username must be rejected by validation');
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['email' => 'longname@example.org']));
+    }
+
+    public function testRegistrationRejectsArrayEmail(): void
+    {
+        $crawler = $this->client->request('GET', '/register');
+        $form = $crawler->filter('form')->form();
+
+        $this->client->request('POST', '/register', [
+            'registration_form' => [
+                'username' => 'hostile_signup',
+                'email' => ['reader@example.org'],
+                'plainPassword' => 'sup3rsecret',
+                'agreeTerms' => '1',
+                '_token' => $form['registration_form[_token]']->getValue(),
+            ],
+        ]);
+
+        $this->assertNotServerError('array e-mail');
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'hostile_signup']));
+    }
 }

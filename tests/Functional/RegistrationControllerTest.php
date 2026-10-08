@@ -64,6 +64,28 @@ final class RegistrationControllerTest extends FunctionalTestCase
         $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['email' => 'noterms@example.com']));
     }
 
+    /**
+     * An address whose domain cannot receive mail must be rejected before the
+     * account exists — otherwise the verification mail bounces back to us.
+     */
+    public function testRegistrationWithUndeliverableDomainFailsAndSendsNoMail(): void
+    {
+        $this->client->enableProfiler();
+
+        $crawler = $this->client->request('GET', '/register');
+        $form = $crawler->filter('form')->form();
+        $form['registration_form[username]'] = 'bouncer';
+        $form['registration_form[email]'] = 'bouncer@nowhere.invalid';
+        $form['registration_form[plainPassword]'] = 'sup3rsecret';
+        $form['registration_form[agreeTerms]']->tick();
+
+        $this->client->submit($form);
+        $this->assertResponseIsSuccessful(); // re-rendered with the error, no redirect
+        $this->assertSelectorTextContains('form', 'cannot receive mail');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['email' => 'bouncer@nowhere.invalid']));
+    }
+
     public function testRegistrationWithShortPasswordFails(): void
     {
         $crawler = $this->client->request('GET', '/register');

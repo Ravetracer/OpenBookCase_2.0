@@ -180,6 +180,24 @@ final class AdminControllerTest extends FunctionalTestCase
         $this->assertFalse($reloaded->isVerified, 'a corrected address must be re-verified');
     }
 
+    public function testCorrectEmailRejectsUndeliverableDomain(): void
+    {
+        $this->loginAsAdmin();
+        $user = UserFactory::createOne(['email' => 'old@example.com', 'isVerified' => true]);
+
+        $crawler = $this->client->request('GET', '/admin/users/' . $user->id);
+        $this->client->request('POST', '/admin/users/' . $user->id . '/email', [
+            '_token' => $this->tokenFor($crawler, '/email'),
+            'email' => 'fixed@nowhere.invalid',
+        ]);
+        $this->assertResponseRedirects();
+
+        $this->em()->clear();
+        $reloaded = $this->em()->getRepository(User::class)->find($user->id);
+        $this->assertSame('old@example.com', $reloaded->email);
+        $this->assertTrue($reloaded->isVerified);
+    }
+
     public function testAssignAndRevokeAdminRole(): void
     {
         $this->loginAsAdmin();

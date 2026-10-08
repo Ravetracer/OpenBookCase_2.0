@@ -30,6 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public ?Ulid $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\Length(max: 180)]
     public ?string $username = null;
 
     #[ORM\Column]
@@ -39,6 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public ?string $password = null;
 
     #[ORM\Column]
+    #[Assert\Length(max: 255)]
     public ?string $email = null;
 
     #[ORM\Column(type: 'boolean')]

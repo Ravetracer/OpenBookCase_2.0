@@ -2,3 +2,4 @@ bookcase.title_no_url: "Links are not allowed in the title — put website links
 bookcase.webpage_unsafe_scheme: "Only web addresses (http/https), e-mail (mailto:) or phone (tel:) links are allowed."
 position.latitude_out_of_range: "Latitude must be between -90 and 90."
 position.longitude_out_of_range: "Longitude must be between -180 and 180."
+user.email_undeliverable: "This e-mail address cannot receive mail (its domain does not exist or accepts no e-mail). Please check it for typos or use a different address."

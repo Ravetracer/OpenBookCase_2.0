@@ -138,6 +138,34 @@ final class ProfileControllerTest extends FunctionalTestCase
         $this->assertResponseStatusCodeSame(400);
     }
 
+    public function testEmailUpdateOversizedAddressRejected(): void
+    {
+        $user = $this->loginAsUser(['email' => 'short@example.org']);
+        $this->client->request('POST', '/profile/email', [
+            '_token' => $this->csrf('profile_email'),
+            'email' => str_repeat('a', 250) . '@example.org',
+        ]);
+        $this->assertResponseStatusCodeSame(400);
+
+        $this->em()->clear();
+        $this->assertSame('short@example.org', $this->em()->getRepository(User::class)->find($user->id)->email);
+    }
+
+    public function testEmailUpdateUndeliverableDomainRejectedAndSendsNoMail(): void
+    {
+        $user = $this->loginAsUser();
+        $this->client->enableProfiler();
+        $this->client->request('POST', '/profile/email', [
+            '_token' => $this->csrf('profile_email'),
+            'email' => 'moved@nowhere.invalid',
+        ]);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertEmailCount(0);
+
+        $this->em()->clear();
+        $this->assertNotSame('moved@nowhere.invalid', $this->em()->getRepository(User::class)->find($user->id)->email);
+    }
+
     // ---------------------------------------------------------------------
     // POST /profile/home
     // ---------------------------------------------------------------------

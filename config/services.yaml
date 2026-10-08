@@ -29,3 +29,9 @@ services:
             $matomoTrackingUrl: '%env(MATOMO_TRACKING_URL)%'
             $matomoSiteId: '%env(int:MATOMO_SITE_ID)%'
             $kernelEnvironment: '%kernel.environment%'
+
+when@test:
+    services:
+        # No DNS lookups in tests: ".invalid" domains bounce, everything else is deliverable.
+        App\Service\MailDomainCheckerInterface:
+            class: App\Tests\Double\FakeMailDomainChecker

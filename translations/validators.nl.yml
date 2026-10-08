@@ -2,3 +2,4 @@ bookcase.title_no_url: "Links zijn niet toegestaan in de titel — zet weblinks 
 bookcase.webpage_unsafe_scheme: "Alleen webadressen (http/https), e-mail- (mailto:) of telefoonlinks (tel:) zijn toegestaan."
 position.latitude_out_of_range: "De breedtegraad moet tussen -90 en 90 liggen."
 position.longitude_out_of_range: "De lengtegraad moet tussen -180 en 180 liggen."
+user.email_undeliverable: "Op dit e-mailadres kan geen post worden bezorgd (het domein bestaat niet of accepteert geen e-mail). Controleer het op typefouten of gebruik een ander adres."

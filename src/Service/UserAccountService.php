@@ -10,6 +10,7 @@ use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use App\Repository\WishlistItemRepository;
 use App\Security\EmailVerifier;
+use App\Validator\DeliverableEmail;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\InputBag;
@@ -156,7 +157,7 @@ class UserAccountService
 
     private function isValidEmail(string $email): bool
     {
-        return count($this->validator->validate($email, [new Assert\NotBlank(), new Assert\Email()])) === 0;
+        return count($this->validator->validate($email, [new Assert\NotBlank(), new Assert\Length(max: 255), new Assert\Email(), new DeliverableEmail()])) === 0;
     }
 
     /**
