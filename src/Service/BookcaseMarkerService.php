@@ -7,7 +7,10 @@ use App\Enums\AccessibilityLevel;
 use App\Enums\ActiveStatus;
 use App\Enums\EntryType;
 use App\Enums\MapSymbol;
+use App\Model\GeoBox;
+use App\Repository\BookcaseRepository;
 use App\Repository\WishlistItemRepository;
+use Symfony\Component\Uid\Ulid;
 
 /**
  * Map marker payloads: the bounding-box shape the map consumes (built from the
@@ -23,7 +26,49 @@ class BookcaseMarkerService
     public function __construct(
         private readonly RatingService $ratingService,
         private readonly WishlistItemRepository $wishlistItemRepository,
+        private readonly BookcaseRepository $bookcaseRepository,
     ) {
+    }
+
+    /**
+     * One page of the map's bounding-box marker load.
+     *
+     * `$exclude` is the box the client already holds, so a zoom-out only pulls
+     * the newly visible ring. `$after` is the keyset cursor (the previous page's
+     * `next`); without it, `$offset` pages the old way. `total` (rows left to
+     * load, for the progress badge) is only counted on the first page; `next`
+     * is null on the last one.
+     *
+     * @return array{total: int|null, offset: int, limit: int, next: string|null, markers: list<array<string, mixed>>}
+     */
+    public function mapPage(GeoBox $box, ?GeoBox $exclude, string $after, int $limit, int $offset): array
+    {
+        $cursor = Ulid::isValid($after) ? Ulid::fromString($after) : null;
+        if ($cursor !== null) {
+            $offset = 0;
+        }
+
+        $total = $cursor === null && $offset === 0
+            ? $this->bookcaseRepository->countByBoundingBox($box->latMin, $box->latMax, $box->lonMin, $box->lonMax, $exclude)
+            : null;
+        $rows = $this->bookcaseRepository->findByBoundingBoxLight(
+            $box->latMin,
+            $box->latMax,
+            $box->lonMin,
+            $box->lonMax,
+            $limit,
+            $offset,
+            $exclude,
+            $cursor,
+        );
+
+        return [
+            'total' => $total,
+            'offset' => $offset,
+            'limit' => $limit,
+            'next' => count($rows) === $limit ? (string) end($rows)['id'] : null,
+            'markers' => array_map($this->fromRow(...), $rows),
+        ];
     }
 
     /**

@@ -71,6 +71,43 @@ final class BookcaseApiTest extends FunctionalTestCase
         $this->assertSame(count($data['markers']), $data['total']);
     }
 
+    public function testBoundingBoxKeysetCursorWalksAllPages(): void
+    {
+        foreach (['One', 'Two', 'Three'] as $title) {
+            BookcaseFactory::new()->at(51.0, 10.0)->create(['title' => $title]);
+        }
+        $bbox = 'latMin=50&latMax=52&lonMin=9&lonMax=11&limit=2';
+
+        $this->client->request('GET', '/api/bookcase/?' . $bbox);
+        $first = $this->json();
+        $this->assertSame(3, $first['total']);
+        $this->assertCount(2, $first['markers']);
+        $this->assertNotNull($first['next'], 'a full page carries a cursor');
+
+        $this->client->request('GET', '/api/bookcase/?' . $bbox . '&after=' . $first['next']);
+        $second = $this->json();
+        $this->assertNull($second['total'], 'the count is only computed for the first page');
+        $this->assertCount(1, $second['markers']);
+        $this->assertNull($second['next'], 'a short page ends the walk');
+
+        $titles = array_merge(array_column($first['markers'], 'title'), array_column($second['markers'], 'title'));
+        sort($titles);
+        $this->assertSame(['One', 'Three', 'Two'], $titles);
+    }
+
+    public function testBoundingBoxExcludeReturnsOnlyTheNewRing(): void
+    {
+        BookcaseFactory::new()->at(51.0, 10.0)->create(['title' => 'Already loaded']);
+        BookcaseFactory::new()->at(51.9, 10.9)->create(['title' => 'New ring']);
+
+        $this->client->request('GET', '/api/bookcase/?latMin=50&latMax=52&lonMin=9&lonMax=11&exclude=50.5,51.5,9.5,10.5');
+        $this->assertResponseIsSuccessful();
+
+        $data = $this->json();
+        $this->assertSame(1, $data['total']);
+        $this->assertSame(['New ring'], array_column($data['markers'], 'title'));
+    }
+
     public function testBoundingBoxMarkerShape(): void
     {
         $bc = BookcaseFactory::new()

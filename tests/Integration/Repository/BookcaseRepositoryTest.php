@@ -5,11 +5,13 @@ namespace App\Tests\Integration\Repository;
 use App\Entity\Bookcase;
 use App\Enums\AccessibilityLevel;
 use App\Model\BookcaseFilter;
+use App\Model\GeoBox;
 use App\Repository\BookcaseRepository;
 use App\Tests\Factory\BookcaseFactory;
 use App\Tests\Factory\RatingFactory;
 use App\Tests\Factory\WishlistItemFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Uid\Ulid;
 
 final class BookcaseRepositoryTest extends KernelTestCase
 {
@@ -56,6 +58,73 @@ final class BookcaseRepositoryTest extends KernelTestCase
         $this->assertSame(2, (int) $row['ratingCount'], 'two ratings, not inflated by the wishlist join');
         $this->assertSame(3.0, (float) $row['ratingAverage']);
         $this->assertSame(1, (int) $row['openWishlistCount'], 'only the OPEN wish counts');
+    }
+
+    public function testCountByBoundingBoxHonoursExcludeBox(): void
+    {
+        BookcaseFactory::new()->at(52.5, 13.4)->create();   // inside the excluded box
+        BookcaseFactory::new()->at(52.9, 13.9)->create();   // in the new ring
+
+        $exclude = new GeoBox(52.4, 52.6, 13.3, 13.5);
+
+        $this->assertSame(1, $this->repo()->countByBoundingBox(52.0, 53.0, 13.0, 14.0, $exclude));
+    }
+
+    public function testFindByBoundingBoxLightSkipsExcludedBox(): void
+    {
+        BookcaseFactory::new()->at(52.5, 13.4)->create(['title' => 'Already loaded']);
+        BookcaseFactory::new()->at(52.9, 13.9)->create(['title' => 'New ring']);
+
+        $rows = $this->repo()->findByBoundingBoxLight(52.0, 53.0, 13.0, 14.0, 10, 0, new GeoBox(52.4, 52.6, 13.3, 13.5));
+
+        $this->assertSame(['New ring'], array_column($rows, 'title'));
+    }
+
+    public function testFindByBoundingBoxLightKeysetPagingCoversEveryRowOnce(): void
+    {
+        for ($i = 0; $i < 5; ++$i) {
+            BookcaseFactory::new()->at(52.5, 13.4)->create();
+        }
+
+        $seen = [];
+        $after = null;
+        do {
+            $page = $this->repo()->findByBoundingBoxLight(52.0, 53.0, 13.0, 14.0, 2, 0, null, $after);
+            foreach ($page as $row) {
+                $seen[] = $row['id'];
+            }
+            $after = count($page) === 2 ? Ulid::fromString(end($page)['id']) : null;
+        } while ($after !== null);
+
+        $this->assertCount(5, $seen);
+        $this->assertCount(5, array_unique($seen), 'no row may repeat across keyset pages');
+        $sorted = $seen;
+        sort($sorted);
+        $this->assertSame($sorted, $seen, 'keyset pages come in id order');
+    }
+
+    public function testFindByBoundingBoxLightWideBoxUsesSameFilter(): void
+    {
+        // A >= 10° latitude span takes the primary-key scan path; the box and
+        // exclusion must still apply exactly as on the indexed path.
+        BookcaseFactory::new()->at(52.5, 13.4)->create(['title' => 'Berlin']);
+        BookcaseFactory::new()->at(48.1, 11.6)->create(['title' => 'Munich']);
+        BookcaseFactory::new()->at(-33.9, 18.4)->create(['title' => 'Cape Town']);
+
+        $rows = $this->repo()->findByBoundingBoxLight(40.0, 60.0, 0.0, 20.0, 100, 0, new GeoBox(52.0, 53.0, 13.0, 14.0));
+
+        $this->assertSame(['Munich'], array_column($rows, 'title'));
+    }
+
+    public function testFindByBoundingBoxLightClampsInfiniteBox(): void
+    {
+        BookcaseFactory::new()->at(52.5, 13.4)->create();
+
+        $rows = $this->repo()->findByBoundingBoxLight(-INF, INF, -INF, INF, 10);
+
+        $this->assertCount(1, $rows, 'an infinite box means "everything", not "nothing"');
+        $this->assertIsString($rows[0]['id']);
+        $this->assertIsFloat($rows[0]['latitude']);
     }
 
     public function testFindByBoundingBoxLightPaginates(): void

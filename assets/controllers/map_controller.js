@@ -2,6 +2,16 @@ import { Controller } from '@hotwired/stimulus';
 import axios from 'axios';
 import { searchPhoton, placeLabel, parseCoords } from '../geocode.js';
 
+// Markers per bbox request (the server caps it at 5000).
+const MAP_PAGE_SIZE = 5000;
+
+// Rectangle helpers for the loaded-area bookkeeping ({latMin, latMax, lngMin, lngMax}).
+const boxContains = (outer, inner) => inner.latMin >= outer.latMin && inner.latMax <= outer.latMax
+    && inner.lngMin >= outer.lngMin && inner.lngMax <= outer.lngMax;
+const boxIntersects = (a, b) => a.latMin <= b.latMax && a.latMax >= b.latMin
+    && a.lngMin <= b.lngMax && a.lngMax >= b.lngMin;
+const boxArea = (b) => (b.latMax - b.latMin) * (b.lngMax - b.lngMin);
+
 export default class extends Controller {
     static targets = ['searchInput', 'searchResults', 'searchClear', 'filterContainer', 'filterPanel', 'filterBadge'];
 
@@ -81,7 +91,12 @@ export default class extends Controller {
         }
 
         this.map = L.map('map').setView(center, zoom);
-        this.markerCluster = L.markerClusterGroup();
+        // chunkedLoading: big addLayers() batches are processed in time slices
+        // instead of freezing the UI.
+        this.markerCluster = L.markerClusterGroup({ chunkedLoading: true });
+        // Shared L.icon instances keyed by variant — tens of thousands of
+        // markers only need a handful of distinct icons.
+        this.iconCache = new Map();
         // Set (not array) so the dedup check while paging markers in is O(1).
         this.loadedMarkers = new Set();
         // id → { marker, item }, so dialog changes can refresh a marker's icon/popup live.
@@ -105,12 +120,9 @@ export default class extends Controller {
 
         this.addGeolocateControl();
 
-        const bounds = this.getBoundingCoordinates(this.map.getBounds());
-
-        this.latMin = bounds.latMin;
-        this.latMax = bounds.latMax;
-        this.lngMin = bounds.lngMin;
-        this.lngMax = bounds.lngMax;
+        // The area whose markers are fully loaded (one rectangle, or null).
+        // Only set once a load completes, so an interrupted load is retried.
+        this.loadedBox = null;
 
         this.map.addLayer(this.markerCluster);
 
@@ -883,22 +895,24 @@ export default class extends Controller {
     // ── Markers ──────────────────────────────────────────────────────────────
 
     // Load the markers for the current view in batches, so they render
-    // progressively (with a count) instead of after one big response. Each page
-    // is bulk-added to the cluster (addLayers) and the await between pages yields
-    // to the UI, keeping the map responsive while a wide area streams in.
+    // progressively (with a count) instead of after one big response. Only the
+    // part of the view that isn't loaded yet is requested (`exclude` = the
+    // already-loaded box), so zooming out fetches just the new ring. Pages are
+    // walked with a keyset cursor (`after`), bulk-added to the cluster
+    // (addLayers), and the await between pages keeps the map responsive.
     async loadEntries() {
-        const bounds = this.getBoundingCoordinates(this.map.getBounds());
-
-        if (!this.loadRequired(bounds) && this.loadedMarkers.size > 0) {
-            return;
-        }
+        const plan = this.planLoad(this.clampBox(this.getBoundingCoordinates(this.map.getBounds())));
+        if (!plan) return;
 
         // Claim this load; a later pan/zoom bumps the generation and supersedes us.
         const generation = ++this.loadGeneration;
-        const pageSize = 1500;
-        const bbox = `latMin=${bounds.latMin}&latMax=${bounds.latMax}&lonMin=${bounds.lngMin}&lonMax=${bounds.lngMax}`;
+        const { box, exclude } = plan;
+        let query = `latMin=${box.latMin}&latMax=${box.latMax}&lonMin=${box.lngMin}&lonMax=${box.lngMax}&limit=${MAP_PAGE_SIZE}`;
+        if (exclude) {
+            query += `&exclude=${[exclude.latMin, exclude.latMax, exclude.lngMin, exclude.lngMax].join(',')}`;
+        }
 
-        let offset = 0;
+        let after = null;
         let total = null;
         let received = 0;
 
@@ -908,7 +922,7 @@ export default class extends Controller {
                 // Trailing slash is intentional — `/api/bookcase` (no slash)
                 // 301-redirects here, and we don't want that extra round-trip on
                 // every page.
-                const { data } = await axios.get(`/api/bookcase/?${bbox}&offset=${offset}&limit=${pageSize}`);
+                const { data } = await axios.get(`/api/bookcase/?${query}${after ? `&after=${after}` : ''}`);
 
                 // A newer load started while we were waiting — drop this page.
                 if (generation !== this.loadGeneration) return;
@@ -929,10 +943,11 @@ export default class extends Controller {
                 received += markers.length;
                 this.updateLoadProgress(received, total);
 
-                offset += pageSize;
-                // Stop on a short page (no more rows) regardless of the count.
-                if (markers.length < pageSize) break;
-            } while (offset < total);
+                after = data.next ?? null;
+            } while (after);
+
+            // Complete — only now does the requested box count as loaded.
+            this.loadedBox = box;
         } catch {
             // Network/parse error — fall through to hide the spinner.
         } finally {
@@ -940,11 +955,49 @@ export default class extends Controller {
         }
     }
 
+    // Decide what to fetch for `view`, given the loaded rectangle. Returns null
+    // when the view is already covered, else { box, exclude }: fetch `box` minus
+    // `exclude`; once complete, `box` becomes the loaded area.
+    planLoad(view) {
+        const loaded = this.loadedBox;
+        if (!loaded) return { box: view, exclude: null };
+        if (boxContains(loaded, view)) return null;
+        if (!boxIntersects(loaded, view)) return { box: view, exclude: null };
+
+        // Grow the loaded rectangle to the bounding box of both. On a zoom-out
+        // that is exactly the new view; on a pan it adds two small corners. Only
+        // for odd shapes (long thin boxes crossing) would it balloon — then load
+        // just the view and forget the old box (markers stay; dedup by id).
+        const union = {
+            latMin: Math.min(loaded.latMin, view.latMin),
+            latMax: Math.max(loaded.latMax, view.latMax),
+            lngMin: Math.min(loaded.lngMin, view.lngMin),
+            lngMax: Math.max(loaded.lngMax, view.lngMax),
+        };
+        if (boxArea(union) > 2 * (boxArea(loaded) + boxArea(view))) {
+            return { box: view, exclude: loaded };
+        }
+
+        return { box: union, exclude: loaded };
+    }
+
+    // Clamp to real coordinates — zoomed far out, Leaflet reports longitudes
+    // beyond ±180 (wrapped world copies) that hold no extra entries.
+    clampBox(b) {
+        const clamp = (v, lim) => Math.max(-lim, Math.min(lim, v));
+        return {
+            latMin: clamp(b.latMin, 90),
+            latMax: clamp(b.latMax, 90),
+            lngMin: clamp(b.lngMin, 180),
+            lngMax: clamp(b.lngMax, 180),
+        };
+    }
+
     // Update the spinner's progress badge. Only shown for multi-page loads —
     // a single-page (zoomed-in) load needs no count.
     updateLoadProgress(received, total) {
         if (!this.loaderProgress) return;
-        if (total > 1500 && received < total) {
+        if (total > MAP_PAGE_SIZE && received < total) {
             this.loaderProgress.hidden = false;
             this.loaderProgress.textContent =
                 `${received.toLocaleString()} / ${total.toLocaleString()}`;
@@ -953,12 +1006,24 @@ export default class extends Controller {
         }
     }
 
+    // The marker icon for an item, one shared instance per variant.
+    markerIcon(item) {
+        const key = `${item.status}|${item.mapSymbol}|${item.entryType}|${item.accessibility ?? ''}`;
+        let icon = this.iconCache.get(key);
+        if (!icon) {
+            icon = this.createMarkerIcon(item);
+            this.iconCache.set(key, icon);
+        }
+
+        return icon;
+    }
+
     // Pick the marker icon. An inactive (currently unavailable) entry always gets
     // the dedicated inactive badge — availability is the most important signal.
     // Otherwise tardis (a rare, manually-assigned DB symbol) wins; then the base
     // pin is chosen by the entry type (givebox vs bookcase), and — when the entry
     // has an accessibility level — its red/yellow/green variant is used.
-    markerIcon(item) {
+    createMarkerIcon(item) {
         if ('inactive' === item.status) {
             return L.icon({
                 iconUrl: '/build/images/marker-icon-inactive.png',
@@ -1299,23 +1364,6 @@ export default class extends Controller {
     // Human-readable distance: metres under 1 km, otherwise one decimal of km.
     formatDistance(km) {
         return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
-    }
-
-    loadRequired(bounds) {
-        if (bounds.latMin < this.latMin ||
-            bounds.latMax > this.latMax ||
-            bounds.lngMin < this.lngMin ||
-            bounds.lngMax > this.lngMax) {
-
-            this.lngMin = Math.min(bounds.lngMin, this.lngMin);
-            this.lngMax = Math.max(bounds.lngMax, this.lngMax);
-            this.latMin = Math.min(bounds.latMin, this.latMin);
-            this.latMax = Math.max(bounds.latMax, this.latMax);
-
-            return true;
-        }
-
-        return false;
     }
 
     getBoundingCoordinates(bounds) {

@@ -171,6 +171,20 @@ final class InjectionTest extends FunctionalTestCase
     }
 
     #[DataProvider('sqlPayloads')]
+    public function testBoundingBoxExcludeAndCursorPayloadsAreIgnored(string $payload): void
+    {
+        $this->seedTwo();
+
+        $this->client->request('GET', '/api/bookcase/', [
+            'latMin' => '52', 'latMax' => '53', 'lonMin' => '13', 'lonMax' => '14',
+            'exclude' => $payload, 'after' => $payload,
+        ]);
+        $this->assertResponseIsSuccessful();
+        $this->assertNoServerError();
+        $this->assertCount(2, $this->json()['markers'], 'a junk exclude box / cursor is ignored, not interpolated');
+    }
+
+    #[DataProvider('sqlPayloads')]
     public function testApiV1BoundingBoxPayloadsAreCastNotInterpolated(string $payload): void
     {
         $this->seedTwo();

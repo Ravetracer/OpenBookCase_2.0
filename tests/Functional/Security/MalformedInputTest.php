@@ -359,6 +359,8 @@ final class MalformedInputTest extends FunctionalTestCase
         yield 'search q' => ['/api/bookcase/search', 'q'];
         yield 'bbox latMin' => ['/api/bookcase/', 'latMin'];
         yield 'bbox limit' => ['/api/bookcase/', 'limit'];
+        yield 'bbox exclude' => ['/api/bookcase/', 'exclude'];
+        yield 'bbox after' => ['/api/bookcase/', 'after'];
         yield 'v1 bbox latMin' => ['/api/v1/bookcases', 'latMin'];
         yield 'v1 bbox limit' => ['/api/v1/bookcases', 'limit'];
         yield 'export gzip' => ['/api/bookcase/export', 'gzip'];

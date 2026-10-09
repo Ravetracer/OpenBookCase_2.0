@@ -6,6 +6,7 @@ use App\Entity\Bookcase;
 use App\Entity\User;
 use App\Form\BookcaseCreateType;
 use App\Form\BookcaseType;
+use App\Model\GeoBox;
 use App\Repository\BookcaseRepository;
 use App\Repository\WishlistItemRepository;
 use App\Service\BookcaseExportService;
@@ -28,7 +29,7 @@ class BookcaseController extends AbstractController
 {
     // Marker paging for the map's bounding-box endpoint: default page size and
     // the hard cap a client may request.
-    private const MAP_PAGE_DEFAULT = 1500;
+    private const MAP_PAGE_DEFAULT = 5000;
     private const MAP_PAGE_MAX = 5000;
 
     public function __construct(
@@ -57,28 +58,19 @@ class BookcaseController extends AbstractController
 
         // Paged loading: the map fetches markers in batches so it can render
         // progressively (and show progress) instead of waiting for one huge
-        // response. `limit` is capped; `offset` walks the result set.
+        // response. `limit` is capped; `offset` is kept for older clients.
         $limit = max(1, min(self::MAP_PAGE_MAX, (int) $request->query->get('limit', self::MAP_PAGE_DEFAULT)));
         $offset = max(0, (int) $request->query->get('offset', 0));
 
-        $total = $this->bookcaseRepository->countByBoundingBox((float) $latMin, (float) $latMax, (float) $lonMin, (float) $lonMax);
-        $rows = $this->bookcaseRepository->findByBoundingBoxLight(
-            (float) $latMin,
-            (float) $latMax,
-            (float) $lonMin,
-            (float) $lonMax,
+        // `exclude` = the box the map already holds (only the new ring is
+        // fetched on zoom-out/pan); `after` = keyset cursor from the previous page.
+        return new JsonResponse($this->markerService->mapPage(
+            new GeoBox((float) $latMin, (float) $latMax, (float) $lonMin, (float) $lonMax),
+            GeoBox::fromCsv($request->query->getString('exclude')),
+            $request->query->getString('after'),
             $limit,
             $offset,
-        );
-
-        // Marker payload built from light array rows (no entity hydration / JMS)
-        // — keeps the wide-bbox response fast.
-        return new JsonResponse([
-            'total' => $total,
-            'offset' => $offset,
-            'limit' => $limit,
-            'markers' => array_map($this->markerService->fromRow(...), $rows),
-        ], Response::HTTP_OK);
+        ), Response::HTTP_OK);
     }
 
     /**

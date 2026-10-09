@@ -6,7 +6,10 @@ use App\Entity\Bookcase;
 use App\Enums\AccessibilityLevel;
 use App\Enums\WishlistItemStatus;
 use App\Model\BookcaseFilter;
+use App\Model\GeoBox;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Query\QueryBuilder as DbalQueryBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
@@ -22,6 +25,9 @@ use Symfony\Component\Uid\Ulid;
  */
 class BookcaseRepository extends ServiceEntityRepository
 {
+    /** Latitude span (degrees) from which the map's bbox read scans by primary key instead of the lat/lon indexes. */
+    private const WIDE_BOX_LAT_SPAN = 10.0;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Bookcase::class);
@@ -50,12 +56,20 @@ class BookcaseRepository extends ServiceEntityRepository
     }
 
     /**
-     * Lightweight bounding-box read for the map: only the fields a marker needs,
-     * via array hydration (no full entity graph, no embeddable objects). This is
-     * ~10x faster than hydrating Bookcase entities when zoomed out, where the
-     * box can match thousands of rows.
+     * Lightweight bounding-box read for the map: only the fields a marker needs.
      *
-     * @return array<int, array{id: \Symfony\Component\Uid\Ulid, title: string, latitude: float, longitude: float, mapSymbol: \App\Enums\MapSymbol, openWishlistCount: int}>
+     * Plain DBAL, not DQL: at zoomed-out views a page is thousands of rows, and
+     * ORM scalar hydration (enum/ULID conversion per column) cost ~3x the query
+     * itself. Enum columns therefore come back as their raw backing values
+     * ({@see \App\Service\BookcaseMarkerService::fromRow()} accepts both).
+     * Ratings and open wishes are aggregated by per-row subselects rather than
+     * joins + GROUP BY, so a page only aggregates its own rows.
+     *
+     * Paging: `$after` (keyset — the last id of the previous page) never rescans
+     * skipped rows; `$offset` remains for the public API. `$exclude` drops
+     * everything inside an already-loaded box.
+     *
+     * @return list<array{id: string, title: string, latitude: float, longitude: float, entryType: string, mapSymbol: string, activeStatus: string, statusDescription: ?string, accessibilityLevel: ?int, isMobile: bool, isBookcrossingZone: bool, source: ?string, ratingAverage: ?float, ratingCount: int, openWishlistCount: int}>
      */
     public function findByBoundingBoxLight(
         float $latMin,
@@ -64,85 +78,87 @@ class BookcaseRepository extends ServiceEntityRepository
         float $lonMax,
         ?int $limit = null,
         int $offset = 0,
+        ?GeoBox $exclude = null,
+        ?Ulid $after = null,
     ): array {
-        $qb = $this->createQueryBuilder('bc')
+        $qb = $this->getEntityManager()->getConnection()->createQueryBuilder()
             ->select(
-                'bc.id AS id',
-                'bc.title AS title',
-                'bc.position.latitude AS latitude',
-                'bc.position.longitude AS longitude',
-                'bc.entryType AS entryType',
-                'bc.mapSymbol AS mapSymbol',
-                'bc.active.status AS activeStatus',
-                'bc.active.statusDescription AS statusDescription',
-                'bc.accessibility.level AS accessibilityLevel',
-                'bc.isMobile AS isMobile',
-                'bc.isBookcrossingZone AS isBookcrossingZone',
-                'bc.source AS source',
-                // COUNT/AVG are DISTINCT/id-safe: two one-to-many joins (wishes +
-                // ratings) cross-multiply rows, so plain COUNT(wi.id) would inflate.
-                // AVG is unaffected by the uniform row duplication.
-                'AVG(r.value) AS ratingAverage',
-                'COUNT(DISTINCT r.id) AS ratingCount',
-                'COUNT(DISTINCT wi.id) AS openWishlistCount',
+                'b.id',
+                'b.title',
+                'b.position_latitude AS latitude',
+                'b.position_longitude AS longitude',
+                'b.entry_type AS entryType',
+                'b.map_symbol AS mapSymbol',
+                'b.active_status AS activeStatus',
+                'b.active_status_description AS statusDescription',
+                'b.accessibility_level AS accessibilityLevel',
+                'b.is_mobile AS isMobile',
+                'b.is_bookcrossing_zone AS isBookcrossingZone',
+                'b.source',
+                '(SELECT AVG(r.value) FROM rating r WHERE r.bookcase_id = b.id) AS ratingAverage',
+                '(SELECT COUNT(*) FROM rating r WHERE r.bookcase_id = b.id) AS ratingCount',
+                // Only count still-open wishes so the marker can flag "wishes wanted here".
+                '(SELECT COUNT(*) FROM wishlist_item w WHERE w.bookcase_id = b.id AND w.status = :open) AS openWishlistCount',
             )
-            // Only count still-open wishes so the marker can flag "wishes wanted here".
-            ->leftJoin('bc.wishlistItems', 'wi', 'WITH', 'wi.status = :open')
-            ->leftJoin('bc.ratings', 'r')
-            ->where('bc.position.latitude BETWEEN :latMin AND :latMax')
-            ->andWhere('bc.position.longitude BETWEEN :lonMin AND :lonMax')
-            // Group by every non-aggregated column for ONLY_FULL_GROUP_BY safety.
-            ->groupBy('bc.id')
-            ->addGroupBy('bc.title')
-            ->addGroupBy('bc.position.latitude')
-            ->addGroupBy('bc.position.longitude')
-            ->addGroupBy('bc.entryType')
-            ->addGroupBy('bc.mapSymbol')
-            ->addGroupBy('bc.active.status')
-            ->addGroupBy('bc.active.statusDescription')
-            ->addGroupBy('bc.accessibility.level')
-            ->addGroupBy('bc.isMobile')
-            ->addGroupBy('bc.isBookcrossingZone')
-            ->addGroupBy('bc.source')
-            ->setParameter('open', WishlistItemStatus::Open->value)
-            ->setParameter('latMin', $latMin)
-            ->setParameter('latMax', $latMax)
-            ->setParameter('lonMin', $lonMin)
-            ->setParameter('lonMax', $lonMax);
+            ->from('bookcase', 'b')
+            ->setParameter('open', WishlistItemStatus::Open->value);
+        // A wide (zoomed-out) box matches most rows, so walking the primary key
+        // in id order beats the latitude index + a full sort on every page
+        // (~7x on 60k rows). The unary `+` keeps the planner off the lat/lon
+        // indexes; a narrow box keeps using them.
+        $wide = $limit !== null && $latMax - $latMin >= self::WIDE_BOX_LAT_SPAN;
+        $this->applyBoundingBox($qb, $latMin, $latMax, $lonMin, $lonMax, $exclude, $wide);
 
-        // Stable order so LIMIT/OFFSET paging never skips or repeats a row. The
-        // query is array-hydrated and grouped by bc.id (no fetched collections),
-        // so LIMIT applies to grouped rows directly — safe to paginate.
+        if ($after !== null) {
+            $qb->andWhere('b.id > :after')->setParameter('after', $after->toBinary(), ParameterType::BINARY);
+        }
+
+        // Stable order so paging never skips or repeats a row.
+        if ($limit !== null || $after !== null) {
+            $qb->orderBy('b.id', 'ASC');
+        }
         if ($limit !== null) {
-            $qb->orderBy('bc.id', SortDirection::Ascending)
-                ->setFirstResult(max(0, $offset))
+            $qb->setFirstResult($after !== null ? 0 : max(0, $offset))
                 ->setMaxResults($limit);
         }
 
-        return $qb->getQuery()->getArrayResult();
+        return array_map(static fn (array $row): array => [
+            'id' => self::ulidKey($row['id']),
+            'title' => $row['title'],
+            'latitude' => (float) $row['latitude'],
+            'longitude' => (float) $row['longitude'],
+            'entryType' => $row['entryType'],
+            'mapSymbol' => $row['mapSymbol'],
+            'activeStatus' => $row['activeStatus'],
+            'statusDescription' => $row['statusDescription'],
+            'accessibilityLevel' => $row['accessibilityLevel'] !== null ? (int) $row['accessibilityLevel'] : null,
+            'isMobile' => (bool) $row['isMobile'],
+            'isBookcrossingZone' => (bool) $row['isBookcrossingZone'],
+            'source' => $row['source'],
+            'ratingAverage' => $row['ratingAverage'] !== null ? (float) $row['ratingAverage'] : null,
+            'ratingCount' => (int) $row['ratingCount'],
+            'openWishlistCount' => (int) $row['openWishlistCount'],
+        ], $qb->executeQuery()->fetchAllAssociative());
     }
 
     /**
-     * Count of entries inside a bounding box. Lets the map show a determinate
-     * progress bar while it pages markers in. No joins — just the indexed
-     * lat/lon range — so it's cheap.
+     * Count of entries inside a bounding box (minus an optional already-loaded
+     * box). Lets the map show a determinate progress bar while it pages markers
+     * in. No joins — just the indexed lat/lon range — so it's cheap.
      */
     public function countByBoundingBox(
         float $latMin,
         float $latMax,
         float $lonMin,
         float $lonMax,
+        ?GeoBox $exclude = null,
     ): int {
-        return (int) $this->createQueryBuilder('bc')
-            ->select('COUNT(bc.id)')
-            ->where('bc.position.latitude BETWEEN :latMin AND :latMax')
-            ->andWhere('bc.position.longitude BETWEEN :lonMin AND :lonMax')
-            ->setParameter('latMin', $latMin)
-            ->setParameter('latMax', $latMax)
-            ->setParameter('lonMin', $lonMin)
-            ->setParameter('lonMax', $lonMax)
-            ->getQuery()
-            ->getSingleScalarResult();
+        $qb = $this->getEntityManager()->getConnection()->createQueryBuilder()
+            ->select('COUNT(*)')
+            ->from('bookcase', 'b');
+        $this->applyBoundingBox($qb, $latMin, $latMax, $lonMin, $lonMax, $exclude);
+
+        return (int) $qb->executeQuery()->fetchOne();
     }
 
     /**
@@ -517,5 +533,52 @@ class BookcaseRepository extends ServiceEntityRepository
             ->setParameter('id', $ulid, 'ulid')
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * Restrict to the lat/lon box and, when given, drop the rows inside
+     * `$exclude` — the area the map has already loaded.
+     *
+     * The bounds are inlined as numeric literals rather than bound: DBAL binds
+     * floats as strings, and once `$skipIndex` turns the column into an
+     * expression (`+col`) it loses its REAL affinity, so SQLite would compare a
+     * number against text and match nothing. The values are PHP floats clamped
+     * to valid coordinates and formatted by sprintf, so nothing user-supplied
+     * reaches the SQL text.
+     */
+    private function applyBoundingBox(
+        DbalQueryBuilder $qb,
+        float $latMin,
+        float $latMax,
+        float $lonMin,
+        float $lonMax,
+        ?GeoBox $exclude,
+        bool $skipIndex = false,
+    ): void {
+        $lat = ($skipIndex ? '+' : '') . 'b.position_latitude';
+        $lon = ($skipIndex ? '+' : '') . 'b.position_longitude';
+
+        $qb->andWhere(sprintf('%s BETWEEN %s AND %s', $lat, self::lat($latMin), self::lat($latMax)))
+            ->andWhere(sprintf('%s BETWEEN %s AND %s', $lon, self::lon($lonMin), self::lon($lonMax)));
+
+        if ($exclude !== null) {
+            $qb->andWhere(sprintf(
+                'NOT (%s BETWEEN %s AND %s AND %s BETWEEN %s AND %s)',
+                $lat, self::lat($exclude->latMin), self::lat($exclude->latMax),
+                $lon, self::lon($exclude->lonMin), self::lon($exclude->lonMax),
+            ));
+        }
+    }
+
+    /** Latitude as an SQL numeric literal, clamped to ±90 (also tames ±INF). */
+    private static function lat(float $value): string
+    {
+        return sprintf('%.8F', max(-90.0, min(90.0, $value)));
+    }
+
+    /** Longitude as an SQL numeric literal, clamped to ±180 (also tames ±INF). */
+    private static function lon(float $value): string
+    {
+        return sprintf('%.8F', max(-180.0, min(180.0, $value)));
     }
 }
