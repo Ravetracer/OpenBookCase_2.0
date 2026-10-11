@@ -256,6 +256,7 @@ js:
   could_not_delete_account: No se pudo eliminar la cuenta.
   something_wrong: Algo salió mal. Inténtalo de nuevo.
   could_not_load: No se pudo cargar esta estantería.
+  too_many_requests: 'Se han abierto demasiadas entradas en poco tiempo. Espera un momento y vuelve a intentarlo.'
   create_failed: 'No se pudo añadir la estantería. Inténtalo de nuevo.'
 
 # ── Flash / errores de API ──
@@ -352,6 +353,12 @@ form:
   agree_terms: Acepto los términos
 
 # ── Páginas estáticas ──
+rate_limit:
+  title: 'Un poco más despacio'
+  body: 'Has abierto muchas entradas de estanterías en poco tiempo, así que hemos pausado las siguientes solicitudes un momento. Espera unos minutos y vuelve a intentarlo.'
+  export_hint: '¿Necesitas el conjunto de datos completo? La exportación de datos abiertos en la página de la lista contiene todas las entradas en una sola descarga.'
+  back: 'Volver al mapa'
+
 static:
   help:
     title: "Guía de uso"

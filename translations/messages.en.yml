@@ -256,6 +256,7 @@ js:
   could_not_delete_account: Could not delete account.
   something_wrong: Something went wrong. Please try again.
   could_not_load: This bookcase could not be loaded.
+  too_many_requests: 'Too many entries opened in a short time. Please wait a moment and try again.'
   create_failed: 'Could not add the bookcase. Please try again.'
 
 # ── Flash / API error messages (PHP) ──
@@ -352,6 +353,12 @@ form:
   agree_terms: I agree to the terms
 
 # ── Static pages ──
+rate_limit:
+  title: 'Slow down a little'
+  body: 'You have opened a lot of bookcase entries in a short time, so we paused further requests for a moment. Please wait a few minutes and try again.'
+  export_hint: 'Need the complete data set? The open-data export on the list page has every entry in one download.'
+  back: 'Back to the map'
+
 static:
   help:
     title: "User guide"

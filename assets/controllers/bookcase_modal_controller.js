@@ -263,6 +263,10 @@ export default class extends Controller {
         this.setLoading();
         try {
             const response = await fetch(url);
+            if (response.status === 429) {
+                this.showError(this.t('transTooManyRequests', 'Too many entries opened in a short time. Please wait a moment and try again.'));
+                return;
+            }
             if (!response.ok) {
                 this.showError(this.t('transCouldNotLoad', 'This bookcase could not be loaded.'));
                 return;

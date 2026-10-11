@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'rate_limit.title'|trans }} – OpenBookCase{% endblock %}
+
+{% block body %}
+<div class="container mx-auto max-w-2xl p-4 sm:p-8">
+  <div class="card bg-base-200">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{{ 'rate_limit.title'|trans }}</h1>
+      <p>{{ 'rate_limit.body'|trans }}</p>
+      <p class="text-base-content/70">
+        {{ 'rate_limit.export_hint'|trans }}
+        <a class="link link-primary" href="{{ path('app_list') }}">{{ 'nav.list'|trans }}</a>
+      </p>
+      <div class="card-actions justify-end">
+        <a class="btn btn-primary" href="{{ path('app_index') }}">{{ 'rate_limit.back'|trans }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

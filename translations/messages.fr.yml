@@ -256,6 +256,7 @@ js:
   could_not_delete_account: Impossible de supprimer le compte.
   something_wrong: Une erreur s'est produite. Veuillez réessayer.
   could_not_load: Impossible de charger cette boîte à livres.
+  too_many_requests: 'Trop d''entrées ouvertes en peu de temps. Veuillez patienter un instant et réessayer.'
   create_failed: 'Impossible d''ajouter la boîte à livres. Veuillez réessayer.'
 
 # ── Flash / erreurs d'API ──
@@ -352,6 +353,12 @@ form:
   agree_terms: J'accepte les conditions
 
 # ── Pages statiques ──
+rate_limit:
+  title: 'Un peu plus lentement'
+  body: 'Vous avez ouvert beaucoup de fiches de boîtes à livres en peu de temps, nous avons donc suspendu les requêtes suivantes pour un moment. Veuillez patienter quelques minutes, puis réessayer.'
+  export_hint: 'Besoin du jeu de données complet ? L''export open data sur la page de liste contient toutes les entrées en un seul téléchargement.'
+  back: 'Retour à la carte'
+
 static:
   help:
     title: "Guide d'utilisation"

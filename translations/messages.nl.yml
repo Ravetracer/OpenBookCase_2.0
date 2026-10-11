@@ -256,6 +256,7 @@ js:
   could_not_delete_account: Kon account niet verwijderen.
   something_wrong: Er is iets misgegaan. Probeer het opnieuw.
   could_not_load: Deze boekenkast kon niet worden geladen.
+  too_many_requests: 'Te veel items in korte tijd geopend. Wacht even en probeer het opnieuw.'
   create_failed: 'Kon de boekenkast niet toevoegen. Probeer het opnieuw.'
 
 # ── Flash / API-foutmeldingen ──
@@ -352,6 +353,12 @@ form:
   agree_terms: Ik ga akkoord met de voorwaarden
 
 # ── Statische pagina’s ──
+rate_limit:
+  title: 'Iets rustiger aan'
+  body: 'Je hebt in korte tijd heel veel boekenkasten geopend, daarom pauzeren we verdere verzoeken even. Wacht een paar minuten en probeer het dan opnieuw.'
+  export_hint: 'Heb je de volledige dataset nodig? De open-data-export op de lijstpagina bevat alle items in één download.'
+  back: 'Terug naar de kaart'
+
 static:
   help:
     title: "Handleiding"

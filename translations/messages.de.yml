@@ -256,6 +256,7 @@ js:
   could_not_delete_account: Konto konnte nicht gelöscht werden.
   something_wrong: Etwas ist schiefgelaufen. Bitte versuche es erneut.
   could_not_load: Dieser Bücherschrank konnte nicht geladen werden.
+  too_many_requests: 'Zu viele Einträge in kurzer Zeit geöffnet. Bitte warte einen Moment und versuche es erneut.'
   create_failed: 'Der Bücherschrank konnte nicht hinzugefügt werden. Bitte versuche es erneut.'
 
 # ── Flash / API-Fehlermeldungen ──
@@ -352,6 +353,12 @@ form:
   agree_terms: Ich stimme den Nutzungsbedingungen zu
 
 # ── Statische Seiten ──
+rate_limit:
+  title: 'Etwas langsamer, bitte'
+  body: 'Du hast in kurzer Zeit sehr viele Bücherschrank-Einträge aufgerufen, deshalb pausieren wir weitere Anfragen kurz. Bitte warte ein paar Minuten und versuche es dann erneut.'
+  export_hint: 'Du brauchst den kompletten Datensatz? Der Open-Data-Export auf der Listenseite enthält alle Einträge in einem Download.'
+  back: 'Zurück zur Karte'
+
 static:
   help:
     title: "Anleitung"
