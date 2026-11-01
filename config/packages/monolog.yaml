@@ -1,6 +1,7 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - bot_trap # Blocked sign-up attempts (RegistrationBotGuard)
 
 when@dev:
     monolog:
@@ -59,3 +60,11 @@ when@prod:
                 type: stream
                 channels: [deprecation]
                 path: php://stderr
+            # Blocked sign-ups, kept in their own file so the traps can be monitored
+            # (the main handler only flushes on errors).
+            bot_trap:
+                type: rotating_file
+                path: "%kernel.logs_dir%/bot_trap.log"
+                level: info
+                max_files: 14
+                channels: [bot_trap]

@@ -3,3 +3,6 @@ bookcase.webpage_unsafe_scheme: "Nur Webadressen (http/https), E-Mail- (mailto:)
 position.latitude_out_of_range: "Der Breitengrad muss zwischen -90 und 90 liegen."
 position.longitude_out_of_range: "Der Längengrad muss zwischen -180 und 180 liegen."
 user.email_undeliverable: "An diese E-Mail-Adresse kann keine Post zugestellt werden (die Domain existiert nicht oder nimmt keine E-Mails an). Bitte prüfe sie auf Tippfehler oder verwende eine andere Adresse."
+registration.too_fast: "Das ging etwas zu schnell. Bitte prüfe deine Angaben und sende das Formular erneut ab."
+registration.form_expired: "Dieses Formular ist abgelaufen. Bitte sende es erneut ab."
+registration.rate_limited: "Aus deinem Netzwerk wurden zuletzt zu viele Konten registriert. Bitte versuche es später noch einmal."

@@ -23,18 +23,33 @@ class RegistrationService
         private readonly UserPasswordHasherInterface $hasher,
         private readonly UserRepository $users,
         private readonly EmailVerifier $emailVerifier,
+        private readonly RegistrationBotGuard $botGuard,
     ) {
     }
 
-    /** Persist the new account with the hashed password and e-mail the verification link. */
-    public function register(User $user, string $plainPassword): void
+    /**
+     * Persist the new account with the hashed password and e-mail the verification
+     * link. Returns false when the client is over the sign-up rate limit. A filled
+     * honeypot returns true without creating anything, so the bot sees the same
+     * success response as a human and learns nothing.
+     */
+    public function register(User $user, string $plainPassword, mixed $honeypot, ?string $clientIp): bool
     {
+        if (!$this->botGuard->consumeSignUp($clientIp)) {
+            return false;
+        }
+        if ($this->botGuard->isHoneypotFilled($honeypot, $user)) {
+            return true;
+        }
+
         $user->setPassword($this->hasher->hashPassword($user, $plainPassword));
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
         $this->emailVerifier->sendVerification($user);
+
+        return true;
     }
 
     /**

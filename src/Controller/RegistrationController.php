@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Service\RegistrationBotGuard;
 use App\Service\RegistrationService;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -41,13 +43,21 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->registration->register($user, $form->get('plainPassword')->getData());
-            // Do NOT log the user in here — the account stays locked until the
-            // user clicks the verification link. Show a "check your inbox"
-            // confirmation instead.
-            $this->addFlash('register_success', $this->translator->trans('flash.check_email'));
+            $accepted = $this->registration->register(
+                $user,
+                $form->get('plainPassword')->getData(),
+                $form->get(RegistrationBotGuard::HONEYPOT_FIELD)->getData(),
+                $request->getClientIp(),
+            );
+            if ($accepted) {
+                // Do NOT log the user in here — the account stays locked until the
+                // user clicks the verification link. Show a "check your inbox"
+                // confirmation instead.
+                $this->addFlash('register_success', $this->translator->trans('flash.check_email'));
 
-            return $this->redirectToRoute('app_index');
+                return $this->redirectToRoute('app_index');
+            }
+            $form->addError(new FormError($this->translator->trans('registration.rate_limited', [], 'validators')));
         }
 
         return $this->render('registration/register.html.twig', [

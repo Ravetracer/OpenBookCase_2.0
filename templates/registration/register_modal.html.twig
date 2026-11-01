@@ -10,6 +10,8 @@
   {% for flash_error in app.flashes('verify_email_error') %}
     <div class="alert alert-error mb-3" role="alert">{{ flash_error }}</div>
   {% endfor %}
+  {# Form-level errors: expired/too-fast form stamp, sign-up rate limit. #}
+  {{ form_errors(registrationForm) }}
 
   {{ form_row(registrationForm.username, {'label': 'form.username'|trans, 'attr': {'placeholder': 'auth.username'|trans}}) }}
   {{ form_row(registrationForm.email, {'label': 'form.email'|trans, 'attr': {'placeholder': 'auth.email_placeholder'|trans, 'autocomplete': 'email'}}) }}
@@ -24,6 +26,8 @@
     </label>
     {{ form_errors(registrationForm.agreeTerms) }}
   </div>
+
+  {% include 'registration/_bot_trap.html.twig' with { form: registrationForm } %}
 
   <div class="modal-action">
     <button type="button" class="btn btn-ghost" onclick="registerModal.close()">{{ 'cancel'|trans }}</button>

@@ -1,0 +1,7 @@
+{# Bot traps (see RegistrationBotGuard). The honeypot must stay invisible and
+   unreachable for humans: off-screen, hidden from assistive tech, not focusable. #}
+<div class="sr-only" aria-hidden="true">
+  {{ form_label(form.website) }}
+  {{ form_widget(form.website) }}
+</div>
+{{ form_widget(form.formStamp) }}

@@ -802,6 +802,7 @@ final class MalformedInputTest extends FunctionalTestCase
                 'email' => $email,
                 'plainPassword' => 'sup3rsecret',
                 'agreeTerms' => '1',
+                'formStamp' => $form['registration_form[formStamp]']->getValue(),
                 '_token' => $form['registration_form[_token]']->getValue(),
             ],
         ]);
@@ -837,11 +838,70 @@ final class MalformedInputTest extends FunctionalTestCase
                 'email' => ['reader@example.org'],
                 'plainPassword' => 'sup3rsecret',
                 'agreeTerms' => '1',
+                'formStamp' => $form['registration_form[formStamp]']->getValue(),
                 '_token' => $form['registration_form[_token]']->getValue(),
             ],
         ]);
 
         $this->assertNotServerError('array e-mail');
         $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'hostile_signup']));
+    }
+
+    /** @return iterable<string, array{mixed}> */
+    public static function hostileBotTrapValues(): iterable
+    {
+        yield 'array' => [['x']];
+        yield 'nested array' => [['a' => ['b' => 'c']]];
+        yield 'huge string' => [str_repeat('9', 200000)];
+        yield 'sql injection' => ["1' OR '1'='1"];
+        yield 'null byte' => ["1700000000\0." . str_repeat('a', 64)];
+        yield 'xss' => ['<script>alert(1)</script>'];
+    }
+
+    /** A hostile form stamp is a validation error — never a 500, an account or a mail. */
+    #[DataProvider('hostileBotTrapValues')]
+    public function testRegistrationRejectsHostileFormStamp(mixed $stamp): void
+    {
+        $this->client->enableProfiler();
+        $form = $this->client->request('GET', '/register')->filter('form')->form();
+
+        $this->client->request('POST', '/register', [
+            'registration_form' => [
+                'username' => 'hostile_stamp',
+                'email' => 'hostile_stamp@example.org',
+                'plainPassword' => 'sup3rsecret',
+                'agreeTerms' => '1',
+                'formStamp' => $stamp,
+                '_token' => $form['registration_form[_token]']->getValue(),
+            ],
+        ]);
+
+        $this->assertNotServerError('hostile form stamp');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'hostile_stamp']));
+    }
+
+    /** Any non-empty honeypot value drops the sign-up without a 500. */
+    #[DataProvider('hostileBotTrapValues')]
+    public function testRegistrationDropsHostileHoneypot(mixed $honeypot): void
+    {
+        $this->client->enableProfiler();
+        $form = $this->client->request('GET', '/register')->filter('form')->form();
+
+        $this->client->request('POST', '/register', [
+            'registration_form' => [
+                'username' => 'hostile_honey',
+                'email' => 'hostile_honey@example.org',
+                'plainPassword' => 'sup3rsecret',
+                'agreeTerms' => '1',
+                'website' => $honeypot,
+                'formStamp' => $form['registration_form[formStamp]']->getValue(),
+                '_token' => $form['registration_form[_token]']->getValue(),
+            ],
+        ]);
+
+        $this->assertNotServerError('hostile honeypot');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'hostile_honey']));
     }
 }

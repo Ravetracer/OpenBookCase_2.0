@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Sign-up time trap: a registration form submitted sooner than this after it was
+    # rendered is treated as scripted (RegistrationBotGuard).
+    app.registration.min_fill_seconds: 3
 
 services:
     # default configuration for services in *this* file
@@ -31,6 +34,10 @@ services:
             $kernelEnvironment: '%kernel.environment%'
 
 when@test:
+    parameters:
+        # Functional tests submit forms instantly; the time trap is unit-tested.
+        app.registration.min_fill_seconds: 0
+
     services:
         # No DNS lookups in tests: ".invalid" domains bounce, everything else is deliverable.
         App\Service\MailDomainCheckerInterface:

@@ -3,3 +3,6 @@ bookcase.webpage_unsafe_scheme: "Seules les adresses web (http/https) et les lie
 position.latitude_out_of_range: "La latitude doit être comprise entre -90 et 90."
 position.longitude_out_of_range: "La longitude doit être comprise entre -180 et 180."
 user.email_undeliverable: "Cette adresse e-mail ne peut pas recevoir de courrier (le domaine n'existe pas ou n'accepte pas d'e-mails). Vérifiez qu'il n'y a pas de faute de frappe ou utilisez une autre adresse."
+registration.too_fast: "C'était un peu trop rapide. Vérifiez vos informations et renvoyez le formulaire."
+registration.form_expired: "Ce formulaire a expiré. Veuillez le renvoyer."
+registration.rate_limited: "Trop de comptes ont été créés récemment depuis votre réseau. Veuillez réessayer plus tard."

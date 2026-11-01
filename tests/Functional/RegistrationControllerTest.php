@@ -5,12 +5,33 @@ namespace App\Tests\Functional;
 use App\Entity\User;
 use App\Tests\Factory\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Form;
 
 final class RegistrationControllerTest extends FunctionalTestCase
 {
     private function em(): EntityManagerInterface
     {
         return static::getContainer()->get(EntityManagerInterface::class);
+    }
+
+    /** A filled-in, otherwise valid registration form. */
+    private function filledForm(string $name): Form
+    {
+        $form = $this->client->request('GET', '/register')->filter('form')->form();
+        $form['registration_form[username]'] = $name;
+        $form['registration_form[email]'] = $name . '@example.com';
+        $form['registration_form[plainPassword]'] = 'sup3rsecret';
+        $form['registration_form[agreeTerms]']->tick();
+
+        return $form;
+    }
+
+    /** A correctly signed form stamp for the given unix time. */
+    private function stampAt(int $timestamp): string
+    {
+        $secret = (string) static::getContainer()->getParameter('kernel.secret');
+
+        return $timestamp . '.' . hash_hmac('sha256', 'registration|' . $timestamp, $secret);
     }
 
     public function testRegisterPageLoads(): void
@@ -163,5 +184,104 @@ final class RegistrationControllerTest extends FunctionalTestCase
         UserFactory::createOne(); // ensure a user exists, but not this id
         $this->client->request('GET', '/verify/email?id=01HZZZZZZZZZZZZZZZZZZZZZZZ');
         $this->assertResponseRedirects('/');
+    }
+
+    public function testHoneypotIsRenderedHiddenAndUnfocusable(): void
+    {
+        foreach (['/register', '/'] as $url) {
+            $crawler = $this->client->request('GET', $url);
+            $fields = $crawler->filter('input[name="registration_form[website]"]');
+            $this->assertGreaterThan(0, $fields->count(), "$url renders the honeypot");
+
+            // /register shows the page form plus the layout's modal form: check both.
+            $fields->each(function ($field) use ($url): void {
+                $this->assertSame('-1', $field->attr('tabindex'));
+                $this->assertSame('off', $field->attr('autocomplete'));
+                $wrapper = $field->ancestors()->first();
+                $this->assertSame('true', $wrapper->attr('aria-hidden'), "$url hides the honeypot from assistive tech");
+                $this->assertStringContainsString('sr-only', (string) $wrapper->attr('class'));
+            });
+            $this->assertCount($fields->count(), $crawler->filter('input[type="hidden"][name="registration_form[formStamp]"]'), "$url renders the form stamp");
+        }
+    }
+
+    /** A bot that fills every field gets the normal success response — but no account and no mail. */
+    public function testFilledHoneypotIsSilentlyDropped(): void
+    {
+        $this->client->enableProfiler();
+        $form = $this->filledForm('honeybot');
+        $form['registration_form[website]'] = 'https://spam.example';
+
+        $this->client->submit($form);
+
+        $this->assertResponseRedirects('/');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'honeybot']));
+        $this->assertSame(['register_success'], array_keys($this->client->getRequest()->getSession()->getFlashBag()->peekAll()), 'same "check your inbox" notice a human gets');
+    }
+
+    public function testMissingFormStampIsRejected(): void
+    {
+        $this->client->enableProfiler();
+        $form = $this->filledForm('nostamp');
+        $values = $form->getPhpValues();
+        unset($values['registration_form']['formStamp']);
+
+        $this->client->request('POST', '/register', $values);
+
+        $this->assertResponseIsSuccessful(); // re-rendered with the error
+        $this->assertSelectorTextContains('form', 'This form has expired');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'nostamp']));
+    }
+
+    public function testForgedFormStampIsRejected(): void
+    {
+        $form = $this->filledForm('forger');
+        $form['registration_form[formStamp]'] = (time() - 60) . '.' . str_repeat('0', 64);
+
+        $this->client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('form', 'This form has expired');
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'forger']));
+    }
+
+    /** A form left open for longer than a day is rejected, and the re-rendered form (fresh stamp) then goes through. */
+    public function testExpiredFormCanBeResubmittedAfterReRender(): void
+    {
+        $form = $this->filledForm('sleeper');
+        $form['registration_form[formStamp]'] = $this->stampAt(time() - 2 * 86400);
+
+        $crawler = $this->client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('form', 'This form has expired');
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'sleeper']));
+
+        $retry = $crawler->filter('form')->form();
+        $this->assertNotSame($form['registration_form[formStamp]']->getValue(), $retry['registration_form[formStamp]']->getValue(), 'the re-render carries a fresh stamp');
+        $retry['registration_form[plainPassword]'] = 'sup3rsecret'; // password fields are never re-filled
+        $retry['registration_form[agreeTerms]']->tick();
+        $this->client->submit($retry);
+
+        $this->assertResponseRedirects('/');
+        $this->assertNotNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'sleeper']));
+    }
+
+    public function testSignUpsArePerIpRateLimited(): void
+    {
+        for ($i = 1; $i <= 5; ++$i) {
+            $this->client->submit($this->filledForm("burst$i"));
+            $this->assertResponseRedirects('/', null, "sign-up #$i is within the budget");
+        }
+
+        $this->client->enableProfiler();
+        $this->client->submit($this->filledForm('burst6'));
+
+        $this->assertResponseIsSuccessful(); // re-rendered with the error
+        $this->assertSelectorTextContains('form', 'Too many accounts');
+        $this->assertEmailCount(0);
+        $this->assertNull($this->em()->getRepository(User::class)->findOneBy(['username' => 'burst6']));
     }
 }

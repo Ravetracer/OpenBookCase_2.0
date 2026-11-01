@@ -3,3 +3,6 @@ bookcase.webpage_unsafe_scheme: "Alleen webadressen (http/https), e-mail- (mailt
 position.latitude_out_of_range: "De breedtegraad moet tussen -90 en 90 liggen."
 position.longitude_out_of_range: "De lengtegraad moet tussen -180 en 180 liggen."
 user.email_undeliverable: "Op dit e-mailadres kan geen post worden bezorgd (het domein bestaat niet of accepteert geen e-mail). Controleer het op typefouten of gebruik een ander adres."
+registration.too_fast: "Dat ging iets te snel. Controleer je gegevens en verstuur het formulier opnieuw."
+registration.form_expired: "Dit formulier is verlopen. Verstuur het opnieuw."
+registration.rate_limited: "Er zijn recent te veel accounts vanaf je netwerk geregistreerd. Probeer het later opnieuw."

@@ -13,9 +13,13 @@
       {% endfor %}
 
       {{ form_start(registrationForm) }}
+        {# Form-level errors: expired/too-fast form stamp, sign-up rate limit. #}
+        {{ form_errors(registrationForm) }}
         {{ form_row(registrationForm.username, { label: 'form.username'|trans }) }}
+        {{ form_row(registrationForm.email, { label: 'form.email'|trans }) }}
         {{ form_row(registrationForm.plainPassword, { label: 'form.password'|trans }) }}
         {{ form_row(registrationForm.agreeTerms) }}
+        {% include 'registration/_bot_trap.html.twig' with { form: registrationForm } %}
 
         <button type="submit" class="btn btn-primary mt-2 w-full">{{ 'auth.register'|trans }}</button>
       {{ form_end(registrationForm) }}
