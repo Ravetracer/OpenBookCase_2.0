@@ -1,3 +1,11 @@
+# Block abusive bot traffic from the 202.46.0.0/16 range (any 202.46.x.x address).
+<IfModule mod_authz_core.c>
+    <RequireAll>
+        Require all granted
+        Require not ip 202.46
+    </RequireAll>
+</IfModule>
+
 <IfModule mod_headers.c>
     # The PWA service worker and manifest must never be served from a stale HTTP
     # cache, otherwise app/page updates would not be picked up. Force a
